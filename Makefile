@@ -1,5 +1,5 @@
 CC := g++
-LIBS := sdl2
+LIBS := sdl2 sdl2_image
 PKG_CONFIG := pkg-config
 
 CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS))
@@ -18,14 +18,14 @@ $(TARGET): $(SRCS)
 
 .PHONY: debug
 debug: $(SRCS)
-	$(CC) -g $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
+	$(CC) -g -mconsole $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
 
 .PHONY: release
 release: $(SRCS)
 	$(CC) -O2 $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
 
 .PHONY: run
-run: $(TARGET)
+run: debug
 	$(TARGET)
 
 clean:

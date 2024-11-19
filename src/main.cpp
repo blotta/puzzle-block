@@ -1,12 +1,57 @@
-#include <stdio.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <stdio.h>
 
-bool running;
+bool running, success = false;
 
-SDL_Renderer *renderer;
-SDL_Window *window;
+SDL_Renderer *renderer = NULL;
+SDL_Window *window = NULL;
+SDL_Texture *splashTexture = NULL;
 
 int frameCount, timerFPS, lastFrame, fps;
+
+bool init();
+bool loadMedia();
+void close();
+
+bool init()
+{
+    running = true;
+    success = true;
+
+    SDL_Init(SDL_INIT_VIDEO);
+
+    window = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_SHOWN);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_SetWindowTitle(window, "Game");
+
+    IMG_Init(IMG_INIT_PNG);
+
+    return success;
+}
+
+bool loadMedia()
+{
+    success = true;
+
+    splashTexture = IMG_LoadTexture(renderer, "assets/images/splash.png");
+    if (!splashTexture)
+    {
+        SDL_Log("Couldn't load splash.png: %s\n", SDL_GetError());
+        success = false;
+    }
+
+    return success;
+}
+
+void close()
+{
+    SDL_DestroyTexture(splashTexture);
+    IMG_Quit();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
 
 void update() {}
 void input()
@@ -32,30 +77,46 @@ void draw()
     SDL_SetRenderDrawColor(renderer, 20, 80, 200, 255);
     SDL_RenderFillRect(renderer, &rect);
 
-    SDL_RenderPresent(renderer);
+    SDL_Rect splash = {
+        300, 300, 400, 200};
+    SDL_RenderCopy(renderer, splashTexture, NULL, &splash);
 
+    SDL_RenderPresent(renderer);
+}
+
+void loop()
+{
+    // lastFrame = SDL_GetTicks();
+    update();
+    input();
+    draw();
+    SDL_Delay(16);
 }
 
 int main(int argc, char **args)
 {
-    running = true;
-    SDL_Init(SDL_INIT_VIDEO);
 
-    window = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_SetWindowTitle(window, "Game");
+    SDL_Log("Starting program\n");
 
-    while (running)
+    if (!init())
     {
-        lastFrame = SDL_GetTicks();
-        update();
-        input();
-        draw();
-        SDL_Delay(16);
+        SDL_Log("Failed to initialize\n");
+    }
+    else
+    {
+        if (!loadMedia())
+        {
+            SDL_Log("Failed to load media\n");
+        }
+        else
+        {
+            while (running)
+            {
+                loop();
+            }
+        }
     }
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    close();
     return 0;
 }
