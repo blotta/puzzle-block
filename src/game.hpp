@@ -3,9 +3,11 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "scene.hpp"
 
@@ -16,12 +18,14 @@ class Game
 {
 public:
     bool isRunning();
+
     bool init();
+    void run();
+
     bool loadAssets();
     void unloadAssets();
     void loadScene(Scenes sceneName);
 
-    void run();
     void update();
     void draw();
     void input();
@@ -31,6 +35,7 @@ public:
 
     SDL_Renderer* getRenderer();
     SDL_Texture* getTexture(const char* textureName);
+    TTF_Font* getFont();
 
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
@@ -42,13 +47,14 @@ public:
 private:
     SDL_Window *mWindow = NULL;
     SDL_Renderer *mRenderer = NULL;
+    TTF_Font* mFont = NULL;
 
     bool mInitialized = false;
     bool mRunning = false;
 
     std::map<std::string,SDL_Texture*> mTextures;
 
-    Scene* mCurrentScene = nullptr;
+    std::shared_ptr<Scene> mCurrentScene;
 };
 
 #endif

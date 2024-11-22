@@ -1,5 +1,5 @@
 CC := g++
-LIBS := sdl2 sdl2_image
+LIBS := sdl2 sdl2_image sdl2_ttf
 PKG_CONFIG := pkg-config
 
 CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS))
@@ -8,7 +8,7 @@ LDFLAGS := $(shell $(PKG_CONFIG) --libs $(LIBS))
 CFLAGS := $(CFLAGS) -Werror -Wall
 
 TARGET := .\build\game
-SRCS := src\main.cpp
+SRCS := src\main.cpp src\game.cpp src\scene.cpp src\scene_splash.cpp src\scene_boot.cpp src\render_text.cpp
 
 all: debug
 

@@ -5,7 +5,8 @@
 
 enum class Scenes
 {
-    SPLASH = 0,
+    BOOT = 0,
+    SPLASH,
 };
 
 class Game;
