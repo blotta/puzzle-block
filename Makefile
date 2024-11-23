@@ -8,7 +8,7 @@ LDFLAGS := $(shell $(PKG_CONFIG) --libs $(LIBS))
 CFLAGS := $(CFLAGS) -Werror -Wall
 
 TARGET := .\build\game
-SRCS := src\main.cpp src\game.cpp src\scene.cpp src\scene_splash.cpp src\scene_boot.cpp src\render_text.cpp
+SRCS := src\main.cpp src\game.cpp src\scene.cpp src\scene_boot.cpp src\scene_splash.cpp src\scene_level.cpp src\render_text.cpp
 
 all: debug
 

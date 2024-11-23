@@ -10,12 +10,9 @@ class BootScene : public Scene
 public:
     BootScene(Game* game);
     ~BootScene();
-    void update() override;
+    void update(float dt) override;
     void draw() override;
     void input() override;
-private:
-    float timer = 0;
-    RenderText mText;
 };
 
 #endif

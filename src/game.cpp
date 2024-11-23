@@ -4,6 +4,7 @@
 #include "scene.hpp"
 #include "scene_splash.hpp"
 #include "scene_boot.hpp"
+#include "scene_level.hpp"
 
 Game::Game() {}
 
@@ -101,24 +102,30 @@ void Game::unloadAssets()
 
 void Game::loadScene(Scenes scene)
 {
-    if (scene == Scenes::BOOT)
+    switch (scene)
     {
-        SDL_Log("Loading scene\n");
-        mCurrentScene = std::make_shared<BootScene>(this);
-    }
+        case Scenes::SPLASH:
+            SDL_Log("Loading Splash scene\n");
+            mCurrentScene = std::make_shared<SplashScene>(this);
+            break;
+        case Scenes::LEVEL:
+            SDL_Log("Loading Level scene\n");
+            mCurrentScene = std::make_shared<LevelScene>(this);
+            break;
+        default:
+            SDL_Log("Loading default scene\n");
+            mCurrentScene = std::make_shared<BootScene>(this);
+            break;
 
-    if (scene == Scenes::SPLASH)
-    {
-        SDL_Log("Loading scene\n");
-        mCurrentScene = std::make_shared<SplashScene>(this);
     }
 }
 
 
 void Game::tick()
 {
+    float dt = 1.0/TargetFPS;
     input();
-    update();
+    update(dt);
     draw();
     SDL_Delay(1000/TargetFPS);
 }
@@ -164,14 +171,19 @@ void Game::input()
     mCurrentScene->input();
 }
 
-void Game::update()
+void Game::update(float dt)
 {
-    mCurrentScene->update();
+    mCurrentScene->update(dt);
 }
 
 void Game::draw()
 {
+    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(mRenderer);
+
     mCurrentScene->draw();
+
+    SDL_RenderPresent(mRenderer);
 }
 
 void Game::run()

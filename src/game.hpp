@@ -26,7 +26,7 @@ public:
     void unloadAssets();
     void loadScene(Scenes sceneName);
 
-    void update();
+    void update(float dt);
     void draw();
     void input();
 

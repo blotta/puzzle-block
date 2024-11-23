@@ -12,6 +12,12 @@ RenderText::~RenderText()
     SDL_DestroyTexture(mTextTexture);
 }
 
+void RenderText::clearText()
+{
+    mText.clear();
+    mPropsChanged = true;
+}
+
 void RenderText::setText(std::string text)
 {
     if (text.compare(mText) == 0)
@@ -42,19 +48,35 @@ void RenderText::draw(SDL_Renderer* rend, int x, int y)
     SDL_RenderCopy(rend, mTextTexture, NULL, &r);
 }
 
+int RenderText::getWidth() { return mWidth; }
+
+int RenderText::getHeight() { return mHeight; }
+
 bool RenderText::sync(SDL_Renderer* rend)
 {
-    if (!mPropsChanged)
+    if (!mPropsChanged && mTextTexture != NULL)
         return true;
     
     if (mText.empty())
+    {
+        if (mTextTexture != NULL)
+        {
+            SDL_DestroyTexture(mTextTexture);
+            mTextTexture = NULL;
+        }
         return false;
+    }
     
     SDL_Surface* surf = TTF_RenderUTF8_Blended(pFont, mText.c_str(), mColor);
     if (!surf)
     {
         SDL_Log("Error generating text surface: %s\n", TTF_GetError());
         return false;
+    }
+    if (mTextTexture != NULL)
+    {
+        SDL_DestroyTexture(mTextTexture);
+        mTextTexture = NULL;
     }
     mTextTexture = SDL_CreateTextureFromSurface(rend, surf);
     if (!mTextTexture)
