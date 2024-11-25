@@ -2,6 +2,7 @@
 #define SCENE_LEVEL_HPP
 
 #include "scene.hpp"
+#include "level.hpp"
 
 class LevelScene : public Scene
 {
@@ -13,6 +14,10 @@ public:
     void input() override;
 private:
     int timer;
+    Level level;
+    int offsetX = 100;
+    int offsetY = 100;
+    int cellSize = 64;
 };
 
 #endif

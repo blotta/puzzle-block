@@ -5,10 +5,10 @@ PKG_CONFIG := pkg-config
 CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS))
 LDFLAGS := $(shell $(PKG_CONFIG) --libs $(LIBS))
 
-CFLAGS := $(CFLAGS) -Werror -Wall
+CFLAGS := $(CFLAGS) -Werror -Wall -std=c++20
 
 TARGET := .\build\game
-SRCS := src\main.cpp src\game.cpp src\scene.cpp src\scene_boot.cpp src\scene_splash.cpp src\scene_level.cpp src\render_text.cpp
+SRCS := src\main.cpp src\game.cpp src\scene.cpp src\scene_boot.cpp src\scene_splash.cpp src\scene_level.cpp src\render_text.cpp src\level.cpp
 
 all: debug
 

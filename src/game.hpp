@@ -36,6 +36,9 @@ public:
     SDL_Renderer* getRenderer();
     SDL_Texture* getTexture(const char* textureName);
     TTF_Font* getFont();
+    const std::string getState(const std::string& name);
+    const std::string getOrCreateState(const std::string& name, const std::string& value);
+    void setState(const std::string& name, const std::string& value);
 
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
@@ -55,6 +58,7 @@ private:
     std::map<std::string,SDL_Texture*> mTextures;
 
     std::shared_ptr<Scene> mCurrentScene;
+    std::map<std::string,std::string> mState;
 };
 
 #endif

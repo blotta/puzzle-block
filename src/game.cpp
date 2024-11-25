@@ -145,6 +145,31 @@ TTF_Font *Game::getFont()
     return mFont;
 }
 
+const std::string Game::getState(const std::string& name)
+{
+    if (!mState.contains(name))
+    {
+        mState.emplace(name, "");
+    }
+
+    return mState.at(name);
+}
+
+const std::string Game::getOrCreateState(const std::string &name, const std::string &value)
+{
+    if (!mState.contains(name))
+    {
+        mState.emplace(name, value);
+    }
+
+    return mState.at(name);
+}
+
+void Game::setState(const std::string& name, const std::string& value)
+{
+    mState.emplace(name, value);
+}
+
 void Game::input()
 {
     SDL_Event event;
