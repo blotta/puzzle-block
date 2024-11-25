@@ -1,4 +1,5 @@
 #include "scene_splash.hpp"
+#include "input_manager.hpp"
 
 SplashScene::SplashScene(Game* game)
     : Scene(game)
@@ -17,6 +18,10 @@ SplashScene::~SplashScene()
 
 void SplashScene::input()
 {
+    if (game->input.just_pressed(SDL_SCANCODE_RETURN))
+    {
+        game->loadScene(Scenes::LEVEL);
+    }
 }
 
 void SplashScene::update(float dt)

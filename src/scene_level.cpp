@@ -29,6 +29,10 @@ LevelScene::~LevelScene()
 
 void LevelScene::input()
 {
+    if (game->input.just_pressed(SDL_SCANCODE_1))
+    {
+        game->loadScene(Scenes::BOOT);
+    }
 }
 
 void LevelScene::update(float dt)

@@ -116,7 +116,6 @@ void Game::loadScene(Scenes scene)
             SDL_Log("Loading default scene\n");
             mCurrentScene = std::make_shared<BootScene>(this);
             break;
-
     }
 }
 
@@ -124,7 +123,7 @@ void Game::loadScene(Scenes scene)
 void Game::tick()
 {
     float dt = 1.0/TargetFPS;
-    input();
+    _input(dt);
     update(dt);
     draw();
     SDL_Delay(1000/TargetFPS);
@@ -170,28 +169,11 @@ void Game::setState(const std::string& name, const std::string& value)
     mState.emplace(name, value);
 }
 
-void Game::input()
+void Game::_input(float dt)
 {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            mRunning = false;
-            break;
-        case SDL_KEYDOWN:
-            switch (event.key.keysym.sym)
-            {
-                case SDLK_RIGHT:
-                    loadScene(Scenes::SPLASH);
-                    break;
-                case SDLK_LEFT:
-                    loadScene(Scenes::BOOT);
-                    break;
-            }
-        }
-    }
+    input.update(dt);
+    if (input.quit_requested())
+        mRunning = false;
 
     mCurrentScene->input();
 }
