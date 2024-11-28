@@ -6,6 +6,16 @@
 #include <span>
 #include <string_view>
 
+#include "util.hpp"
+
+
+enum CellType
+{
+    EMPTY = 0,
+    FLOOR = 1,
+    START = 2,
+    FINISH = 3
+};
 struct Level
 {
     Level();
@@ -14,11 +24,12 @@ struct Level
     int rows = 6;
     int cols = 4;
 
-    std::array<std::array<int, 10>, 10> mGrid = {{}};
+    std::array<std::array<CellType, 10>, 10> mGrid = {{}};
 
     void clear();
-    void set(int x, int y, int value);
+    void set(int x, int y, CellType value);
     void load(const std::span<std::string_view>& ld);
+    vec2 getStartPos();
 };
 
 extern std::array<std::span<std::string_view>, 2> LEVELS;
