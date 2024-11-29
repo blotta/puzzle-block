@@ -5,15 +5,6 @@
 #include "level.hpp"
 #include "block.hpp"
 
-enum MoveDir
-{
-    NONE,
-    MV_UP,
-    DOWN,
-    LEFT,
-    RIGHT
-};
-
 class LevelScene : public Scene
 {
 public:
@@ -29,7 +20,9 @@ private:
     int offsetX = 100;
     int offsetY = 100;
     int cellSize = 64;
-    MoveDir moveDir = MoveDir::NONE;
+    vec2 moveDir;
+    bool playerLost;
+    void reset();
 };
 
 #endif

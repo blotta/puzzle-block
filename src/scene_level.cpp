@@ -8,6 +8,15 @@ LevelScene::LevelScene(Game *game)
 {
     SDL_Log("Loading Level scene\n");
 
+    this->reset();
+}
+
+LevelScene::~LevelScene()
+{
+}
+
+void LevelScene::reset()
+{
     auto lvl = game->getOrCreateState("next_level", "2");
 
     auto lvlIdx = std::stoi(lvl) - 1;
@@ -27,10 +36,6 @@ LevelScene::LevelScene(Game *game)
     block.state = BlockState::UP;
 }
 
-LevelScene::~LevelScene()
-{
-}
-
 void LevelScene::input()
 {
     if (game->input.just_pressed(SDL_SCANCODE_1))
@@ -38,63 +43,23 @@ void LevelScene::input()
         game->loadScene(Scenes::BOOT);
     }
 
-    moveDir = MoveDir::NONE;
+    moveDir = vec2(0, 0);
     if (game->input.just_pressed(SDL_SCANCODE_UP))
-        moveDir = MoveDir::MV_UP;
+        moveDir = vec2(0, -1);
     if (game->input.just_pressed(SDL_SCANCODE_DOWN))
-        moveDir = MoveDir::DOWN;
+        moveDir = vec2(0, 1);
     if (game->input.just_pressed(SDL_SCANCODE_LEFT))
-        moveDir = MoveDir::LEFT;
+        moveDir = vec2(-1, 0);
     if (game->input.just_pressed(SDL_SCANCODE_RIGHT))
-        moveDir = MoveDir::RIGHT;
+        moveDir = vec2(1, 0);
 }
+
 
 void LevelScene::update(float dt)
 {
-    switch (moveDir)
+    if (moveDir.x != 0 || moveDir.y != 0)
     {
-        case MoveDir::MV_UP:
-        case MoveDir::DOWN:
-        {
-            if (block.state == BlockState::UP)
-            {
-                block.y = moveDir == MoveDir::MV_UP ? block.y - 2 : block.y + 1;
-                block.state = BlockState::LONG;
-            }
-            else if (block.state == BlockState::LONG)
-            {
-                block.y = moveDir == MoveDir::MV_UP ? block.y - 1 : block.y + 2;
-                block.state = BlockState::UP;
-            }
-            else if (block.state == BlockState::WIDE)
-            {
-                block.y = moveDir == MoveDir::MV_UP ? block.y - 1 : block.y + 1;
-            }
-        }
-        break;
-
-        case MoveDir::LEFT:
-        case MoveDir::RIGHT:
-        {
-            if (block.state == BlockState::UP)
-            {
-                block.x = moveDir == MoveDir::LEFT ? block.x - 2 : block.x + 1;
-                block.state = BlockState::WIDE;
-            }
-            else if (block.state == BlockState::LONG)
-            {
-                block.x = moveDir == MoveDir::LEFT ? block.x - 1 : block.x + 1;
-            }
-            else if (block.state == BlockState::WIDE)
-            {
-                block.x = moveDir == MoveDir::LEFT ? block.x - 1 : block.x + 2;
-                block.state = BlockState::UP;
-            }
-        }
-        break;
-
-        default:
-        break;
+        block.move(moveDir);
     }
 }
 

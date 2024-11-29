@@ -15,6 +15,11 @@ struct vec2
         x = _x;
         y = _y;
     }
+
+    bool operator==(const vec2& other) const
+    {
+        return this->x == other.x && this->y == other.y;
+    }
 };
 
 #endif
