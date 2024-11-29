@@ -7,26 +7,28 @@ LDFLAGS := $(shell $(PKG_CONFIG) --libs $(LIBS))
 
 CFLAGS := $(CFLAGS) -Werror -Wall -std=c++20
 
-TARGET := .\build\game
+EXE := .\build\game.exe
 SRCS := $(wildcard src/*.cpp)
+OBJS := $(SRCS:src/%.cpp=obj/%.o)
 
 all: debug
 
-# Build rules
-$(TARGET): $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
+debug: CFLAGS += -g -mconsole
+debug: $(EXE)
 
-.PHONY: debug
-debug: $(SRCS)
-	$(CC) -g -mconsole $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
+release: CFLAGS += -O2
+release: clean $(EXE)
 
-.PHONY: release
-release: $(SRCS)
-	$(CC) -O2 $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET)
+$(EXE): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+obj/%.o: src/%.cpp
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 
 .PHONY: run
 run: debug
-	$(TARGET)
+	$(EXE)
 
 clean:
-	rm $(TARGET)
+	del $(EXE) .\obj\*.o
