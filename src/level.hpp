@@ -5,6 +5,7 @@
 #include <vector>
 #include <span>
 #include <string_view>
+#include <SDL2/SDL.h>
 
 #include "util.hpp"
 
@@ -30,6 +31,9 @@ struct Level
     void set(int x, int y, CellType value);
     void load(const std::span<std::string_view>& ld);
     vec2 getStartPos();
+    bool isValidPos(const vec2& pos);
+    bool hasFloorAt(const vec2& pos);
+    void draw(SDL_Renderer* rend, int x, int y, int cellSize);
 };
 
 extern std::array<std::span<std::string_view>, 2> LEVELS;

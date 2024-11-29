@@ -2,6 +2,9 @@
 
 void Block::move(const vec2 &dir)
 {
+    if (dir.x == 0 && dir.y == 0)
+        return;
+
     prevX = x;
     prevY = y;
     prevState = state;
@@ -64,4 +67,20 @@ std::pair<vec2, vec2> Block::getPositions()
 
     return std::pair<vec2,vec2>(vec2(x, y), vec2(x, y));
 
+}
+
+void Block::draw(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
+{
+    SDL_SetRenderDrawColor(rend, 200, 100, 100, 255);
+    SDL_Rect blockRect = {
+        levelX + this->x * cellSize,
+        levelY + this->y * cellSize,
+        cellSize,
+        cellSize
+    };
+    if (state == BlockState::WIDE)
+        blockRect.w *= 2;
+    if (state == BlockState::LONG)
+        blockRect.h *= 2;
+    SDL_RenderFillRect(rend, &blockRect);
 }
