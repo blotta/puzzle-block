@@ -14,6 +14,7 @@ OBJS := $(SRCS:src/%.cpp=obj/%.o)
 all: debug
 
 debug: CFLAGS += -g -mconsole
+debug: LDFLAGS += -g -mconsole
 debug: $(EXE)
 
 release: CFLAGS += -O2

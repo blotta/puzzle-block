@@ -22,4 +22,16 @@ struct vec2
     }
 };
 
+struct IsoSprite
+{
+    int tx;
+    int ty;
+    int tw;
+    int th;
+    int heightOffset;
+    int widthOffset;
+};
+
+void toISO(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
+
 #endif

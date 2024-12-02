@@ -7,6 +7,7 @@
 #include <string_view>
 #include <SDL2/SDL.h>
 
+#include "game.hpp"
 #include "util.hpp"
 
 
@@ -19,11 +20,14 @@ enum CellType
 };
 struct Level
 {
-    Level();
+    Level(Game* game);
     ~Level();
+
+    Game* game;
 
     int rows = 6;
     int cols = 4;
+    SDL_Texture* pSpriteSheet;
 
     std::array<std::array<CellType, 10>, 10> mGrid = {{}};
 
@@ -34,6 +38,7 @@ struct Level
     bool isValidPos(const vec2& pos);
     bool hasFloorAt(const vec2& pos);
     void draw(SDL_Renderer* rend, int x, int y, int cellSize);
+    void drawISO(SDL_Renderer* rend, int x, int y, int cellSize);
 };
 
 extern std::array<std::span<std::string_view>, 2> LEVELS;

@@ -4,7 +4,11 @@
 #include "scene_level.hpp"
 
 LevelScene::LevelScene(Game *game)
-    : Scene(game)
+    :
+    Scene(game)
+    ,
+    level(game)
+    , block(game)
 {
     SDL_Log("Loading Level scene\n");
 

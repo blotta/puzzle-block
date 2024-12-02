@@ -5,6 +5,7 @@
 #include "scene_splash.hpp"
 #include "scene_boot.hpp"
 #include "scene_level.hpp"
+#include "scene_isolevel.hpp"
 
 Game::Game() {}
 
@@ -59,6 +60,12 @@ bool Game::init()
         success = false;
     }
 
+    mUpdateTimer.setDuration(1.0 / TargetFPS);
+    mUpdateTimer.reset();
+
+    mFPSTimer.setDuration(1.0);
+    mFPSTimer.reset();
+
     mInitialized = success;
     return success;
 }
@@ -88,6 +95,14 @@ bool Game::loadAssets()
     }
     mTextures["splash"] = tex;
 
+    tex = IMG_LoadTexture(mRenderer, "assets/images/spritesheet.png");
+    if (!tex)
+    {
+        SDL_Log("Couldn't load spritesheet.png: %s\n", SDL_GetError());
+        success = false;
+    }
+    mTextures["spritesheet"] = tex;
+
     return success;
 }
 
@@ -112,6 +127,10 @@ void Game::loadScene(Scenes scene)
             SDL_Log("Loading Level scene\n");
             mCurrentScene = std::make_shared<LevelScene>(this);
             break;
+        case Scenes::ISOLEVEL:
+            SDL_Log("Loading ISO Level scene\n");
+            mCurrentScene = std::make_shared<IsoLevelScene>(this);
+            break;
         default:
             SDL_Log("Loading default scene\n");
             mCurrentScene = std::make_shared<BootScene>(this);
@@ -122,11 +141,21 @@ void Game::loadScene(Scenes scene)
 
 void Game::tick()
 {
-    float dt = 1.0/TargetFPS;
+    mUpdateTimer.waitUntilDone();
+    float dt = mUpdateTimer.elapsed();
+    mUpdateTimer.reset();
+
     _input(dt);
     update(dt);
     draw();
-    SDL_Delay(1000/TargetFPS);
+
+    if (mFPSTimer.isDone())
+    {
+        mFPSTimer.reset();
+        // SDL_Log("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
+        mFpsCounter = 0;
+    }
+    mFpsCounter += 1;
 }
 
 SDL_Renderer *Game::getRenderer()

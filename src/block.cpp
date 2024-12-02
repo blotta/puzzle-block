@@ -1,5 +1,38 @@
 #include "block.hpp"
 
+static IsoSprite isoSprUp = {
+    .tx = 0,
+    .ty = 64,
+    .tw = 64,
+    .th = 96,
+    .heightOffset = 64,
+    .widthOffset = 0
+};
+
+static IsoSprite isoSprLong = {
+    .tx = 64,
+    .ty = 80,
+    .tw = 96,
+    .th = 80,
+    .heightOffset = 32,
+    .widthOffset = 32
+};
+
+static IsoSprite isoSprWide = {
+    .tx = 160,
+    .ty = 80,
+    .tw = 96,
+    .th = 80,
+    .heightOffset = 32,
+    .widthOffset = 0
+};
+
+Block::Block(Game *game)
+    :game(game)
+{
+    pSpriteSheet = game->getTexture("spritesheet");
+}
+
 void Block::move(const vec2 &dir)
 {
     if (dir.x == 0 && dir.y == 0)
@@ -46,6 +79,8 @@ void Block::move(const vec2 &dir)
             y = dir.y > 0 ? y + 2 : y - 1;
         }
     }
+
+    SDL_Log("block %d %d\n", x, y);
 }
 
 void Block::undoMove()
@@ -83,4 +118,34 @@ void Block::draw(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
     if (state == BlockState::LONG)
         blockRect.h *= 2;
     SDL_RenderFillRect(rend, &blockRect);
+}
+
+void Block::drawISO(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
+{
+    IsoSprite* bs = &isoSprUp;
+    if (state == BlockState::LONG)
+        bs = &isoSprLong;
+    if (state == BlockState::WIDE)
+        bs = &isoSprWide;
+
+    SDL_Rect src = {
+        bs->tx,
+        bs->ty,
+        bs->tw,
+        bs->th
+    };
+
+    int scale = cellSize / isoSprUp.tw;
+
+    int sx, sy;
+    toISO(x, y, cellSize, cellSize/2, &sx, &sy);
+
+    SDL_Rect dest = {
+        levelX + sx - bs->widthOffset * scale,
+        levelY + sy - bs->heightOffset * scale,
+        bs->tw * scale,
+        bs->th * scale
+    };
+
+    SDL_RenderCopy(rend, pSpriteSheet, &src, &dest);
 }

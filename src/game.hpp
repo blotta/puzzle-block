@@ -12,6 +12,8 @@
 #include "scene.hpp"
 #include "input_manager.hpp"
 
+#include "timer.hpp"
+
 class Scene;
 enum class Scenes;
 
@@ -53,6 +55,11 @@ private:
     SDL_Window *mWindow = NULL;
     SDL_Renderer *mRenderer = NULL;
     TTF_Font* mFont = NULL;
+
+    Timer mUpdateTimer;
+    Timer mFPSTimer;
+    int mFpsCounter = 0;
+
 
     bool mInitialized = false;
     bool mRunning = false;

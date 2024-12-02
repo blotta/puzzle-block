@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include <utility>
+#include "game.hpp"
 #include "util.hpp"
 
 enum BlockState
@@ -14,6 +15,11 @@ enum BlockState
 };
 struct Block
 {
+    Block(Game* game);
+
+    Game* game;
+    SDL_Texture* pSpriteSheet;
+
     int x;
     int y;
     BlockState state = BlockState::UP; 
@@ -26,7 +32,9 @@ struct Block
     void undoMove();
     std::pair<vec2, vec2> getPositions();
 
-    void draw(SDL_Renderer* rend, int x, int y, int cellSize);
+    void draw(SDL_Renderer* rend, int levelX, int levelY, int cellSize);
+    void drawISO(SDL_Renderer* rend, int levelX, int levelY, int cellSize);
 };
+
 
 #endif

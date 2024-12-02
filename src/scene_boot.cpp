@@ -17,7 +17,7 @@ void BootScene::input()
 
 void BootScene::update(float dt)
 {
-    game->loadScene(Scenes::SPLASH);
+    game->loadScene(Scenes::ISOLEVEL);
 }
 
 void BootScene::draw()

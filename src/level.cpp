@@ -4,8 +4,34 @@
 
 #include <SDL2/SDL.h>
 
-Level::Level()
+static IsoSprite isoSprFloor = {
+    .tx = 0,
+    .ty = 0,
+    .tw = 64,
+    .th = 64,
+    .heightOffset = 0,
+    .widthOffset = 0};
+
+static IsoSprite isoSprFinish = {
+    .tx = 64,
+    .ty = 0,
+    .tw = 64,
+    .th = 64,
+    .heightOffset = 0,
+    .widthOffset = 0};
+
+static IsoSprite isoSprStart = {
+    .tx = 64 * 2,
+    .ty = 0,
+    .tw = 64,
+    .th = 64,
+    .heightOffset = 0,
+    .widthOffset = 0};
+
+Level::Level(Game *game)
+    : game(game)
 {
+    pSpriteSheet = game->getTexture("spritesheet");
 }
 
 Level::~Level()
@@ -70,7 +96,7 @@ bool Level::hasFloorAt(const vec2 &pos)
     return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH;
 }
 
-void Level::draw(SDL_Renderer* rend, int x, int y, int cellSize)
+void Level::draw(SDL_Renderer *rend, int x, int y, int cellSize)
 {
     SDL_Rect rr = {x - 1, y - 1, cellSize * this->cols + 2, cellSize * this->rows + 2};
     SDL_SetRenderDrawColor(rend, 40, 200, 80, 255);
@@ -86,7 +112,7 @@ void Level::draw(SDL_Renderer* rend, int x, int y, int cellSize)
                 y + cellSize * j,
                 cellSize,
                 cellSize};
-            
+
             switch (mGrid[j][i])
             {
             case CellType::FLOOR: // floor
@@ -108,21 +134,62 @@ void Level::draw(SDL_Renderer* rend, int x, int y, int cellSize)
             SDL_RenderDrawRect(rend, &r);
         }
     }
+}
 
+void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
+{
+    for (int i = 0; i < cols; i++)
+    {
+        for (int j = 0; j < rows; j++)
+        {
+            IsoSprite *spr = nullptr;
+
+            switch (mGrid[j][i])
+            {
+            case CellType::START: // start
+                spr = &isoSprStart;
+                break;
+            case CellType::FINISH: // finish
+                spr = &isoSprFinish;
+                break;
+            case CellType::FLOOR: // floor
+                spr = &isoSprFloor;
+                break;
+            case CellType::EMPTY:
+            default: // empty
+                break;
+            }
+
+            if (spr != nullptr)
+            {
+                int sx;
+                int sy;
+                toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
+                SDL_Rect dest = {
+                    x + sx,
+                    y + sy,
+                    cellSize,
+                    cellSize};
+
+                SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
+                SDL_RenderCopy(rend, pSpriteSheet, &src, &dest);
+            }
+        }
+    }
 }
 
 std::array<std::string_view, 6> LVL01 = {
     "3111",
     "0001",
-    "0001",
-    "0001",
+    "0111",
+    "0111",
     "0001",
     "2111",
 };
 
 std::vector<std::string_view> LVL02 = {
     "3111",
-    "0001",
+    "0111",
     "1001",
     "0001",
     "0011",
@@ -131,5 +198,4 @@ std::vector<std::string_view> LVL02 = {
 
 std::array<std::span<std::string_view>, 2> LEVELS = {
     LVL01,
-    LVL02
-};
+    LVL02};
