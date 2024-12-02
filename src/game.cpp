@@ -103,6 +103,8 @@ bool Game::loadAssets()
     }
     mTextures["spritesheet"] = tex;
 
+    loadLevels();
+
     return success;
 }
 
@@ -112,6 +114,14 @@ void Game::unloadAssets()
     for (auto it = mTextures.begin(); it != mTextures.end(); it++)
     {
         SDL_DestroyTexture(it->second);
+    }
+}
+
+void Game::loadLevels()
+{
+    for (auto& lvl : DEFAULT_LEVELS)
+    {
+        mLevels.emplace_back(lvl);
     }
 }
 
@@ -175,27 +185,24 @@ TTF_Font *Game::getFont()
 
 const std::string Game::getState(const std::string& name)
 {
-    if (!mState.contains(name))
-    {
-        mState.emplace(name, "");
-    }
-
     return mState.at(name);
 }
 
 const std::string Game::getOrCreateState(const std::string &name, const std::string &value)
 {
-    if (!mState.contains(name))
-    {
-        mState.emplace(name, value);
-    }
+    mState.try_emplace(name, value);
 
     return mState.at(name);
 }
 
 void Game::setState(const std::string& name, const std::string& value)
 {
-    mState.emplace(name, value);
+    mState[name] = value;
+}
+
+const LevelData &Game::getLevel(int idx)
+{
+    return mLevels[idx];
 }
 
 void Game::_input(float dt)

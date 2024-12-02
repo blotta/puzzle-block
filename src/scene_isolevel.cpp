@@ -18,13 +18,12 @@ IsoLevelScene::~IsoLevelScene()
 void IsoLevelScene::reset()
 {
     auto lvl = game->getOrCreateState("next_level", "1");
-
+    SDL_Log("Loading level %s\n", lvl.c_str());
     auto lvlIdx = std::stoi(lvl) - 1;
-
-    level.load(LEVELS[lvlIdx]);
+    level.load(game->getLevel(lvlIdx));
 
     // view sizes
-    cellSize = 64 * 2;
+    cellSize = 64; // * 2;
     vec2 boundLeft, boundRight;
     toISO(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
     toISO(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
@@ -46,9 +45,17 @@ void IsoLevelScene::reset()
 
 void IsoLevelScene::input()
 {
-    if (game->input.just_pressed(SDL_SCANCODE_1))
+    if (game->input.just_pressed(SDL_SCANCODE_L))
     {
-        game->loadScene(Scenes::BOOT);
+        auto idx = std::stoi(game->getState("next_level"));
+        game->setState("next_level", std::to_string(idx + 1));
+        reset();
+    }
+    else if (game->input.just_pressed(SDL_SCANCODE_H))
+    {
+        auto idx = std::stoi(game->getState("next_level"));
+        game->setState("next_level", std::to_string(idx - 1));
+        reset();
     }
 
     moveDir = vec2(0, 0);

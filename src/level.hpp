@@ -10,6 +10,14 @@
 #include "game.hpp"
 #include "util.hpp"
 
+class Game;
+
+struct LevelData
+{
+    int rows;
+    int cols;
+    char data[10][11];
+};
 
 enum CellType
 {
@@ -34,6 +42,7 @@ struct Level
     void clear();
     void set(int x, int y, CellType value);
     void load(const std::span<std::string_view>& ld);
+    void load(const LevelData& ld);
     vec2 getStartPos();
     bool isValidPos(const vec2& pos);
     bool hasFloorAt(const vec2& pos);
@@ -41,6 +50,6 @@ struct Level
     void drawISO(SDL_Renderer* rend, int x, int y, int cellSize);
 };
 
-extern std::array<std::span<std::string_view>, 2> LEVELS;
+extern std::array<LevelData,3> DEFAULT_LEVELS;
 
 #endif

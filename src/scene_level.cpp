@@ -22,10 +22,9 @@ LevelScene::~LevelScene()
 void LevelScene::reset()
 {
     auto lvl = game->getOrCreateState("next_level", "1");
-
+    SDL_Log("Loading level %s\n", lvl.c_str());
     auto lvlIdx = std::stoi(lvl) - 1;
-
-    level.load(LEVELS[lvlIdx]);
+    level.load(game->getLevel(lvlIdx));
 
     // view sizes
     int hor = SDL_floorf(game->ScreenWidth * 0.8) / level.cols;
@@ -42,11 +41,6 @@ void LevelScene::reset()
 
 void LevelScene::input()
 {
-    if (game->input.just_pressed(SDL_SCANCODE_1))
-    {
-        game->loadScene(Scenes::BOOT);
-    }
-
     moveDir = vec2(0, 0);
     if (game->input.just_pressed(SDL_SCANCODE_UP))
         moveDir = vec2(0, -1);

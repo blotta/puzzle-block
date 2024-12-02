@@ -1,8 +1,9 @@
-#include "level.hpp"
 #include <stdlib.h>
 #include <span>
 
 #include <SDL2/SDL.h>
+
+#include "level.hpp"
 
 static IsoSprite isoSprFloor = {
     .tx = 0,
@@ -64,6 +65,22 @@ void Level::load(const std::span<std::string_view> &ld)
         for (size_t col = 0; col < ld[row].size(); ++col)
         {
             auto v = ld[row][col];
+            CellType vi = (CellType)atoi(&v);
+            this->set(col, row, vi);
+        }
+    }
+}
+
+void Level::load(const LevelData &ld)
+{
+    this->clear();
+    this->rows = ld.rows;
+    this->cols = ld.cols;
+    for (int row = 0; row < ld.rows; ++row)
+    {
+        for (int col = 0; col < ld.cols; ++col)
+        {
+            auto v = ld.data[row][col];
             CellType vi = (CellType)atoi(&v);
             this->set(col, row, vi);
         }
@@ -178,24 +195,41 @@ void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
     }
 }
 
-std::array<std::string_view, 6> LVL01 = {
-    "3111",
-    "0001",
-    "0111",
-    "0111",
-    "0001",
-    "2111",
-};
+std::array<LevelData, 3> DEFAULT_LEVELS = {{
 
-std::vector<std::string_view> LVL02 = {
-    "3111",
-    "0111",
-    "1001",
-    "0001",
-    "0011",
-    "2111",
-};
+    {.rows = 10, .cols = 10, .data = {
 
-std::array<std::span<std::string_view>, 2> LEVELS = {
-    LVL01,
-    LVL02};
+                                 "1111113111",
+                                 "1111110001",
+                                 "1111110111",
+                                 "1111110111",
+                                 "1111110001",
+                                 "1111112111",
+                                 "1111110111",
+                                 "1111110111",
+                                 "1111110111",
+                                 "1111110111",
+                             }
+
+    },
+    {.rows = 6, .cols = 4, .data = {
+                               "3111",
+                               "0001",
+                               "0111",
+                               "0111",
+                               "0001",
+                               "2111",
+                           }
+
+    },
+    {.rows = 6, .cols = 4, .data = {
+                               "1311",
+                               "0001",
+                               "0111",
+                               "0111",
+                               "0001",
+                               "2111",
+                           }
+
+    },
+}};
