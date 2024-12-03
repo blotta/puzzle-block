@@ -23,7 +23,7 @@ void IsoLevelScene::reset()
     level.load(game->getLevel(lvlIdx));
 
     // view sizes
-    cellSize = 64; // * 2;
+    cellSize = 64;
     vec2 boundLeft, boundRight;
     toISO(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
     toISO(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
@@ -67,6 +67,8 @@ void IsoLevelScene::input()
         moveDir = vec2(-1, 0);
     if (game->input.just_pressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
+
+    game->input.mouse_position(&mousePos.x, &mousePos.y);
 }
 
 void IsoLevelScene::update(float dt)
@@ -81,5 +83,11 @@ void IsoLevelScene::draw()
 {
     level.drawISO(game->getRenderer(), offsetX, offsetY, cellSize);
     block.drawISO(game->getRenderer(), offsetX, offsetY, cellSize);
+
+    SDL_SetRenderDrawColor(game->getRenderer(), 255, 0, 0, 255);
+    if (game->input.mouse_pressed(SDL_BUTTON_LEFT))
+        SDL_SetRenderDrawColor(game->getRenderer(), 0, 255, 100, 255);
+    SDL_Rect r = {mousePos.x - 10, mousePos.y - 10, 20, 20};
+    SDL_RenderDrawRect(game->getRenderer(), &r);
 }
 

@@ -21,6 +21,7 @@ private:
     int offsetY = 100;
     int cellSize = 64;
     vec2 moveDir;
+    vec2 mousePos;
     bool playerLost;
     void reset();
 };
