@@ -108,6 +108,9 @@ bool Level::isValidPos(const vec2 &pos)
 
 bool Level::hasFloorAt(const vec2 &pos)
 {
+    if (!isValidPos(pos))
+        return false;
+
     CellType type = mGrid[pos.y][pos.x];
 
     return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH;
