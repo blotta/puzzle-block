@@ -4,35 +4,37 @@
 #include <SDL2/SDL.h>
 
 #include "level.hpp"
+#include "asset.hpp"
 
-static IsoSprite isoSprFloor = {
+// level sprites
+IsoSprite isoSprFloor = {
     .tx = 0,
     .ty = 0,
     .tw = 64,
     .th = 64,
-    .heightOffset = 0,
-    .widthOffset = 0};
+    .originY = 0,
+    .originX = 0};
 
-static IsoSprite isoSprFinish = {
+IsoSprite isoSprFinish = {
     .tx = 64,
     .ty = 0,
     .tw = 64,
     .th = 64,
-    .heightOffset = 0,
-    .widthOffset = 0};
+    .originY = 0,
+    .originX = 0};
 
-static IsoSprite isoSprStart = {
+IsoSprite isoSprStart = {
     .tx = 64 * 2,
     .ty = 0,
     .tw = 64,
     .th = 64,
-    .heightOffset = 0,
-    .widthOffset = 0};
+    .originY = 0,
+    .originX = 0};
 
 Level::Level(Game *game)
     : game(game)
 {
-    pSpriteSheet = game->getTexture("spritesheet");
+    pSpriteSheet = game->getTTexture("assets/images/spritesheet.png");
 }
 
 Level::~Level()
@@ -192,7 +194,7 @@ void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
                     cellSize};
 
                 SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
-                SDL_RenderCopy(rend, pSpriteSheet, &src, &dest);
+                SDL_RenderCopy(rend, pSpriteSheet->get(), &src, &dest);
             }
         }
     }

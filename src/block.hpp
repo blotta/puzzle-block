@@ -18,7 +18,7 @@ struct Block
     Block(Game* game);
 
     Game* game;
-    SDL_Texture* pSpriteSheet;
+    const Texture* pSpriteSheet;
 
     int x;
     int y;

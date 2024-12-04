@@ -6,7 +6,7 @@ SplashScene::SplashScene(Game* game)
     , mText(game->getFont())
 {
     SDL_Log("Loading splash scene\n");
-    pSplashTexture = game->getTexture("splash");
+    pSplashTexture = game->getTTexture("assets/images/splash.png");
     mTimer = 0;
     mText.clearText();
 }
@@ -52,5 +52,5 @@ void SplashScene::update(float dt)
 
 void SplashScene::draw()
 {
-    mText.draw(pRenderer, game->ScreenWidth/2 - mText.getWidth()/2, game->ScreenHeight/2 - mText.getHeight()/2);
+    mText.draw(game->getRenderer(), game->ScreenWidth/2 - mText.getWidth()/2, game->ScreenHeight/2 - mText.getHeight()/2);
 }

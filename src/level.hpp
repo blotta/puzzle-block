@@ -35,7 +35,7 @@ struct Level
 
     int rows = 6;
     int cols = 4;
-    SDL_Texture* pSpriteSheet;
+    const Texture* pSpriteSheet;
 
     std::array<std::array<CellType, 10>, 10> mGrid = {{}};
 

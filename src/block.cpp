@@ -1,36 +1,36 @@
 #include "block.hpp"
 
-static IsoSprite isoSprUp = {
+#include "asset.hpp"
+
+// block sprites
+IsoSprite isoSprUp = {
     .tx = 0,
     .ty = 64,
     .tw = 64,
     .th = 96,
-    .heightOffset = 64,
-    .widthOffset = 0
-};
+    .originY = 64,
+    .originX = 0};
 
-static IsoSprite isoSprLong = {
+IsoSprite isoSprLong = {
     .tx = 64,
     .ty = 80,
     .tw = 96,
     .th = 80,
-    .heightOffset = 32,
-    .widthOffset = 32
-};
+    .originY = 32,
+    .originX = 32};
 
-static IsoSprite isoSprWide = {
+IsoSprite isoSprWide = {
     .tx = 160,
     .ty = 80,
     .tw = 96,
     .th = 80,
-    .heightOffset = 32,
-    .widthOffset = 0
-};
+    .originY = 32,
+    .originX = 0};
 
 Block::Block(Game *game)
     :game(game)
 {
-    pSpriteSheet = game->getTexture("spritesheet");
+    pSpriteSheet = game->mAsset.getTexture("assets/images/spritesheet.png");
 }
 
 void Block::move(const vec2 &dir)
@@ -141,11 +141,11 @@ void Block::drawISO(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);
 
     SDL_Rect dest = {
-        levelX + sx - bs->widthOffset * scale,
-        levelY + sy - bs->heightOffset * scale,
+        levelX + sx - bs->originX * scale,
+        levelY + sy - bs->originY * scale,
         bs->tw * scale,
         bs->th * scale
     };
 
-    SDL_RenderCopy(rend, pSpriteSheet, &src, &dest);
+    SDL_RenderCopy(rend, pSpriteSheet->get(), &src, &dest);
 }

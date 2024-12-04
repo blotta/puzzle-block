@@ -13,7 +13,7 @@ public:
     void draw() override;
     void input() override;
 private:
-    SDL_Texture* pSplashTexture;
+    const Texture* pSplashTexture;
     RenderText mText;
     float mTimer;
 };

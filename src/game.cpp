@@ -7,23 +7,8 @@
 #include "scene_level.hpp"
 #include "scene_isolevel.hpp"
 
-Game::Game() {}
-
-Game::~Game()
-{
-    if (mInitialized)
-    {
-        SDL_Log("Deinitializing game\n");
-        unloadAssets();
-        TTF_Quit();
-        IMG_Quit();
-        SDL_DestroyRenderer(mRenderer);
-        SDL_DestroyWindow(mWindow);
-        SDL_Quit();
-    }
-}
-
-bool Game::init()
+Game::Game()
+    : mAsset(nullptr)
 {
     bool success = true;
     mRunning = true;
@@ -40,13 +25,15 @@ bool Game::init()
         success = false;
     }
 
+    SDL_SetWindowTitle(mWindow, "Game");
+
     mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
     if (!mRenderer)
     {
         SDL_Log("Failed to initialize SDL Renderer\n");
         success = false;
     }
-    SDL_SetWindowTitle(mWindow, "Game");
+    mAsset.setRenderer(mRenderer);
 
     if (!IMG_Init(IMG_INIT_PNG))
     {
@@ -66,8 +53,22 @@ bool Game::init()
     mFPSTimer.setDuration(1.0);
     mFPSTimer.reset();
 
-    mInitialized = success;
-    return success;
+    if (!success)
+        SDL_Log("Failed to initialize\n");
+}
+
+Game::~Game()
+{
+    SDL_Log("Deinitializing game\n");
+
+    // make sure to deinit assets before deiniting systems
+    unloadAssets();
+
+    TTF_Quit();
+    IMG_Quit();
+    SDL_DestroyRenderer(mRenderer);
+    SDL_DestroyWindow(mWindow);
+    SDL_Quit();
 }
 
 bool Game::isRunning()
@@ -82,26 +83,13 @@ bool Game::loadAssets()
     mFont = TTF_OpenFont("assets/fonts/Cabin-Regular.ttf", 28);
     if (!mFont)
     {
-        SDL_Log("Failed to laod font: %s\n", TTF_GetError());
+        SDL_Log("Failed to load font: %s\n", TTF_GetError());
         success = false;
     }
 
-    SDL_Texture* tex = NULL;
-    tex = IMG_LoadTexture(mRenderer, "assets/images/splash.png");
-    if (!tex)
-    {
-        SDL_Log("Couldn't load splash.png: %s\n", SDL_GetError());
-        success = false;
-    }
-    mTextures["splash"] = tex;
-
-    tex = IMG_LoadTexture(mRenderer, "assets/images/spritesheet.png");
-    if (!tex)
-    {
-        SDL_Log("Couldn't load spritesheet.png: %s\n", SDL_GetError());
-        success = false;
-    }
-    mTextures["spritesheet"] = tex;
+    // preload textures
+    mAsset.getTexture("assets/images/splash.png");
+    mAsset.getTexture("assets/images/spritesheet.png");
 
     loadLevels();
 
@@ -110,16 +98,13 @@ bool Game::loadAssets()
 
 void Game::unloadAssets()
 {
+    mAsset.unloadAssets();
     TTF_CloseFont(mFont);
-    for (auto it = mTextures.begin(); it != mTextures.end(); it++)
-    {
-        SDL_DestroyTexture(it->second);
-    }
 }
 
 void Game::loadLevels()
 {
-    for (auto& lvl : DEFAULT_LEVELS)
+    for (auto &lvl : DEFAULT_LEVELS)
     {
         mLevels.emplace_back(lvl);
     }
@@ -129,25 +114,24 @@ void Game::loadScene(Scenes scene)
 {
     switch (scene)
     {
-        case Scenes::SPLASH:
-            SDL_Log("Loading Splash scene\n");
-            mCurrentScene = std::make_shared<SplashScene>(this);
-            break;
-        case Scenes::LEVEL:
-            SDL_Log("Loading Level scene\n");
-            mCurrentScene = std::make_shared<LevelScene>(this);
-            break;
-        case Scenes::ISOLEVEL:
-            SDL_Log("Loading ISO Level scene\n");
-            mCurrentScene = std::make_shared<IsoLevelScene>(this);
-            break;
-        default:
-            SDL_Log("Loading default scene\n");
-            mCurrentScene = std::make_shared<BootScene>(this);
-            break;
+    case Scenes::SPLASH:
+        SDL_Log("Loading Splash scene\n");
+        mCurrentScene = std::make_shared<SplashScene>(this);
+        break;
+    case Scenes::LEVEL:
+        SDL_Log("Loading Level scene\n");
+        mCurrentScene = std::make_shared<LevelScene>(this);
+        break;
+    case Scenes::ISOLEVEL:
+        SDL_Log("Loading ISO Level scene\n");
+        mCurrentScene = std::make_shared<IsoLevelScene>(this);
+        break;
+    default:
+        SDL_Log("Loading default scene\n");
+        mCurrentScene = std::make_shared<BootScene>(this);
+        break;
     }
 }
-
 
 void Game::tick()
 {
@@ -173,9 +157,9 @@ SDL_Renderer *Game::getRenderer()
     return mRenderer;
 }
 
-SDL_Texture *Game::getTexture(const char *textureName)
+const Texture* Game::getTTexture(const std::string &texture)
 {
-    return mTextures.at(textureName);
+    return mAsset.getTexture(texture);
 }
 
 TTF_Font *Game::getFont()
@@ -183,7 +167,7 @@ TTF_Font *Game::getFont()
     return mFont;
 }
 
-const std::string Game::getState(const std::string& name)
+const std::string Game::getState(const std::string &name)
 {
     return mState.at(name);
 }
@@ -195,7 +179,7 @@ const std::string Game::getOrCreateState(const std::string &name, const std::str
     return mState.at(name);
 }
 
-void Game::setState(const std::string& name, const std::string& value)
+void Game::setState(const std::string &name, const std::string &value)
 {
     mState[name] = value;
 }
@@ -234,23 +218,16 @@ void Game::run()
     SDL_Log("Starting program\n");
     mRunning = true;
 
-    if (!init())
+    if (!loadAssets())
     {
-        SDL_Log("Failed to initialize\n");
+        SDL_Log("Failed to load media\n");
     }
     else
     {
-        if (!loadAssets())
+        loadScene(Scenes::BOOT);
+        while (mRunning)
         {
-            SDL_Log("Failed to load media\n");
-        }
-        else
-        {
-            loadScene(Scenes::BOOT);
-            while (mRunning)
-            {
-                tick();
-            }
+            tick();
         }
     }
 }

@@ -11,6 +11,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "scene.hpp"
+#include "asset.hpp"
 #include "input_manager.hpp"
 #include "level.hpp"
 
@@ -37,15 +38,16 @@ public:
     void loadScene(Scenes sceneName);
 
     SDL_Renderer *getRenderer();
-    SDL_Texture *getTexture(const char *textureName);
+    const Texture* getTTexture(const std::string& texture);
     TTF_Font *getFont();
     const std::string getState(const std::string &name);
     const std::string getOrCreateState(const std::string &name, const std::string &value);
     void setState(const std::string &name, const std::string &value);
     const LevelData &getLevel(int idx);
 
+    AssetManager mAsset;
+
 private:
-    bool init();
     bool loadAssets();
     void unloadAssets();
     void loadLevels();
@@ -63,10 +65,8 @@ private:
     Timer mFPSTimer;
     int mFpsCounter = 0;
 
-    bool mInitialized = false;
     bool mRunning = false;
 
-    std::map<std::string, SDL_Texture *> mTextures;
     std::vector<LevelData> mLevels;
 
     std::shared_ptr<Scene> mCurrentScene;

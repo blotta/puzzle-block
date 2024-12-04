@@ -23,7 +23,6 @@ public:
     virtual void input() = 0;
 protected:
     Game* game;
-    SDL_Renderer* pRenderer;
 };
 
 #endif

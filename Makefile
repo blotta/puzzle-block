@@ -13,10 +13,12 @@ OBJS := $(SRCS:src/%.cpp=obj/%.o)
 
 all: debug
 
+.PHONY: debug
 debug: CFLAGS += -g -mconsole
 debug: LDFLAGS += -g -mconsole
 debug: $(EXE)
 
+.PHONY: release
 release: CFLAGS += -O2
 release: clean $(EXE)
 
@@ -31,5 +33,6 @@ obj/%.o: src/%.cpp
 run: debug
 	$(EXE)
 
+.PHONY: clean
 clean:
 	del $(EXE) .\obj\*.o
