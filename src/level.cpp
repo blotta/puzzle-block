@@ -6,31 +6,6 @@
 #include "level.hpp"
 #include "asset.hpp"
 
-// level sprites
-IsoSprite isoSprFloor = {
-    .tx = 0,
-    .ty = 0,
-    .tw = 64,
-    .th = 64,
-    .originY = 0,
-    .originX = 0};
-
-IsoSprite isoSprFinish = {
-    .tx = 64,
-    .ty = 0,
-    .tw = 64,
-    .th = 64,
-    .originY = 0,
-    .originX = 0};
-
-IsoSprite isoSprStart = {
-    .tx = 64 * 2,
-    .ty = 0,
-    .tw = 64,
-    .th = 64,
-    .originY = 0,
-    .originX = 0};
-
 Level::Level(Game *game)
     : game(game)
 {
@@ -164,18 +139,18 @@ void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
     {
         for (int j = 0; j < rows; j++)
         {
-            IsoSprite *spr = nullptr;
+            Sprite *spr = nullptr;
 
             switch (mGrid[j][i])
             {
             case CellType::START: // start
-                spr = &isoSprStart;
+                spr = &SPRITES[SpriteID::FLOOR_START];
                 break;
             case CellType::FINISH: // finish
-                spr = &isoSprFinish;
+                spr = &SPRITES[SpriteID::FLOOR_FINISH];
                 break;
             case CellType::FLOOR: // floor
-                spr = &isoSprFloor;
+                spr = &SPRITES[SpriteID::FLOOR];
                 break;
             case CellType::EMPTY:
             default: // empty

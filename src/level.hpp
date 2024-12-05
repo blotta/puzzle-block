@@ -19,7 +19,7 @@ struct LevelData
     char data[10][11];
 };
 
-enum CellType
+enum class CellType
 {
     EMPTY = 0,
     FLOOR = 1,

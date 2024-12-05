@@ -2,31 +2,6 @@
 
 #include "asset.hpp"
 
-// block sprites
-IsoSprite isoSprUp = {
-    .tx = 0,
-    .ty = 64,
-    .tw = 64,
-    .th = 96,
-    .originY = 64,
-    .originX = 0};
-
-IsoSprite isoSprLong = {
-    .tx = 64,
-    .ty = 80,
-    .tw = 96,
-    .th = 80,
-    .originY = 32,
-    .originX = 32};
-
-IsoSprite isoSprWide = {
-    .tx = 160,
-    .ty = 80,
-    .tw = 96,
-    .th = 80,
-    .originY = 32,
-    .originX = 0};
-
 Block::Block(Game *game)
     :game(game)
 {
@@ -122,29 +97,31 @@ void Block::draw(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
 
 void Block::drawISO(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
 {
-    IsoSprite* bs = &isoSprUp;
+    SpriteID sprId = SpriteID::BLOCK_UP;
     if (state == BlockState::LONG)
-        bs = &isoSprLong;
+        sprId = SpriteID::BLOCK_LONG;
     if (state == BlockState::WIDE)
-        bs = &isoSprWide;
+        sprId = SpriteID::BLOCK_WIDE;
+    
+    Sprite* spr = &SPRITES[sprId];
 
     SDL_Rect src = {
-        bs->tx,
-        bs->ty,
-        bs->tw,
-        bs->th
+        spr->tx,
+        spr->ty,
+        spr->tw,
+        spr->th
     };
 
-    int scale = cellSize / isoSprUp.tw;
+    int scale = 1;
 
     int sx, sy;
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);
 
     SDL_Rect dest = {
-        levelX + sx - bs->originX * scale,
-        levelY + sy - bs->originY * scale,
-        bs->tw * scale,
-        bs->th * scale
+        levelX + sx - spr->originX * scale,
+        levelY + sy - spr->originY * scale,
+        spr->tw * scale,
+        spr->th * scale
     };
 
     SDL_RenderCopy(rend, pSpriteSheet->get(), &src, &dest);
