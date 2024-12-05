@@ -1,5 +1,9 @@
-#ifndef SPRITE_HPP
-#define SPRITE_HPP
+#ifndef DATA_HPP
+#define DATA_HPP
+
+#include <array>
+
+// SPRITES
 
 enum SpriteID
 {
@@ -26,5 +30,16 @@ struct Sprite
 };
 
 extern Sprite SPRITES[SpriteID::NUM_SPRITES];
+
+// LEVELS
+
+struct LevelData
+{
+    int rows;
+    int cols;
+    char data[10][11];
+};
+
+extern std::array<LevelData, 3> DEFAULT_LEVELS;
 
 #endif

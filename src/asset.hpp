@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #include <SDL2/SDL.h>
-#include "sprite.hpp"
+#include "data.hpp"
 
 class Texture
 {

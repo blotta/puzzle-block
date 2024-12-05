@@ -12,13 +12,6 @@
 
 class Game;
 
-struct LevelData
-{
-    int rows;
-    int cols;
-    char data[10][11];
-};
-
 enum class CellType
 {
     EMPTY = 0,
@@ -28,28 +21,26 @@ enum class CellType
 };
 struct Level
 {
-    Level(Game* game);
+    Level(Game *game);
     ~Level();
 
-    Game* game;
+    Game *game;
 
     int rows = 6;
     int cols = 4;
-    const Texture* pSpriteSheet;
+    const Texture *pSpriteSheet;
 
     std::array<std::array<CellType, 10>, 10> mGrid = {{}};
 
     void clear();
     void set(int x, int y, CellType value);
-    void load(const std::span<std::string_view>& ld);
-    void load(const LevelData& ld);
+    void load(const std::span<std::string_view> &ld);
+    void load(const LevelData &ld);
     vec2 getStartPos();
-    bool isValidPos(const vec2& pos);
-    bool hasFloorAt(const vec2& pos);
-    void draw(SDL_Renderer* rend, int x, int y, int cellSize);
-    void drawISO(SDL_Renderer* rend, int x, int y, int cellSize);
+    bool isValidPos(const vec2 &pos);
+    bool hasFloorAt(const vec2 &pos);
+    void draw(SDL_Renderer *rend, int x, int y, int cellSize);
+    void drawISO(SDL_Renderer *rend, int x, int y, int cellSize);
 };
-
-extern std::array<LevelData,3> DEFAULT_LEVELS;
 
 #endif
