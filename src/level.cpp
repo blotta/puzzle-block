@@ -174,3 +174,41 @@ void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
         }
     }
 }
+
+void Level::toggleFloor(const vec2 &pos)
+{
+    CellType& cell = mGrid[pos.y][pos.x];
+    switch (cell)
+    {
+        case CellType::EMPTY:
+            cell = CellType::FLOOR;
+            break;
+        case CellType::FLOOR:
+        case CellType::START:
+        case CellType::FINISH:
+            cell = CellType::EMPTY;
+            break;
+        default:
+            break;
+    }
+}
+
+void Level::toggleStartFinish(const vec2 &pos)
+{
+    CellType& cell = mGrid[pos.y][pos.x];
+    switch (cell)
+    {
+        case CellType::START:
+            cell = CellType::FINISH;
+            break;
+        case CellType::FINISH:
+            cell = CellType::EMPTY;
+            break;
+        case CellType::EMPTY:
+        case CellType::FLOOR:
+            cell = CellType::START;
+            break;
+        default:
+            break;
+    }
+}

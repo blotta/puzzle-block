@@ -41,6 +41,9 @@ struct Level
     bool hasFloorAt(const vec2 &pos);
     void draw(SDL_Renderer *rend, int x, int y, int cellSize);
     void drawISO(SDL_Renderer *rend, int x, int y, int cellSize);
+
+    void toggleFloor(const vec2& pos);
+    void toggleStartFinish(const vec2& pos);
 };
 
 #endif

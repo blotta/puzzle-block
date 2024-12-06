@@ -45,6 +45,13 @@ void IsoLevelScene::reset()
 
 void IsoLevelScene::input()
 {
+    if (game->input.just_pressed(SDL_SCANCODE_E))
+    {
+        // edit this level
+        game->loadScene(Scenes::LEVEL_EDIT);
+        return;
+    }
+
     if (game->input.just_pressed(SDL_SCANCODE_L))
     {
         auto idx = std::stoi(game->getState("next_level"));

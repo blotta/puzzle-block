@@ -7,7 +7,7 @@ enum class Scenes
 {
     BOOT = 0,
     SPLASH,
-    LEVEL,
+    LEVEL_EDIT,
     ISOLEVEL,
 };
 

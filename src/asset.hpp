@@ -44,6 +44,7 @@ private:
 class AssetManager
 {
 public:
+    AssetManager();
     AssetManager(SDL_Renderer* renderer);
     ~AssetManager();
 
@@ -56,11 +57,10 @@ public:
     // void addToAtlas(const std::string& name, IsoSprite data);
 
 private:
-    SDL_Renderer* pRenderer;
+    SDL_Renderer* pRenderer = nullptr;
     std::unordered_map<std::string, Texture> mTextures;
     // std::unordered_map<std::string, Atlas> mAtlases;
     void loadTexture(const std::string& path);
 };
-// extern std::vector<IsoSprite> ASSET_DEFS;
 
 #endif

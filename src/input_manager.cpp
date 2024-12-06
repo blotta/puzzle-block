@@ -82,19 +82,19 @@ bool InputManager::just_released(SDL_Scancode code)
 
 bool InputManager::mouse_pressed(uint8_t btn)
 {
-    uint8_t b = mMouse.button[SDL_BUTTON(btn)];
+    uint8_t b = mMouse.button[btn];
     return b == 2 || b == 1;
 }
 
 bool InputManager::mouse_just_pressed(uint8_t btn)
 {
-    uint8_t b = mMouse.button[SDL_BUTTON(btn)];
+    uint8_t b = mMouse.button[btn];
     return b == 2;
 }
 
 bool InputManager::mouse_just_released(uint8_t btn)
 {
-    uint8_t b = mMouse.button[SDL_BUTTON(btn)];
+    uint8_t b = mMouse.button[btn];
     return b == 3;
 }
 

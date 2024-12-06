@@ -44,6 +44,11 @@ SDL_Texture *Texture::get() const
     return mTexture;
 }
 
+AssetManager::AssetManager()
+{
+    pRenderer = nullptr;
+}
+
 AssetManager::AssetManager(SDL_Renderer *renderer)
     : pRenderer(renderer)
 {

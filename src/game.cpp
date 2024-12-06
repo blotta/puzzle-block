@@ -4,11 +4,10 @@
 #include "scene.hpp"
 #include "scene_splash.hpp"
 #include "scene_boot.hpp"
-#include "scene_level.hpp"
+#include "scene_leveledit.hpp"
 #include "scene_isolevel.hpp"
 
 Game::Game()
-    : mAsset(nullptr)
 {
     bool success = true;
     mRunning = true;
@@ -118,9 +117,9 @@ void Game::loadScene(Scenes scene)
         SDL_Log("Loading Splash scene\n");
         mCurrentScene = std::make_shared<SplashScene>(this);
         break;
-    case Scenes::LEVEL:
+    case Scenes::LEVEL_EDIT:
         SDL_Log("Loading Level scene\n");
-        mCurrentScene = std::make_shared<LevelScene>(this);
+        mCurrentScene = std::make_shared<LevelEditScene>(this);
         break;
     case Scenes::ISOLEVEL:
         SDL_Log("Loading ISO Level scene\n");

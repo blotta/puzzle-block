@@ -5,11 +5,11 @@
 #include "level.hpp"
 #include "block.hpp"
 
-class LevelScene : public Scene
+class LevelEditScene : public Scene
 {
 public:
-    LevelScene(Game* game);
-    ~LevelScene();
+    LevelEditScene(Game* game);
+    ~LevelEditScene();
     void update(float dt) override;
     void draw() override;
     void input() override;
@@ -21,7 +21,8 @@ private:
     int offsetY = 100;
     int cellSize = 64;
     vec2 moveDir;
-    bool playerLost;
+    vec2 mousePos;
+    vec2 mouseGridPos;
     void reset();
 };
 

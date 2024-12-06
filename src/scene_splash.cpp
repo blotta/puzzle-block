@@ -20,7 +20,7 @@ void SplashScene::input()
 {
     if (game->input.just_pressed(SDL_SCANCODE_RETURN))
     {
-        game->loadScene(Scenes::LEVEL);
+        game->loadScene(Scenes::LEVEL_EDIT);
     }
 }
 
@@ -46,7 +46,7 @@ void SplashScene::update(float dt)
 
     if (mTimer > 4)
     {
-        game->loadScene(Scenes::LEVEL);
+        game->loadScene(Scenes::LEVEL_EDIT);
     }
 }
 
