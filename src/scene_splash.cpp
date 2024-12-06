@@ -6,7 +6,7 @@ SplashScene::SplashScene(Game* game)
     , mText(game->getFont())
 {
     SDL_Log("Loading splash scene\n");
-    pSplashTexture = game->getTTexture("assets/images/splash.png");
+    pSplashTexture = game->getTexture("assets/images/splash.png");
     mTimer = 0;
     mText.clearText();
 }

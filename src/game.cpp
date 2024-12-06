@@ -52,6 +52,8 @@ Game::Game()
     mFPSTimer.setDuration(1.0);
     mFPSTimer.reset();
 
+    load_game_data(&mData);
+
     if (!success)
         SDL_Log("Failed to initialize\n");
 }
@@ -86,9 +88,8 @@ bool Game::loadAssets()
         success = false;
     }
 
-    // preload textures
-    mAsset.getTexture("assets/images/splash.png");
-    mAsset.getTexture("assets/images/spritesheet.png");
+    // preload spritesheet
+    pActiveTexture = mAsset.getTexture("assets/images/spritesheet.png");
 
     loadLevels();
 
@@ -103,7 +104,7 @@ void Game::unloadAssets()
 
 void Game::loadLevels()
 {
-    for (auto &lvl : DEFAULT_LEVELS)
+    for (auto &lvl : mData.DefaultLevels)
     {
         mLevels.emplace_back(lvl);
     }
@@ -156,7 +157,7 @@ SDL_Renderer *Game::getRenderer()
     return mRenderer;
 }
 
-const Texture* Game::getTTexture(const std::string &texture)
+const Texture* Game::getTexture(const std::string &texture)
 {
     return mAsset.getTexture(texture);
 }
@@ -183,9 +184,33 @@ void Game::setState(const std::string &name, const std::string &value)
     mState[name] = value;
 }
 
-const LevelData &Game::getLevel(int idx)
+const LevelData &Game::getLevelData(int idx)
 {
     return mLevels[idx];
+}
+
+const Sprite &Game::getSprite(SpriteID id)
+{
+    return mData.Sprites[id];
+}
+
+void Game::drawSprite(int x, int y, SpriteID sprId)
+{
+    const Sprite* spr = &mData.Sprites[sprId];
+    SDL_Rect src = {
+        spr->tx,
+        spr->ty,
+        spr->tw,
+        spr->th
+    };
+    SDL_Rect dest = {
+        x - spr->originX,
+        y - spr->originY,
+        spr->tw,
+        spr->th
+    };
+
+    SDL_RenderCopy(mRenderer, pActiveTexture->get(), &src, &dest);
 }
 
 void Game::_input(float dt)

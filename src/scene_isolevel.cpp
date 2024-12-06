@@ -20,7 +20,7 @@ void IsoLevelScene::reset()
     auto lvl = game->getOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
     auto lvlIdx = std::stoi(lvl) - 1;
-    level.load(game->getLevel(lvlIdx));
+    level.load(game->getLevelData(lvlIdx));
 
     // view sizes
     cellSize = 64;
@@ -88,8 +88,8 @@ void IsoLevelScene::update(float dt)
 
 void IsoLevelScene::draw()
 {
-    level.drawISO(game->getRenderer(), offsetX, offsetY, cellSize);
-    block.drawISO(game->getRenderer(), offsetX, offsetY, cellSize);
+    level.draw(offsetX, offsetY, cellSize);
+    block.draw(offsetX, offsetY, cellSize);
 
     SDL_SetRenderDrawColor(game->getRenderer(), 255, 0, 0, 255);
     if (game->input.mouse_pressed(SDL_BUTTON_LEFT))

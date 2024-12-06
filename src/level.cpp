@@ -9,7 +9,6 @@
 Level::Level(Game *game)
     : game(game)
 {
-    pSpriteSheet = game->getTTexture("assets/images/spritesheet.png");
 }
 
 Level::~Level()
@@ -18,7 +17,7 @@ Level::~Level()
 
 void Level::clear()
 {
-    for (auto &row : mGrid)
+    for (auto &row : grid)
     {
         for (auto &cell : row)
         {
@@ -29,7 +28,7 @@ void Level::clear()
 
 void Level::set(int x, int y, CellType value)
 {
-    mGrid[y][x] = value;
+    grid[y][x] = value;
 }
 
 void Level::load(const std::span<std::string_view> &ld)
@@ -70,7 +69,7 @@ vec2 Level::getStartPos()
     {
         for (int i = 0; i < this->cols; i++)
         {
-            if (mGrid[j][i] == CellType::START)
+            if (grid[j][i] == CellType::START)
                 return vec2(i, j);
         }
     }
@@ -88,96 +87,47 @@ bool Level::hasFloorAt(const vec2 &pos)
     if (!isValidPos(pos))
         return false;
 
-    CellType type = mGrid[pos.y][pos.x];
+    CellType type = grid[pos.y][pos.x];
 
     return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH;
 }
 
-void Level::draw(SDL_Renderer *rend, int x, int y, int cellSize)
-{
-    SDL_Rect rr = {x - 1, y - 1, cellSize * this->cols + 2, cellSize * this->rows + 2};
-    SDL_SetRenderDrawColor(rend, 40, 200, 80, 255);
-    SDL_RenderDrawRect(rend, &rr);
-
-    // draw level
-    for (int j = 0; j < rows; j++)
-    {
-        for (int i = 0; i < cols; i++)
-        {
-            SDL_Rect r = {
-                x + cellSize * i,
-                y + cellSize * j,
-                cellSize,
-                cellSize};
-
-            switch (mGrid[j][i])
-            {
-            case CellType::FLOOR: // floor
-                SDL_SetRenderDrawColor(rend, 100, 100, 100, 255);
-                break;
-            case CellType::START: // start
-                SDL_SetRenderDrawColor(rend, 100, 100, 200, 255);
-                break;
-            case CellType::FINISH: // finish
-                SDL_SetRenderDrawColor(rend, 100, 200, 100, 255);
-                break;
-            case CellType::EMPTY:
-            default: // empty
-                SDL_SetRenderDrawColor(rend, 10, 10, 10, 255);
-                break;
-            }
-            SDL_RenderFillRect(rend, &r);
-            SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-            SDL_RenderDrawRect(rend, &r);
-        }
-    }
-}
-
-void Level::drawISO(SDL_Renderer *rend, int x, int y, int cellSize)
+void Level::draw(int x, int y, int cellSize)
 {
     for (int i = 0; i < cols; i++)
     {
         for (int j = 0; j < rows; j++)
         {
-            Sprite *spr = nullptr;
+            if (grid[j][i] == CellType::EMPTY)
+                continue;
+            
+            int sx;
+            int sy;
+            toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
 
-            switch (mGrid[j][i])
+            SpriteID sprId = SpriteID::FLOOR;
+
+            switch (grid[j][i])
             {
-            case CellType::START: // start
-                spr = &SPRITES[SpriteID::FLOOR_START];
-                break;
-            case CellType::FINISH: // finish
-                spr = &SPRITES[SpriteID::FLOOR_FINISH];
-                break;
-            case CellType::FLOOR: // floor
-                spr = &SPRITES[SpriteID::FLOOR];
-                break;
-            case CellType::EMPTY:
-            default: // empty
-                break;
+                case CellType::START:
+                    sprId = SpriteID::FLOOR_START;
+                    break;
+                case CellType::FINISH:
+                    sprId = SpriteID::FLOOR_FINISH;
+                    break;
+                default:
+                    sprId = SpriteID::FLOOR;
+                    break;
             }
 
-            if (spr != nullptr)
-            {
-                int sx;
-                int sy;
-                toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
-                SDL_Rect dest = {
-                    x + sx,
-                    y + sy,
-                    cellSize,
-                    cellSize};
-
-                SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
-                SDL_RenderCopy(rend, pSpriteSheet->get(), &src, &dest);
-            }
+            game->drawSprite(x + sx, y + sy, sprId);
         }
     }
 }
 
 void Level::toggleFloor(const vec2 &pos)
 {
-    CellType& cell = mGrid[pos.y][pos.x];
+    CellType& cell = grid[pos.y][pos.x];
     switch (cell)
     {
         case CellType::EMPTY:
@@ -195,7 +145,7 @@ void Level::toggleFloor(const vec2 &pos)
 
 void Level::toggleStartFinish(const vec2 &pos)
 {
-    CellType& cell = mGrid[pos.y][pos.x];
+    CellType& cell = grid[pos.y][pos.x];
     switch (cell)
     {
         case CellType::START:

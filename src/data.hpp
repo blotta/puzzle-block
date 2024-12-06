@@ -29,8 +29,6 @@ struct Sprite
     int originX = 0;
 };
 
-extern Sprite SPRITES[SpriteID::NUM_SPRITES];
-
 // LEVELS
 
 struct LevelData
@@ -40,6 +38,14 @@ struct LevelData
     char data[10][11];
 };
 
-extern std::array<LevelData, 3> DEFAULT_LEVELS;
+// Game data context
+
+struct GameData
+{
+    Sprite Sprites[SpriteID::NUM_SPRITES];
+    std::array<LevelData, 3> DefaultLevels;
+};
+
+void load_game_data(GameData* d);
 
 #endif

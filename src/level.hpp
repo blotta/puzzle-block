@@ -28,9 +28,8 @@ struct Level
 
     int rows = 6;
     int cols = 4;
-    const Texture *pSpriteSheet;
 
-    std::array<std::array<CellType, 10>, 10> mGrid = {{}};
+    std::array<std::array<CellType, 10>, 10> grid = {{}};
 
     void clear();
     void set(int x, int y, CellType value);
@@ -39,8 +38,7 @@ struct Level
     vec2 getStartPos();
     bool isValidPos(const vec2 &pos);
     bool hasFloorAt(const vec2 &pos);
-    void draw(SDL_Renderer *rend, int x, int y, int cellSize);
-    void drawISO(SDL_Renderer *rend, int x, int y, int cellSize);
+    void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);
     void toggleStartFinish(const vec2& pos);

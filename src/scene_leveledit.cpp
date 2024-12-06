@@ -21,7 +21,7 @@ void LevelEditScene::reset()
     auto lvl = game->getOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
     auto lvlIdx = std::stoi(lvl) - 1;
-    level.load(game->getLevel(lvlIdx));
+    level.load(game->getLevelData(lvlIdx));
 
     // view sizes
     int hor = SDL_floorf(game->ScreenWidth * 0.8) / level.cols;
@@ -70,7 +70,6 @@ void LevelEditScene::update(float dt)
 
         if (game->input.mouse_just_pressed(SDL_BUTTON_RIGHT))
         {
-            SDL_Log("Not coming here\n");
             level.toggleStartFinish(mouseGridPos);
         }
     }
@@ -87,17 +86,67 @@ void LevelEditScene::update(float dt)
         moveDir = vec2(1, 0);
 
     block.move(moveDir);
-    auto positions = block.getPositions();
-    if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
-        block.undoMove();
+    // auto positions = block.getPositions();
+    // if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
+    //     block.undoMove();
 }
 
 
 void LevelEditScene::draw()
 {
-    level.draw(game->getRenderer(), offsetX, offsetY, cellSize);
-    block.draw(game->getRenderer(), offsetX, offsetY, cellSize);
+    // level outline
+    SDL_Rect rr = {offsetX - 1, offsetY - 1, cellSize * level.cols + 2, cellSize * level.rows + 2};
+    SDL_SetRenderDrawColor(game->getRenderer(), 40, 200, 80, 255);
+    SDL_RenderDrawRect(game->getRenderer(), &rr);
 
+    // draw level
+    for (int j = 0; j < level.rows; j++)
+    {
+        for (int i = 0; i < level.cols; i++)
+        {
+            SDL_Rect r = {
+                offsetX + cellSize * i,
+                offsetY + cellSize * j,
+                cellSize,
+                cellSize};
+
+            switch (level.grid[j][i])
+            {
+            case CellType::FLOOR: // floor
+                SDL_SetRenderDrawColor(game->getRenderer(), 100, 100, 100, 255);
+                break;
+            case CellType::START: // start
+                SDL_SetRenderDrawColor(game->getRenderer(), 100, 100, 200, 255);
+                break;
+            case CellType::FINISH: // finish
+                SDL_SetRenderDrawColor(game->getRenderer(), 100, 200, 100, 255);
+                break;
+            case CellType::EMPTY:
+            default: // empty
+                SDL_SetRenderDrawColor(game->getRenderer(), 10, 10, 10, 255);
+                break;
+            }
+            SDL_RenderFillRect(game->getRenderer(), &r);
+            SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 255);
+            SDL_RenderDrawRect(game->getRenderer(), &r);
+        }
+    }
+
+    // draw block
+    SDL_SetRenderDrawColor(game->getRenderer(), 200, 100, 100, 255);
+    SDL_Rect blockRect = {
+        offsetX + block.x * cellSize,
+        offsetY + block.y * cellSize,
+        cellSize,
+        cellSize
+    };
+    if (block.state == BlockState::WIDE)
+        blockRect.w *= 2;
+    if (block.state == BlockState::LONG)
+        blockRect.h *= 2;
+    SDL_RenderFillRect(game->getRenderer(), &blockRect);
+
+    // editor
     if (level.isValidPos(mouseGridPos))
     {
         SDL_SetRenderDrawColor(game->getRenderer(), 255, 100, 0, 255);

@@ -5,7 +5,6 @@
 Block::Block(Game *game)
     :game(game)
 {
-    pSpriteSheet = game->mAsset.getTexture("assets/images/spritesheet.png");
 }
 
 void Block::move(const vec2 &dir)
@@ -79,23 +78,7 @@ std::pair<vec2, vec2> Block::getPositions()
 
 }
 
-void Block::draw(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
-{
-    SDL_SetRenderDrawColor(rend, 200, 100, 100, 255);
-    SDL_Rect blockRect = {
-        levelX + this->x * cellSize,
-        levelY + this->y * cellSize,
-        cellSize,
-        cellSize
-    };
-    if (state == BlockState::WIDE)
-        blockRect.w *= 2;
-    if (state == BlockState::LONG)
-        blockRect.h *= 2;
-    SDL_RenderFillRect(rend, &blockRect);
-}
-
-void Block::drawISO(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
+void Block::draw(int levelX, int levelY, int cellSize)
 {
     SpriteID sprId = SpriteID::BLOCK_UP;
     if (state == BlockState::LONG)
@@ -103,26 +86,8 @@ void Block::drawISO(SDL_Renderer *rend, int levelX, int levelY, int cellSize)
     if (state == BlockState::WIDE)
         sprId = SpriteID::BLOCK_WIDE;
     
-    Sprite* spr = &SPRITES[sprId];
-
-    SDL_Rect src = {
-        spr->tx,
-        spr->ty,
-        spr->tw,
-        spr->th
-    };
-
-    int scale = 1;
-
     int sx, sy;
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);
 
-    SDL_Rect dest = {
-        levelX + sx - spr->originX * scale,
-        levelY + sy - spr->originY * scale,
-        spr->tw * scale,
-        spr->th * scale
-    };
-
-    SDL_RenderCopy(rend, pSpriteSheet->get(), &src, &dest);
+    game->drawSprite(levelX + sx, levelY + sy, sprId);
 }

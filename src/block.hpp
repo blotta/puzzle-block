@@ -18,7 +18,6 @@ struct Block
     Block(Game* game);
 
     Game* game;
-    const Texture* pSpriteSheet;
 
     int x;
     int y;
@@ -32,8 +31,7 @@ struct Block
     void undoMove();
     std::pair<vec2, vec2> getPositions();
 
-    void draw(SDL_Renderer* rend, int levelX, int levelY, int cellSize);
-    void drawISO(SDL_Renderer* rend, int levelX, int levelY, int cellSize);
+    void draw(int levelX, int levelY, int cellSize);
 };
 
 

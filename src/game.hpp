@@ -38,12 +38,14 @@ public:
     void loadScene(Scenes sceneName);
 
     SDL_Renderer *getRenderer();
-    const Texture* getTTexture(const std::string& texture);
+    const Texture* getTexture(const std::string& texture);
     TTF_Font *getFont();
     const std::string getState(const std::string &name);
     const std::string getOrCreateState(const std::string &name, const std::string &value);
     void setState(const std::string &name, const std::string &value);
-    const LevelData &getLevel(int idx);
+    const LevelData &getLevelData(int idx);
+    const Sprite& getSprite(SpriteID id);
+    void drawSprite(int x, int y, SpriteID sprId);
 
     AssetManager mAsset;
 
@@ -67,10 +69,15 @@ private:
 
     bool mRunning = false;
 
-    std::vector<LevelData> mLevels;
+    const Texture* pActiveTexture;
 
     std::shared_ptr<Scene> mCurrentScene;
     std::map<std::string, std::string> mState;
+
+    std::vector<LevelData> mLevels;
+
+    // data
+    GameData mData = {};
 };
 
 #endif
