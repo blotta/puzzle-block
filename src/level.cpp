@@ -63,6 +63,54 @@ void Level::load(const LevelData &ld)
     }
 }
 
+void printLevel(const LevelData &lvl)
+{
+    SDL_Log("===LevelData===\n");
+    SDL_Log("rows: %d    cols:%d\n", lvl.rows, lvl.cols);
+    SDL_Log("data:\n");
+    char row[MAX_GRID_SIZE + 1] = {};
+    for (int j = 0; j < lvl.rows; j++)
+    {
+        memcpy(&row, lvl.data[j], lvl.cols);
+        SDL_Log("%s\n", row);
+    }
+}
+
+void Level::toLevelData(LevelData *ld)
+{
+    ld->cols = cols;
+    ld->rows = rows;
+
+    for (int j = 0; j < MAX_GRID_SIZE; j++)
+    {
+        for (int i = 0; i < MAX_GRID_SIZE; i++)
+        {
+            if (j >= this->rows || i >= this->cols)
+            {
+                ld->data[j][i] = '0';
+                continue;
+            }
+
+            switch (grid[j][i])
+            {
+            case CellType::EMPTY:
+                ld->data[j][i] = '0';
+                break;
+            case CellType::FLOOR:
+                ld->data[j][i] = '1';
+                break;
+            case CellType::START:
+                ld->data[j][i] = '2';
+                break;
+            case CellType::FINISH:
+                ld->data[j][i] = '3';
+                break;
+            }
+        }
+    }
+    printLevel(*ld);
+}
+
 vec2 Level::getStartPos()
 {
     for (int j = 0; j < this->rows; j++)
@@ -80,6 +128,36 @@ vec2 Level::getStartPos()
 bool Level::isValidPos(const vec2 &pos)
 {
     return pos.x >= 0 && pos.x < cols && pos.y >= 0 && pos.y < rows;
+}
+
+bool Level::isValid()
+{
+    int startCount = 0;
+    int finishCount = 0;
+    bool valid = true;
+
+    for (int j = 0; j < MAX_GRID_SIZE; j++)
+    {
+        for (int i = 0; i < MAX_GRID_SIZE; i++)
+        {
+            // if (j >= rows && grid[j][i] != CellType::EMPTY)
+            //     valid = false;
+
+            // if (i >= cols && grid[j][i] != CellType::EMPTY)
+            //     valid = false;
+
+            if (j < rows && i < cols && grid[j][i] == CellType::START)
+                startCount += 1;
+
+            if (j < rows && i < cols && grid[j][i] == CellType::FINISH)
+                finishCount += 1;
+        }
+    }
+
+    if (startCount != 1 || finishCount != 1)
+        valid = false;
+
+    return valid;
 }
 
 bool Level::hasFloorAt(const vec2 &pos)
@@ -100,7 +178,7 @@ void Level::draw(int x, int y, int cellSize)
         {
             if (grid[j][i] == CellType::EMPTY)
                 continue;
-            
+
             int sx;
             int sy;
             toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
@@ -109,15 +187,15 @@ void Level::draw(int x, int y, int cellSize)
 
             switch (grid[j][i])
             {
-                case CellType::START:
-                    sprId = SpriteID::FLOOR_START;
-                    break;
-                case CellType::FINISH:
-                    sprId = SpriteID::FLOOR_FINISH;
-                    break;
-                default:
-                    sprId = SpriteID::FLOOR;
-                    break;
+            case CellType::START:
+                sprId = SpriteID::FLOOR_START;
+                break;
+            case CellType::FINISH:
+                sprId = SpriteID::FLOOR_FINISH;
+                break;
+            default:
+                sprId = SpriteID::FLOOR;
+                break;
             }
 
             game->drawSprite(x + sx, y + sy, sprId);
@@ -127,38 +205,62 @@ void Level::draw(int x, int y, int cellSize)
 
 void Level::toggleFloor(const vec2 &pos)
 {
-    CellType& cell = grid[pos.y][pos.x];
+    CellType &cell = grid[pos.y][pos.x];
     switch (cell)
     {
-        case CellType::EMPTY:
-            cell = CellType::FLOOR;
-            break;
-        case CellType::FLOOR:
-        case CellType::START:
-        case CellType::FINISH:
-            cell = CellType::EMPTY;
-            break;
-        default:
-            break;
+    case CellType::EMPTY:
+        cell = CellType::FLOOR;
+        break;
+    case CellType::FLOOR:
+    case CellType::START:
+    case CellType::FINISH:
+        cell = CellType::EMPTY;
+        break;
+    default:
+        break;
     }
 }
 
 void Level::toggleStartFinish(const vec2 &pos)
 {
-    CellType& cell = grid[pos.y][pos.x];
+    CellType &cell = grid[pos.y][pos.x];
     switch (cell)
     {
-        case CellType::START:
-            cell = CellType::FINISH;
-            break;
-        case CellType::FINISH:
-            cell = CellType::EMPTY;
-            break;
-        case CellType::EMPTY:
-        case CellType::FLOOR:
-            cell = CellType::START;
-            break;
-        default:
-            break;
+    case CellType::START:
+        cell = CellType::FINISH;
+        break;
+    case CellType::FINISH:
+        cell = CellType::EMPTY;
+        break;
+    case CellType::EMPTY:
+    case CellType::FLOOR:
+        cell = CellType::START;
+        break;
+    default:
+        break;
     }
+}
+
+void Level::addRow()
+{
+    if (rows < MAX_GRID_SIZE)
+        rows++;
+}
+
+void Level::removeRow()
+{
+    if (rows > 1)
+        rows--;
+}
+
+void Level::addColumn()
+{
+    if (cols < MAX_GRID_SIZE)
+        cols++;
+}
+
+void Level::removeColumn()
+{
+    if (cols > 1)
+        cols--;
 }

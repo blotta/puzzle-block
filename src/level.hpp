@@ -1,16 +1,18 @@
-#ifndef LEVELS_HPP
-#define LEVELS_HPP
+#ifndef LEVEL_HPP
+#define LEVEL_HPP
 
 #include <array>
 #include <vector>
 #include <span>
-#include <string_view>
 #include <SDL2/SDL.h>
 
 #include "game.hpp"
 #include "util.hpp"
 
+const int MAX_GRID_SIZE = 10;
+
 class Game;
+struct LevelData;
 
 enum class CellType
 {
@@ -29,19 +31,25 @@ struct Level
     int rows = 6;
     int cols = 4;
 
-    std::array<std::array<CellType, 10>, 10> grid = {{}};
+    std::array<std::array<CellType, MAX_GRID_SIZE>, MAX_GRID_SIZE> grid = {{}};
 
     void clear();
     void set(int x, int y, CellType value);
     void load(const std::span<std::string_view> &ld);
     void load(const LevelData &ld);
+    void toLevelData(LevelData* ld);
     vec2 getStartPos();
     bool isValidPos(const vec2 &pos);
+    bool isValid();
     bool hasFloorAt(const vec2 &pos);
     void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);
     void toggleStartFinish(const vec2& pos);
+    void addRow();
+    void removeRow();
+    void addColumn();
+    void removeColumn();
 };
 
 #endif

@@ -189,6 +189,11 @@ const LevelData &Game::getLevelData(int idx)
     return mLevels[idx];
 }
 
+void Game::saveLevelData(const LevelData &ld, int idx)
+{
+    mLevels[idx] = ld;
+}
+
 const Sprite &Game::getSprite(SpriteID id)
 {
     return mData.Sprites[id];

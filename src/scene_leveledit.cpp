@@ -20,20 +20,25 @@ void LevelEditScene::reset()
 {
     auto lvl = game->getOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
-    auto lvlIdx = std::stoi(lvl) - 1;
+    lvlIdx = std::stoi(lvl) - 1;
     level.load(game->getLevelData(lvlIdx));
 
+    auto startPos = level.getStartPos();
+    block.x = startPos.x;
+    block.y = startPos.y;
+    block.state = BlockState::UP;
+
+    resize();
+}
+
+void LevelEditScene::resize()
+{
     // view sizes
     int hor = SDL_floorf(game->ScreenWidth * 0.8) / level.cols;
     int vert = SDL_floorf(game->ScreenHeight * 0.8) / level.rows;
     cellSize = hor > vert ? vert : hor;
     offsetX = game->ScreenWidth / 2 - level.cols * cellSize / 2;
     offsetY = game->ScreenHeight / 2 - level.rows * cellSize / 2;
-
-    auto startPos = level.getStartPos();
-    block.x = startPos.x;
-    block.y = startPos.y;
-    block.state = BlockState::UP;
 }
 
 void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y)
@@ -66,12 +71,44 @@ void LevelEditScene::update(float dt)
         if (game->input.mouse_just_pressed(SDL_BUTTON_LEFT))
         {
             level.toggleFloor(mouseGridPos);
+            saved = false;
         }
 
         if (game->input.mouse_just_pressed(SDL_BUTTON_RIGHT))
         {
             level.toggleStartFinish(mouseGridPos);
+            saved = false;
         }
+    }
+
+    if (game->input.just_pressed(SDL_SCANCODE_KP_6)) {
+        level.addColumn();
+        saved = false;
+        resize();
+    }
+    if (game->input.just_pressed(SDL_SCANCODE_KP_8)) {
+        level.removeRow();
+        saved = false;
+        resize();
+    }
+    if (game->input.just_pressed(SDL_SCANCODE_KP_4)) {
+        level.removeColumn();
+        saved = false;
+        resize();
+    }
+    if (game->input.just_pressed(SDL_SCANCODE_KP_2)) {
+        level.addRow();
+        saved = false;
+        resize();
+    }
+
+    // save
+    if (game->input.just_pressed(SDL_SCANCODE_S) && level.isValid())
+    {
+        LevelData ld = {};
+        level.toLevelData(&ld);
+        game->saveLevelData(ld, lvlIdx);
+        saved = true;
     }
 
     // normal op
@@ -94,9 +131,13 @@ void LevelEditScene::update(float dt)
 
 void LevelEditScene::draw()
 {
-    // level outline
+    // outline
     SDL_Rect rr = {offsetX - 1, offsetY - 1, cellSize * level.cols + 2, cellSize * level.rows + 2};
-    SDL_SetRenderDrawColor(game->getRenderer(), 40, 200, 80, 255);
+    SDL_SetRenderDrawColor(game->getRenderer(), 40, 200, 80, 255); // green
+    if (!level.isValid())
+        SDL_SetRenderDrawColor(game->getRenderer(), 200, 40, 80, 255); // orange
+    else if (!saved)
+        SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 20, 255); // yellow
     SDL_RenderDrawRect(game->getRenderer(), &rr);
 
     // draw level
@@ -144,6 +185,11 @@ void LevelEditScene::draw()
         blockRect.w *= 2;
     if (block.state == BlockState::LONG)
         blockRect.h *= 2;
+    
+    blockRect.x += 4;
+    blockRect.y += 4;
+    blockRect.w -= 8;
+    blockRect.h -= 8;
     SDL_RenderFillRect(game->getRenderer(), &blockRect);
 
     // editor

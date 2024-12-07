@@ -16,6 +16,7 @@ public:
 private:
     int timer;
     Level level;
+    int lvlIdx;
     Block block;
     int offsetX = 100;
     int offsetY = 100;
@@ -23,7 +24,9 @@ private:
     vec2 moveDir;
     vec2 mousePos;
     vec2 mouseGridPos;
+    bool saved = true;
     void reset();
+    void resize();
 };
 
 #endif

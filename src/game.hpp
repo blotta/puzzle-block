@@ -44,6 +44,7 @@ public:
     const std::string getOrCreateState(const std::string &name, const std::string &value);
     void setState(const std::string &name, const std::string &value);
     const LevelData &getLevelData(int idx);
+    void saveLevelData(const LevelData& ld, int idx);
     const Sprite& getSprite(SpriteID id);
     void drawSprite(int x, int y, SpriteID sprId);
 
