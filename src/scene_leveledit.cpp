@@ -3,9 +3,7 @@
 
 #include "scene_leveledit.hpp"
 
-LevelEditScene::LevelEditScene(Game *game)
-    : Scene(game),
-      level(game), block(game)
+LevelEditScene::LevelEditScene()
 {
     SDL_Log("Loading Level scene\n");
 
@@ -18,10 +16,10 @@ LevelEditScene::~LevelEditScene()
 
 void LevelEditScene::reset()
 {
-    auto lvl = game->getOrCreateState("next_level", "1");
+    auto lvl = Game::GetOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
     lvlIdx = std::stoi(lvl) - 1;
-    level.load(game->getLevelData(lvlIdx));
+    level.load(Game::GetLevelData(lvlIdx));
 
     auto startPos = level.getStartPos();
     block.x = startPos.x;
@@ -34,11 +32,11 @@ void LevelEditScene::reset()
 void LevelEditScene::resize()
 {
     // view sizes
-    int hor = SDL_floorf(game->ScreenWidth * 0.8) / level.cols;
-    int vert = SDL_floorf(game->ScreenHeight * 0.8) / level.rows;
+    int hor = SDL_floorf(Game::ScreenWidth() * 0.8) / level.cols;
+    int vert = SDL_floorf(Game::ScreenHeight() * 0.8) / level.rows;
     cellSize = hor > vert ? vert : hor;
-    offsetX = game->ScreenWidth / 2 - level.cols * cellSize / 2;
-    offsetY = game->ScreenHeight / 2 - level.rows * cellSize / 2;
+    offsetX = Game::ScreenWidth() / 2 - level.cols * cellSize / 2;
+    offsetY = Game::ScreenHeight() / 2 - level.rows * cellSize / 2;
 }
 
 void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y)
@@ -53,14 +51,14 @@ void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, in
 
 void LevelEditScene::input()
 {
-    if (game->input.just_pressed(SDL_SCANCODE_E))
+    if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // exit level edit
-        game->loadScene(Scenes::ISOLEVEL);
+        Game::LoadScene(Scenes::ISOLEVEL);
         return;
     }
 
-    game->input.mouse_position(&mousePos.x, &mousePos.y);
+    Input::MousePosition(&mousePos.x, &mousePos.y);
     toGrid(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, level.cols, level.rows, &mouseGridPos.x, &mouseGridPos.y);
 }
 
@@ -68,58 +66,58 @@ void LevelEditScene::update(float dt)
 {
     if (level.isValidPos(mouseGridPos))
     {
-        if (game->input.mouse_just_pressed(SDL_BUTTON_LEFT))
+        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
         {
             level.toggleFloor(mouseGridPos);
             saved = false;
         }
 
-        if (game->input.mouse_just_pressed(SDL_BUTTON_RIGHT))
+        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
         {
             level.toggleStartFinish(mouseGridPos);
             saved = false;
         }
     }
 
-    if (game->input.just_pressed(SDL_SCANCODE_KP_6)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_6)) {
         level.addColumn();
         saved = false;
         resize();
     }
-    if (game->input.just_pressed(SDL_SCANCODE_KP_8)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_8)) {
         level.removeRow();
         saved = false;
         resize();
     }
-    if (game->input.just_pressed(SDL_SCANCODE_KP_4)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_4)) {
         level.removeColumn();
         saved = false;
         resize();
     }
-    if (game->input.just_pressed(SDL_SCANCODE_KP_2)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_2)) {
         level.addRow();
         saved = false;
         resize();
     }
 
     // save
-    if (game->input.just_pressed(SDL_SCANCODE_S) && level.isValid())
+    if (Input::JustPressed(SDL_SCANCODE_S) && level.isValid())
     {
         LevelData ld = {};
         level.toLevelData(&ld);
-        game->saveLevelData(ld, lvlIdx);
+        Game::SaveLevelData(ld, lvlIdx);
         saved = true;
     }
 
     // normal op
     moveDir = vec2(0, 0);
-    if (game->input.just_pressed(SDL_SCANCODE_UP))
+    if (Input::JustPressed(SDL_SCANCODE_UP))
         moveDir = vec2(0, -1);
-    if (game->input.just_pressed(SDL_SCANCODE_DOWN))
+    if (Input::JustPressed(SDL_SCANCODE_DOWN))
         moveDir = vec2(0, 1);
-    if (game->input.just_pressed(SDL_SCANCODE_LEFT))
+    if (Input::JustPressed(SDL_SCANCODE_LEFT))
         moveDir = vec2(-1, 0);
-    if (game->input.just_pressed(SDL_SCANCODE_RIGHT))
+    if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
     block.move(moveDir);
@@ -133,12 +131,12 @@ void LevelEditScene::draw()
 {
     // outline
     SDL_Rect rr = {offsetX - 1, offsetY - 1, cellSize * level.cols + 2, cellSize * level.rows + 2};
-    SDL_SetRenderDrawColor(game->getRenderer(), 40, 200, 80, 255); // green
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 40, 200, 80, 255); // green
     if (!level.isValid())
-        SDL_SetRenderDrawColor(game->getRenderer(), 200, 40, 80, 255); // orange
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 200, 40, 80, 255); // orange
     else if (!saved)
-        SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 20, 255); // yellow
-    SDL_RenderDrawRect(game->getRenderer(), &rr);
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 20, 255); // yellow
+    SDL_RenderDrawRect(Game::GetRenderer(), &rr);
 
     // draw level
     for (int j = 0; j < level.rows; j++)
@@ -154,27 +152,27 @@ void LevelEditScene::draw()
             switch (level.grid[j][i])
             {
             case CellType::FLOOR: // floor
-                SDL_SetRenderDrawColor(game->getRenderer(), 100, 100, 100, 255);
+                SDL_SetRenderDrawColor(Game::GetRenderer(), 100, 100, 100, 255);
                 break;
             case CellType::START: // start
-                SDL_SetRenderDrawColor(game->getRenderer(), 100, 100, 200, 255);
+                SDL_SetRenderDrawColor(Game::GetRenderer(), 100, 100, 200, 255);
                 break;
             case CellType::FINISH: // finish
-                SDL_SetRenderDrawColor(game->getRenderer(), 100, 200, 100, 255);
+                SDL_SetRenderDrawColor(Game::GetRenderer(), 100, 200, 100, 255);
                 break;
             case CellType::EMPTY:
             default: // empty
-                SDL_SetRenderDrawColor(game->getRenderer(), 10, 10, 10, 255);
+                SDL_SetRenderDrawColor(Game::GetRenderer(), 10, 10, 10, 255);
                 break;
             }
-            SDL_RenderFillRect(game->getRenderer(), &r);
-            SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 255);
-            SDL_RenderDrawRect(game->getRenderer(), &r);
+            SDL_RenderFillRect(Game::GetRenderer(), &r);
+            SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, 255);
+            SDL_RenderDrawRect(Game::GetRenderer(), &r);
         }
     }
 
     // draw block
-    SDL_SetRenderDrawColor(game->getRenderer(), 200, 100, 100, 255);
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 200, 100, 100, 255);
     SDL_Rect blockRect = {
         offsetX + block.x * cellSize,
         offsetY + block.y * cellSize,
@@ -190,17 +188,17 @@ void LevelEditScene::draw()
     blockRect.y += 4;
     blockRect.w -= 8;
     blockRect.h -= 8;
-    SDL_RenderFillRect(game->getRenderer(), &blockRect);
+    SDL_RenderFillRect(Game::GetRenderer(), &blockRect);
 
     // editor
     if (level.isValidPos(mouseGridPos))
     {
-        SDL_SetRenderDrawColor(game->getRenderer(), 255, 100, 0, 255);
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 100, 0, 255);
         SDL_Rect tileSelect = {
             .x = offsetX + mouseGridPos.x * cellSize,
             .y = offsetY + mouseGridPos.y * cellSize,
             .w = cellSize,
             .h = cellSize};
-        SDL_RenderDrawRect(game->getRenderer(), &tileSelect);
+        SDL_RenderDrawRect(Game::GetRenderer(), &tileSelect);
     }
 }

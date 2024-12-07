@@ -8,10 +8,10 @@
 
 class Game;
 
-class RenderText{
+class StaticText{
 public:
-    RenderText(TTF_Font* font);
-    ~RenderText();
+    StaticText();
+    ~StaticText();
     void clearText();
     void setText(std::string text);
     void setColor(SDL_Color color);
@@ -19,7 +19,6 @@ public:
     int getWidth();
     int getHeight();
 private:
-    TTF_Font* pFont;
     std::string mText;
     SDL_Color mColor = {255, 255, 255, 255};
     SDL_Texture* mTextTexture = NULL;

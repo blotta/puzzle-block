@@ -4,16 +4,6 @@
 #include <SDL2/SDL.h>
 
 #include "level.hpp"
-#include "asset.hpp"
-
-Level::Level(Game *game)
-    : game(game)
-{
-}
-
-Level::~Level()
-{
-}
 
 void Level::clear()
 {
@@ -198,7 +188,7 @@ void Level::draw(int x, int y, int cellSize)
                 break;
             }
 
-            game->drawSprite(x + sx, y + sy, sprId);
+            Game::DrawSprite(x + sx, y + sy, sprId);
         }
     }
 }

@@ -8,7 +8,7 @@
 class BootScene : public Scene
 {
 public:
-    BootScene(Game* game);
+    BootScene();
     ~BootScene();
     void update(float dt) override;
     void draw() override;

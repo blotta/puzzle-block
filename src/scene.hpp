@@ -16,13 +16,12 @@ class Game;
 class Scene
 {
 public:
-    Scene(Game* game);
+    Scene();
     virtual ~Scene() {}
     virtual void update(float dt) = 0;
     virtual void draw() = 0;
     virtual void input() = 0;
 protected:
-    Game* game;
 };
 
 #endif

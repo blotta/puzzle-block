@@ -15,10 +15,6 @@ enum BlockState
 };
 struct Block
 {
-    Block(Game* game);
-
-    Game* game;
-
     int x;
     int y;
     BlockState state = BlockState::UP; 

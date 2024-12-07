@@ -1,12 +1,10 @@
 #include "scene_splash.hpp"
 #include "input_manager.hpp"
 
-SplashScene::SplashScene(Game* game)
-    : Scene(game)
-    , mText(game->getFont())
+SplashScene::SplashScene()
 {
     SDL_Log("Loading splash scene\n");
-    pSplashTexture = game->getTexture("assets/images/splash.png");
+    pSplashTexture = Asset::GetTexture("assets/images/splash.png");
     mTimer = 0;
     mText.clearText();
 }
@@ -18,9 +16,9 @@ SplashScene::~SplashScene()
 
 void SplashScene::input()
 {
-    if (game->input.just_pressed(SDL_SCANCODE_RETURN))
+    if (Input::JustPressed(SDL_SCANCODE_RETURN))
     {
-        game->loadScene(Scenes::LEVEL_EDIT);
+        Game::LoadScene(Scenes::LEVEL_EDIT);
     }
 }
 
@@ -46,11 +44,11 @@ void SplashScene::update(float dt)
 
     if (mTimer > 4)
     {
-        game->loadScene(Scenes::LEVEL_EDIT);
+        Game::LoadScene(Scenes::LEVEL_EDIT);
     }
 }
 
 void SplashScene::draw()
 {
-    mText.draw(game->getRenderer(), game->ScreenWidth/2 - mText.getWidth()/2, game->ScreenHeight/2 - mText.getHeight()/2);
+    mText.draw(Game::GetRenderer(), Game::ScreenWidth()/2 - mText.getWidth()/2, Game::ScreenHeight()/2 - mText.getHeight()/2);
 }

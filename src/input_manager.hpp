@@ -10,21 +10,27 @@ struct MouseState
     uint8_t button[6] = {};
 };
 
-class InputManager
+class Input
 {
 public:
-    void update(float dt);
-    bool pressed(SDL_Scancode code);
-    bool just_pressed(SDL_Scancode code);
-    bool just_released(SDL_Scancode code);
-    bool mouse_pressed(uint8_t btn);
-    bool mouse_just_pressed(uint8_t btn);
-    bool mouse_just_released(uint8_t btn);
-    void mouse_position(int* x, int* y);
-    bool quit_requested();
+    Input(const Input&) = delete;
+
+    static void Update(float dt);
+    static bool QuitRequested();
+    static bool Pressed(SDL_Scancode code);
+    static bool JustPressed(SDL_Scancode code);
+    static bool JustReleased(SDL_Scancode code);
+    static bool MousePressed(uint8_t btn);
+    static bool MouseJustPressed(uint8_t btn);
+    static bool MouseJustReleased(uint8_t btn);
+    static void MousePosition(int* x, int* y);
 private:
+    Input();
+    static Input& get();
+
     uint8_t mKeyState[SDL_NUM_SCANCODES] = {};
     MouseState mMouse = {};
     bool mQuitEvent = false;
 };
+
 #endif

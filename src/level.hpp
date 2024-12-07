@@ -23,11 +23,6 @@ enum class CellType
 };
 struct Level
 {
-    Level(Game *game);
-    ~Level();
-
-    Game *game;
-
     int rows = 6;
     int cols = 4;
 

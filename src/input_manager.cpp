@@ -1,7 +1,19 @@
 #include "input_manager.hpp"
 
-void InputManager::update(float dt)
+Input::Input()
 {
+    SDL_Log("Input initialized\n");
+}
+
+Input &Input::get()
+{
+    static Input instance;
+    return instance;
+}
+
+void Input::Update(float dt)
+{
+    auto& mgr = Input::get();
     // 0 not pressed
     // 1 pressed
     // 2 just pressed
@@ -10,23 +22,23 @@ void InputManager::update(float dt)
     for (uint16_t i = 0; i < SDL_NUM_SCANCODES; i++)
     {
         // just pressed becomes pressed
-        if (mKeyState[i] == 2)
-            mKeyState[i] = 1;
+        if (mgr.mKeyState[i] == 2)
+            mgr.mKeyState[i] = 1;
 
         // just released becomes not pressed
-        if (mKeyState[i] == 3)
-            mKeyState[i] = 0;
+        if (mgr.mKeyState[i] == 3)
+            mgr.mKeyState[i] = 0;
     }
 
     for (uint8_t i = 0; i < 6; i++)
     {
-        if (mMouse.button[i] == 2)
-            mMouse.button[i] = 1;
-        if (mMouse.button[i] == 3)
-            mMouse.button[i] = 0;
+        if (mgr.mMouse.button[i] == 2)
+            mgr.mMouse.button[i] = 1;
+        if (mgr.mMouse.button[i] == 3)
+            mgr.mMouse.button[i] = 0;
     }
 
-    SDL_GetMouseState(&mMouse.x, &mMouse.y);
+    SDL_GetMouseState(&mgr.mMouse.x, &mgr.mMouse.y);
 
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -35,76 +47,76 @@ void InputManager::update(float dt)
         {
             case SDL_QUIT:
             {
-                mQuitEvent = true;
+                mgr.mQuitEvent = true;
                 break;
             }
             case SDL_KEYDOWN:
             {
-                mKeyState[event.key.keysym.scancode] = 2; // just pressed
+                mgr.mKeyState[event.key.keysym.scancode] = 2; // just pressed
             }
             break;
             case SDL_KEYUP:
             {
-                mKeyState[event.key.keysym.scancode] = 3; // just released
+                mgr.mKeyState[event.key.keysym.scancode] = 3; // just released
             }
             break;
             case SDL_MOUSEBUTTONDOWN:
             {
-                mMouse.button[event.button.button] = 2;
+                mgr.mMouse.button[event.button.button] = 2;
             }
             break;
             case SDL_MOUSEBUTTONUP:
             {
-                mMouse.button[event.button.button] = 3;
+                mgr.mMouse.button[event.button.button] = 3;
             }
             break;
         }
     }
 }
 
-bool InputManager::pressed(SDL_Scancode code)
+bool Input::QuitRequested()
 {
-    uint8_t k = mKeyState[code];
+    return Input::get().mQuitEvent;
+}
+
+bool Input::Pressed(SDL_Scancode code)
+{
+    uint8_t k = Input::get().mKeyState[code];
     return k == 1 || k == 2;
 }
 
-bool InputManager::just_pressed(SDL_Scancode code)
+bool Input::JustPressed(SDL_Scancode code)
 {
-    uint8_t k = mKeyState[code];
+    uint8_t k = Input::get().mKeyState[code];
     return k == 2;
 }
 
-bool InputManager::just_released(SDL_Scancode code)
+bool Input::JustReleased(SDL_Scancode code)
 {
-    uint8_t k = mKeyState[code];
+    uint8_t k = Input::get().mKeyState[code];
     return k == 3;
 }
 
-bool InputManager::mouse_pressed(uint8_t btn)
+bool Input::MousePressed(uint8_t btn)
 {
-    uint8_t b = mMouse.button[btn];
+    uint8_t b = Input::get().mMouse.button[btn];
     return b == 2 || b == 1;
 }
 
-bool InputManager::mouse_just_pressed(uint8_t btn)
+bool Input::MouseJustPressed(uint8_t btn)
 {
-    uint8_t b = mMouse.button[btn];
+    uint8_t b = Input::get().mMouse.button[btn];
     return b == 2;
 }
 
-bool InputManager::mouse_just_released(uint8_t btn)
+bool Input::MouseJustReleased(uint8_t btn)
 {
-    uint8_t b = mMouse.button[btn];
+    uint8_t b = Input::get().mMouse.button[btn];
     return b == 3;
 }
 
-void InputManager::mouse_position(int *x, int *y)
+void Input::MousePosition(int *x, int *y)
 {
-    *x = mMouse.x;
-    *y = mMouse.y;
-}
-
-bool InputManager::quit_requested()
-{
-    return mQuitEvent;
+    *x = Input::get().mMouse.x;
+    *y = Input::get().mMouse.y;
 }

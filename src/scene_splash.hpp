@@ -7,14 +7,14 @@
 class SplashScene : public Scene
 {
 public:
-    SplashScene(Game* game);
+    SplashScene();
     ~SplashScene();
     void update(float dt) override;
     void draw() override;
     void input() override;
 private:
     const Texture* pSplashTexture;
-    RenderText mText;
+    StaticText mText;
     float mTimer;
 };
 

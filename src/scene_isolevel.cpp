@@ -1,10 +1,6 @@
 #include "scene_isolevel.hpp"
 
-IsoLevelScene::IsoLevelScene(Game *game)
-    :
-    Scene(game)
-    ,
-    level(game), block(game)
+IsoLevelScene::IsoLevelScene()
 {
     SDL_Log("Loading IsoLevel scene\n");
 
@@ -17,10 +13,10 @@ IsoLevelScene::~IsoLevelScene()
 
 void IsoLevelScene::reset()
 {
-    auto lvl = game->getOrCreateState("next_level", "1");
+    auto lvl = Game::GetOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
     auto lvlIdx = std::stoi(lvl) - 1;
-    level.load(game->getLevelData(lvlIdx));
+    level.load(Game::GetLevelData(lvlIdx));
 
     // view sizes
     cellSize = 64;
@@ -34,8 +30,8 @@ void IsoLevelScene::reset()
     toISO(level.cols - 1, level.rows - 1, cellSize, cellSize/2, &boundBottom.x, &boundBottom.y);
     int height = boundBottom.y + cellSize/2/2 - boundTop.y;
 
-    offsetX = ((game->ScreenWidth - width) / 2) - boundLeft.x - cellSize / 2;
-    offsetY = (game->ScreenHeight - height) / 2;
+    offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
+    offsetY = (Game::ScreenHeight() - height) / 2;
 
     auto startPos = level.getStartPos();
     block.x = startPos.x;
@@ -45,37 +41,37 @@ void IsoLevelScene::reset()
 
 void IsoLevelScene::input()
 {
-    if (game->input.just_pressed(SDL_SCANCODE_E))
+    if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // edit this level
-        game->loadScene(Scenes::LEVEL_EDIT);
+        Game::LoadScene(Scenes::LEVEL_EDIT);
         return;
     }
 
-    if (game->input.just_pressed(SDL_SCANCODE_L))
+    if (Input::JustPressed(SDL_SCANCODE_L))
     {
-        auto idx = std::stoi(game->getState("next_level"));
-        game->setState("next_level", std::to_string(idx + 1));
+        auto idx = std::stoi(Game::GetState("next_level"));
+        Game::SetState("next_level", std::to_string(idx + 1));
         reset();
     }
-    else if (game->input.just_pressed(SDL_SCANCODE_H))
+    else if (Input::JustPressed(SDL_SCANCODE_H))
     {
-        auto idx = std::stoi(game->getState("next_level"));
-        game->setState("next_level", std::to_string(idx - 1));
+        auto idx = std::stoi(Game::GetState("next_level"));
+        Game::SetState("next_level", std::to_string(idx - 1));
         reset();
     }
 
     moveDir = vec2(0, 0);
-    if (game->input.just_pressed(SDL_SCANCODE_UP))
+    if (Input::JustPressed(SDL_SCANCODE_UP))
         moveDir = vec2(0, -1);
-    if (game->input.just_pressed(SDL_SCANCODE_DOWN))
+    if (Input::JustPressed(SDL_SCANCODE_DOWN))
         moveDir = vec2(0, 1);
-    if (game->input.just_pressed(SDL_SCANCODE_LEFT))
+    if (Input::JustPressed(SDL_SCANCODE_LEFT))
         moveDir = vec2(-1, 0);
-    if (game->input.just_pressed(SDL_SCANCODE_RIGHT))
+    if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-    game->input.mouse_position(&mousePos.x, &mousePos.y);
+    Input::MousePosition(&mousePos.x, &mousePos.y);
 }
 
 void IsoLevelScene::update(float dt)
@@ -91,10 +87,10 @@ void IsoLevelScene::draw()
     level.draw(offsetX, offsetY, cellSize);
     block.draw(offsetX, offsetY, cellSize);
 
-    SDL_SetRenderDrawColor(game->getRenderer(), 255, 0, 0, 255);
-    if (game->input.mouse_pressed(SDL_BUTTON_LEFT))
-        SDL_SetRenderDrawColor(game->getRenderer(), 0, 255, 100, 255);
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 0, 0, 255);
+    if (Input::MousePressed(SDL_BUTTON_LEFT))
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 255, 100, 255);
     SDL_Rect r = {mousePos.x - 10, mousePos.y - 10, 20, 20};
-    SDL_RenderDrawRect(game->getRenderer(), &r);
+    SDL_RenderDrawRect(Game::GetRenderer(), &r);
 }
 

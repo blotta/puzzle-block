@@ -1,12 +1,5 @@
 #include "block.hpp"
 
-#include "asset.hpp"
-
-Block::Block(Game *game)
-    :game(game)
-{
-}
-
 void Block::move(const vec2 &dir)
 {
     if (dir.x == 0 && dir.y == 0)
@@ -89,5 +82,5 @@ void Block::draw(int levelX, int levelY, int cellSize)
     int sx, sy;
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);
 
-    game->drawSprite(levelX + sx, levelY + sy, sprId);
+    Game::DrawSprite(levelX + sx, levelY + sy, sprId);
 }

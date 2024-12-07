@@ -7,6 +7,12 @@
 #include "scene_leveledit.hpp"
 #include "scene_isolevel.hpp"
 
+Game &Game::get()
+{
+    static Game instance;
+    return instance;
+}
+
 Game::Game()
 {
     bool success = true;
@@ -17,7 +23,7 @@ Game::Game()
         success = false;
     }
 
-    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->ScreenWidth, this->ScreenHeight, SDL_WINDOW_SHOWN);
+    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth, this->mScreenHeight, SDL_WINDOW_SHOWN);
     if (!mWindow)
     {
         SDL_Log("Failed to initialize SDL Window\n");
@@ -32,7 +38,7 @@ Game::Game()
         SDL_Log("Failed to initialize SDL Renderer\n");
         success = false;
     }
-    mAsset.setRenderer(mRenderer);
+    Asset::SetRenderer(mRenderer);
 
     if (!IMG_Init(IMG_INIT_PNG))
     {
@@ -46,7 +52,7 @@ Game::Game()
         success = false;
     }
 
-    mUpdateTimer.setDuration(1.0 / TargetFPS);
+    mUpdateTimer.setDuration(1.0 / mTargetFPS);
     mUpdateTimer.reset();
 
     mFPSTimer.setDuration(1.0);
@@ -63,7 +69,7 @@ Game::~Game()
     SDL_Log("Deinitializing game\n");
 
     // make sure to deinit assets before deiniting systems
-    unloadAssets();
+    Asset::UnloadAssets();
 
     TTF_Quit();
     IMG_Quit();
@@ -72,34 +78,136 @@ Game::~Game()
     SDL_Quit();
 }
 
-bool Game::isRunning()
+int Game::ScreenWidth()
 {
-    return mRunning;
+    return Game::get().mScreenWidth;
 }
 
-bool Game::loadAssets()
+int Game::ScreenHeight()
 {
-    bool success = true;
+    return Game::get().mScreenHeight;
+}
 
-    mFont = TTF_OpenFont("assets/fonts/Cabin-Regular.ttf", 28);
-    if (!mFont)
+int Game::TargetFPS()
+{
+    return Game::get().mTargetFPS;
+}
+
+
+void Game::LoadScene(Scenes sceneName)
+{
+    Game::get().loadScene(sceneName);
+}
+
+
+
+SDL_Renderer *Game::GetRenderer()
+{
+    return Game::get().mRenderer;
+}
+
+const std::string Game::GetState(const std::string &name)
+{
+    return Game::get().mState.at(name);
+}
+
+const std::string Game::GetOrCreateState(const std::string &name, const std::string &value)
+{
+    auto& g = Game::get();
+    g.mState.try_emplace(name, value);
+    return g.mState.at(name);
+}
+
+void Game::SetState(const std::string &name, const std::string &value)
+{
+    Game::get().mState[name] = value;
+}
+
+const LevelData &Game::GetLevelData(int idx)
+{
+    return Game::get().mLevels[idx];
+}
+
+void Game::SaveLevelData(const LevelData &ld, int idx)
+{
+    Game::get().mLevels[idx] = ld;
+}
+
+const Sprite &Game::GetSprite(SpriteID id)
+{
+    return Game::get().mData.Sprites[id];
+}
+
+void Game::DrawSprite(int x, int y, SpriteID sprId)
+{
+    auto& g = Game::get();
+    const Sprite* spr = &g.mData.Sprites[sprId];
+    SDL_Rect src = {
+        spr->tx,
+        spr->ty,
+        spr->tw,
+        spr->th
+    };
+    SDL_Rect dest = {
+        x - spr->originX,
+        y - spr->originY,
+        spr->tw,
+        spr->th
+    };
+
+    SDL_RenderCopy(g.mRenderer, g.pActiveTexture->get(), &src, &dest);
+}
+
+void Game::Run()
+{
+    Game::get().run();
+}
+
+
+//////////////////////
+// Instance Methods //
+//////////////////////
+
+void Game::run()
+{
+    SDL_Log("Starting program\n");
+    mRunning = true;
+
+    loadAssets();
+    loadScene(Scenes::BOOT);
+    while (mRunning)
     {
-        SDL_Log("Failed to load font: %s\n", TTF_GetError());
-        success = false;
+        tick();
     }
+}
+
+void Game::tick()
+{
+    mUpdateTimer.waitUntilDone();
+    float dt = mUpdateTimer.elapsed();
+    mUpdateTimer.reset();
+
+    input(dt);
+    update(dt);
+    draw();
+
+    if (mFPSTimer.isDone())
+    {
+        mFPSTimer.reset();
+        // SDL_Log("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
+        mFpsCounter = 0;
+    }
+    mFpsCounter += 1;
+}
+
+void Game::loadAssets()
+{
+    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 28);
 
     // preload spritesheet
-    pActiveTexture = mAsset.getTexture("assets/images/spritesheet.png");
+    pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");
 
     loadLevels();
-
-    return success;
-}
-
-void Game::unloadAssets()
-{
-    mAsset.unloadAssets();
-    TTF_CloseFont(mFont);
 }
 
 void Game::loadLevels()
@@ -116,112 +224,27 @@ void Game::loadScene(Scenes scene)
     {
     case Scenes::SPLASH:
         SDL_Log("Loading Splash scene\n");
-        mCurrentScene = std::make_shared<SplashScene>(this);
+        mCurrentScene = std::make_shared<SplashScene>();
         break;
     case Scenes::LEVEL_EDIT:
         SDL_Log("Loading Level scene\n");
-        mCurrentScene = std::make_shared<LevelEditScene>(this);
+        mCurrentScene = std::make_shared<LevelEditScene>();
         break;
     case Scenes::ISOLEVEL:
         SDL_Log("Loading ISO Level scene\n");
-        mCurrentScene = std::make_shared<IsoLevelScene>(this);
+        mCurrentScene = std::make_shared<IsoLevelScene>();
         break;
     default:
         SDL_Log("Loading default scene\n");
-        mCurrentScene = std::make_shared<BootScene>(this);
+        mCurrentScene = std::make_shared<BootScene>();
         break;
     }
 }
 
-void Game::tick()
+void Game::input(float dt)
 {
-    mUpdateTimer.waitUntilDone();
-    float dt = mUpdateTimer.elapsed();
-    mUpdateTimer.reset();
-
-    _input(dt);
-    update(dt);
-    draw();
-
-    if (mFPSTimer.isDone())
-    {
-        mFPSTimer.reset();
-        // SDL_Log("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
-        mFpsCounter = 0;
-    }
-    mFpsCounter += 1;
-}
-
-SDL_Renderer *Game::getRenderer()
-{
-    return mRenderer;
-}
-
-const Texture* Game::getTexture(const std::string &texture)
-{
-    return mAsset.getTexture(texture);
-}
-
-TTF_Font *Game::getFont()
-{
-    return mFont;
-}
-
-const std::string Game::getState(const std::string &name)
-{
-    return mState.at(name);
-}
-
-const std::string Game::getOrCreateState(const std::string &name, const std::string &value)
-{
-    mState.try_emplace(name, value);
-
-    return mState.at(name);
-}
-
-void Game::setState(const std::string &name, const std::string &value)
-{
-    mState[name] = value;
-}
-
-const LevelData &Game::getLevelData(int idx)
-{
-    return mLevels[idx];
-}
-
-void Game::saveLevelData(const LevelData &ld, int idx)
-{
-    mLevels[idx] = ld;
-}
-
-const Sprite &Game::getSprite(SpriteID id)
-{
-    return mData.Sprites[id];
-}
-
-void Game::drawSprite(int x, int y, SpriteID sprId)
-{
-    const Sprite* spr = &mData.Sprites[sprId];
-    SDL_Rect src = {
-        spr->tx,
-        spr->ty,
-        spr->tw,
-        spr->th
-    };
-    SDL_Rect dest = {
-        x - spr->originX,
-        y - spr->originY,
-        spr->tw,
-        spr->th
-    };
-
-    SDL_RenderCopy(mRenderer, pActiveTexture->get(), &src, &dest);
-}
-
-void Game::_input(float dt)
-{
-    input.update(dt);
-    if (input.quit_requested())
+    Input::Update(dt);
+    if (Input::QuitRequested())
         mRunning = false;
 
     mCurrentScene->input();
@@ -242,21 +265,6 @@ void Game::draw()
     SDL_RenderPresent(mRenderer);
 }
 
-void Game::run()
-{
-    SDL_Log("Starting program\n");
-    mRunning = true;
 
-    if (!loadAssets())
-    {
-        SDL_Log("Failed to load media\n");
-    }
-    else
-    {
-        loadScene(Scenes::BOOT);
-        while (mRunning)
-        {
-            tick();
-        }
-    }
-}
+
+

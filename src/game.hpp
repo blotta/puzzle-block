@@ -8,11 +8,10 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 
 #include "scene.hpp"
-#include "asset.hpp"
 #include "input_manager.hpp"
+#include "asset_manager.hpp"
 #include "level.hpp"
 
 #include "timer.hpp"
@@ -24,45 +23,48 @@ struct LevelData;
 class Game
 {
 public:
-    Game();
-    ~Game();
+    Game(const Game &) = delete;
 
-    const int ScreenWidth = 1280;
-    const int ScreenHeight = 720;
-    const int TargetFPS = 60;
+    static int ScreenWidth();
+    static int ScreenHeight();
+    static int TargetFPS();
 
-    InputManager input;
+    static void Run();
+    static void LoadScene(Scenes sceneName);
 
-    bool isRunning();
-    void run();
-    void loadScene(Scenes sceneName);
+    static SDL_Renderer *GetRenderer();
 
-    SDL_Renderer *getRenderer();
-    const Texture* getTexture(const std::string& texture);
-    TTF_Font *getFont();
-    const std::string getState(const std::string &name);
-    const std::string getOrCreateState(const std::string &name, const std::string &value);
-    void setState(const std::string &name, const std::string &value);
-    const LevelData &getLevelData(int idx);
-    void saveLevelData(const LevelData& ld, int idx);
-    const Sprite& getSprite(SpriteID id);
-    void drawSprite(int x, int y, SpriteID sprId);
+    static const std::string GetState(const std::string &name);
+    static const std::string GetOrCreateState(const std::string &name, const std::string &value);
+    static void SetState(const std::string &name, const std::string &value);
 
-    AssetManager mAsset;
+    static const LevelData &GetLevelData(int idx);
+    static void SaveLevelData(const LevelData &ld, int idx);
+
+    static const Sprite &GetSprite(SpriteID id);
+    static void DrawSprite(int x, int y, SpriteID sprId);
 
 private:
-    bool loadAssets();
-    void unloadAssets();
+    Game();
+    ~Game();
+    static Game &get();
+
+    void loadAssets();
     void loadLevels();
-    void _input(float dt);
-    void update(float dt);
-    void draw();
+    void loadScene(Scenes sceneName);
+    void run();
     // Runs input(), update() and draw()
     void tick();
+    void input(float dt);
+    void update(float dt);
+    void draw();
+
+    const int mScreenWidth = 1280;
+    const int mScreenHeight = 720;
+    const int mTargetFPS = 60;
 
     SDL_Window *mWindow = NULL;
     SDL_Renderer *mRenderer = NULL;
-    TTF_Font *mFont = NULL;
 
     Timer mUpdateTimer;
     Timer mFPSTimer;
@@ -70,7 +72,7 @@ private:
 
     bool mRunning = false;
 
-    const Texture* pActiveTexture;
+    const Texture *pActiveTexture;
 
     std::shared_ptr<Scene> mCurrentScene;
     std::map<std::string, std::string> mState;

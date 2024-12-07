@@ -1,24 +1,23 @@
 #include "render_text.hpp"
 
-RenderText::RenderText(TTF_Font* font)
+StaticText::StaticText()
 {
-    pFont = font;
     setText(mText);
     setColor(mColor);
 }
 
-RenderText::~RenderText()
+StaticText::~StaticText()
 {
     SDL_DestroyTexture(mTextTexture);
 }
 
-void RenderText::clearText()
+void StaticText::clearText()
 {
     mText.clear();
     mPropsChanged = true;
 }
 
-void RenderText::setText(std::string text)
+void StaticText::setText(std::string text)
 {
     if (text.compare(mText) == 0)
         return;
@@ -27,7 +26,7 @@ void RenderText::setText(std::string text)
     mPropsChanged = true;
 }
 
-void RenderText::setColor(SDL_Color color)
+void StaticText::setColor(SDL_Color color)
 {
     if (color.r == mColor.r && color.g == mColor.g && color.b == mColor.b && color.a == mColor.a)
         return;
@@ -36,7 +35,7 @@ void RenderText::setColor(SDL_Color color)
     mPropsChanged = true;
 }
 
-void RenderText::draw(SDL_Renderer* rend, int x, int y)
+void StaticText::draw(SDL_Renderer* rend, int x, int y)
 {
     if (!sync(rend))
         return;
@@ -48,11 +47,11 @@ void RenderText::draw(SDL_Renderer* rend, int x, int y)
     SDL_RenderCopy(rend, mTextTexture, NULL, &r);
 }
 
-int RenderText::getWidth() { return mWidth; }
+int StaticText::getWidth() { return mWidth; }
 
-int RenderText::getHeight() { return mHeight; }
+int StaticText::getHeight() { return mHeight; }
 
-bool RenderText::sync(SDL_Renderer* rend)
+bool StaticText::sync(SDL_Renderer* rend)
 {
     if (!mPropsChanged && mTextTexture != NULL)
         return true;
@@ -67,7 +66,7 @@ bool RenderText::sync(SDL_Renderer* rend)
         return false;
     }
     
-    SDL_Surface* surf = TTF_RenderUTF8_Blended(pFont, mText.c_str(), mColor);
+    SDL_Surface* surf = TTF_RenderUTF8_Blended(Asset::GetFont(), mText.c_str(), mColor);
     if (!surf)
     {
         SDL_Log("Error generating text surface: %s\n", TTF_GetError());

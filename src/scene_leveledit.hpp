@@ -8,7 +8,7 @@
 class LevelEditScene : public Scene
 {
 public:
-    LevelEditScene(Game* game);
+    LevelEditScene();
     ~LevelEditScene();
     void update(float dt) override;
     void draw() override;

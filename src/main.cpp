@@ -5,8 +5,7 @@
 
 int main(int argc, char **args)
 {
-    Game game;
-    game.run();
+    Game::Run();
 
     return 0;
 }

@@ -1,6 +1,6 @@
 #include "scene.hpp"
 
-Scene::Scene(Game *game) : game(game)
+Scene::Scene()
 {
     SDL_Log("Loading scene\n");
 };

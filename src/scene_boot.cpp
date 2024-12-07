@@ -1,7 +1,6 @@
 #include "scene_boot.hpp"
 
-BootScene::BootScene(Game* game)
-    : Scene(game)
+BootScene::BootScene()
 {
     SDL_Log("Loading boot scene\n");
 }
@@ -17,7 +16,7 @@ void BootScene::input()
 
 void BootScene::update(float dt)
 {
-    game->loadScene(Scenes::ISOLEVEL);
+    Game::LoadScene(Scenes::ISOLEVEL);
 }
 
 void BootScene::draw()
