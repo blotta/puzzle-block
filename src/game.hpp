@@ -23,7 +23,7 @@ struct LevelData;
 class Game
 {
 public:
-    Game(const Game &) = delete;
+    Game(const Game&) = delete;
 
     static int ScreenWidth();
     static int ScreenHeight();
@@ -32,30 +32,29 @@ public:
     static void Run();
     static void LoadScene(Scenes sceneName);
 
-    static SDL_Renderer *GetRenderer();
+    static SDL_Renderer* GetRenderer();
 
     static const std::string GetState(const std::string &name);
     static const std::string GetOrCreateState(const std::string &name, const std::string &value);
     static void SetState(const std::string &name, const std::string &value);
 
-    static const LevelData &GetLevelData(int idx);
+    static const LevelData& GetLevelData(int idx);
     static void SaveLevelData(const LevelData &ld, int idx);
 
-    static const Sprite &GetSprite(SpriteID id);
+    static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);
 
 private:
     Game();
     ~Game();
-    static Game &get();
+    static Game& get();
 
     void loadAssets();
     void loadLevels();
     void loadScene(Scenes sceneName);
     void run();
-    // Runs input(), update() and draw()
+    // Runs update() and draw()
     void tick();
-    void input(float dt);
     void update(float dt);
     void draw();
 
@@ -63,8 +62,8 @@ private:
     const int mScreenHeight = 720;
     const int mTargetFPS = 60;
 
-    SDL_Window *mWindow = NULL;
-    SDL_Renderer *mRenderer = NULL;
+    SDL_Window* mWindow = NULL;
+    SDL_Renderer* mRenderer = NULL;
 
     Timer mUpdateTimer;
     Timer mFPSTimer;
@@ -72,7 +71,7 @@ private:
 
     bool mRunning = false;
 
-    const Texture *pActiveTexture;
+    const Texture* pActiveTexture;
 
     std::shared_ptr<Scene> mCurrentScene;
     std::map<std::string, std::string> mState;

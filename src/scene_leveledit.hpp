@@ -4,6 +4,7 @@
 #include "scene.hpp"
 #include "level.hpp"
 #include "block.hpp"
+#include "text.hpp"
 
 class LevelEditScene : public Scene
 {
@@ -12,8 +13,10 @@ public:
     ~LevelEditScene();
     void update(float dt) override;
     void draw() override;
-    void input() override;
 private:
+    void reset();
+    void resize();
+
     Level level;
     int lvlIdx;
     Block block;
@@ -24,8 +27,7 @@ private:
     vec2 mousePos;
     vec2 mouseGridPos;
     bool saved = true;
-    void reset();
-    void resize();
+    StaticText mLevelText;
 };
 
 #endif

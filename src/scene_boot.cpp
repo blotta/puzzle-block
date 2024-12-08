@@ -10,10 +10,6 @@ BootScene::~BootScene()
     SDL_Log("Unloading boot scene\n");
 }
 
-void BootScene::input()
-{
-}
-
 void BootScene::update(float dt)
 {
     Game::LoadScene(Scenes::ISOLEVEL);

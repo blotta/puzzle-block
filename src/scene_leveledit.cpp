@@ -20,6 +20,7 @@ void LevelEditScene::reset()
     SDL_Log("Loading level %s\n", lvl.c_str());
     lvlIdx = std::stoi(lvl) - 1;
     level.load(Game::GetLevelData(lvlIdx));
+    mLevelText.setText("Level " + lvl);
 
     auto startPos = level.getStartPos();
     block.x = startPos.x;
@@ -49,7 +50,7 @@ void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, in
         *y -= 1;
 }
 
-void LevelEditScene::input()
+void LevelEditScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
@@ -60,10 +61,7 @@ void LevelEditScene::input()
 
     Input::MousePosition(&mousePos.x, &mousePos.y);
     toGrid(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, level.cols, level.rows, &mouseGridPos.x, &mouseGridPos.y);
-}
 
-void LevelEditScene::update(float dt)
-{
     if (level.isValidPos(mouseGridPos))
     {
         if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
@@ -201,4 +199,6 @@ void LevelEditScene::draw()
             .h = cellSize};
         SDL_RenderDrawRect(Game::GetRenderer(), &tileSelect);
     }
+
+    mLevelText.draw(Game::GetRenderer(), 10, 10);
 }

@@ -68,6 +68,9 @@ Game::~Game()
 {
     SDL_Log("Deinitializing game\n");
 
+    // unload scene
+    loadScene(Scenes::NONE);
+
     // make sure to deinit assets before deiniting systems
     Asset::UnloadAssets();
 
@@ -187,7 +190,8 @@ void Game::tick()
     float dt = mUpdateTimer.elapsed();
     mUpdateTimer.reset();
 
-    input(dt);
+    Input::Update(dt);
+
     update(dt);
     draw();
 
@@ -234,24 +238,21 @@ void Game::loadScene(Scenes scene)
         SDL_Log("Loading ISO Level scene\n");
         mCurrentScene = std::make_shared<IsoLevelScene>();
         break;
-    default:
-        SDL_Log("Loading default scene\n");
+    case Scenes::BOOT:
+        SDL_Log("Loading BOOT scene\n");
         mCurrentScene = std::make_shared<BootScene>();
+        break;
+    default:
+        mCurrentScene = nullptr;
         break;
     }
 }
 
-void Game::input(float dt)
+void Game::update(float dt)
 {
-    Input::Update(dt);
     if (Input::QuitRequested())
         mRunning = false;
 
-    mCurrentScene->input();
-}
-
-void Game::update(float dt)
-{
     mCurrentScene->update(dt);
 }
 

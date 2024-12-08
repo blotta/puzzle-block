@@ -1,4 +1,4 @@
-#include "render_text.hpp"
+#include "text.hpp"
 
 StaticText::StaticText()
 {
@@ -13,7 +13,7 @@ StaticText::~StaticText()
     SDL_Log("Destroy Static Text\n");
 }
 
-StaticText::StaticText(StaticText &&other) noexcept
+StaticText::StaticText(StaticText&& other) noexcept
 {
     this->mText = other.mText;
     this->mColor = other.mColor;

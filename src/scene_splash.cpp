@@ -14,16 +14,13 @@ SplashScene::~SplashScene()
     SDL_Log("Unloading splash scene\n");
 }
 
-void SplashScene::input()
+void SplashScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_RETURN))
     {
         Game::LoadScene(Scenes::LEVEL_EDIT);
     }
-}
 
-void SplashScene::update(float dt)
-{
     mTimer += dt;
     if (mTimer > 3)
     {

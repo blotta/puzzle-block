@@ -3,8 +3,6 @@
 
 #include "scene.hpp"
 
-#include "render_text.hpp"
-
 class BootScene : public Scene
 {
 public:
@@ -12,7 +10,6 @@ public:
     ~BootScene();
     void update(float dt) override;
     void draw() override;
-    void input() override;
 };
 
 #endif

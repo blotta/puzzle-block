@@ -5,7 +5,8 @@
 
 enum class Scenes
 {
-    BOOT = 0,
+    NONE = 0,
+    BOOT,
     SPLASH,
     LEVEL_EDIT,
     ISOLEVEL,
@@ -20,7 +21,6 @@ public:
     virtual ~Scene() {}
     virtual void update(float dt) = 0;
     virtual void draw() = 0;
-    virtual void input() = 0;
 protected:
 };
 

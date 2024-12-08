@@ -41,7 +41,7 @@ void IsoLevelScene::reset()
     block.state = BlockState::UP;
 }
 
-void IsoLevelScene::input()
+void IsoLevelScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
@@ -63,6 +63,8 @@ void IsoLevelScene::input()
         reset();
     }
 
+    Input::MousePosition(&mousePos.x, &mousePos.y);
+
     moveDir = vec2(0, 0);
     if (Input::JustPressed(SDL_SCANCODE_UP))
         moveDir = vec2(0, -1);
@@ -73,11 +75,7 @@ void IsoLevelScene::input()
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-    Input::MousePosition(&mousePos.x, &mousePos.y);
-}
 
-void IsoLevelScene::update(float dt)
-{
     block.move(moveDir);
     auto positions = block.getPositions();
     if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))

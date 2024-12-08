@@ -1,7 +1,7 @@
 #ifndef SCENE_ISOLEVEL_HPP
 #define SCENE_ISOLEVEL_HPP
 
-#include "render_text.hpp"
+#include "text.hpp"
 #include "scene.hpp"
 #include "level.hpp"
 #include "block.hpp"
@@ -13,7 +13,6 @@ public:
     ~IsoLevelScene();
     void update(float dt) override;
     void draw() override;
-    void input() override;
 private:
     Level level;
     Block block;
