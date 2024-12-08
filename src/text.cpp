@@ -18,8 +18,8 @@ StaticText::StaticText(StaticText&& other) noexcept
     this->mText = other.mText;
     this->mColor = other.mColor;
     this->mPropsChanged = other.mPropsChanged;
-    this->mWidth = other.mWidth;
-    this->mHeight = other.mHeight;
+    this->width = other.width;
+    this->height = other.height;
     this->mTextTexture = other.mTextTexture;
 
     other.mTextTexture = nullptr;
@@ -56,14 +56,15 @@ void StaticText::draw(SDL_Renderer* rend, int x, int y)
 
     SDL_Rect r = {
         x, y,
-        mWidth, mHeight
+        (int)SDL_floor(width * scale),
+        (int)SDL_floor(height * scale)
     };
     SDL_RenderCopy(rend, mTextTexture, NULL, &r);
 }
 
-int StaticText::getWidth() { return mWidth; }
+int StaticText::getWidth() { return width; }
 
-int StaticText::getHeight() { return mHeight; }
+int StaticText::getHeight() { return height; }
 
 bool StaticText::sync(SDL_Renderer* rend)
 {
@@ -97,8 +98,8 @@ bool StaticText::sync(SDL_Renderer* rend)
         SDL_Log("Error creating text texture: %s\n", SDL_GetError());
         return false;
     }
-    mWidth = surf->w;
-    mHeight = surf->h;
+    width = surf->w;
+    height = surf->h;
     SDL_FreeSurface(surf);
 
     mPropsChanged = false;

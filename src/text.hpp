@@ -20,12 +20,13 @@ public:
     void draw(SDL_Renderer* rend, int x, int y);
     int getWidth();
     int getHeight();
+    int width, height = 0;
+    float scale = 1.0f;
 private:
     std::string mText;
     SDL_Color mColor = {255, 255, 255, 255};
     SDL_Texture* mTextTexture = NULL;
     bool mPropsChanged = true;
-    int mWidth, mHeight = 0;
     bool sync(SDL_Renderer* rend);
 };
 

@@ -38,8 +38,10 @@ public:
     static const std::string GetOrCreateState(const std::string &name, const std::string &value);
     static void SetState(const std::string &name, const std::string &value);
 
+    static const int GetLevelsSize();
     static const LevelData& GetLevelData(int idx);
     static void SaveLevelData(const LevelData &ld, int idx);
+    static int AddLevelData(const LevelData &ld);
 
     static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);

@@ -1,5 +1,6 @@
 #include <math.h>
 #include <string>
+#include <format>
 
 #include "scene_leveledit.hpp"
 
@@ -19,13 +20,18 @@ void LevelEditScene::reset()
     auto lvl = Game::GetOrCreateState("next_level", "1");
     SDL_Log("Loading level %s\n", lvl.c_str());
     lvlIdx = std::stoi(lvl) - 1;
+    if (lvlIdx >= Game::GetLevelsSize())
+        lvlIdx = 0;
     level.load(Game::GetLevelData(lvlIdx));
-    mLevelText.setText("Level " + lvl);
 
     auto startPos = level.getStartPos();
     block.x = startPos.x;
     block.y = startPos.y;
     block.state = BlockState::UP;
+
+    mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    S: save curr    N: save new    NUMPAD Arrows: resize grid");
+    mLevelText.setText(
+        std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
 
     resize();
 }
@@ -50,11 +56,26 @@ void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, in
         *y -= 1;
 }
 
+void save_level(Level& level, int& lvlIdx, bool newLevel)
+{
+    // save current
+    LevelData ld = {};
+    level.toLevelData(&ld);
+    if (newLevel)
+        lvlIdx = Game::AddLevelData(ld);
+    else
+        Game::SaveLevelData(ld, lvlIdx);
+}
+
 void LevelEditScene::update(float dt)
 {
+    bool levelChanged = false;
+
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // exit level edit
+        if (level.isValid())
+            save_level(level, lvlIdx, false);
         Game::LoadScene(Scenes::ISOLEVEL);
         return;
     }
@@ -68,12 +89,14 @@ void LevelEditScene::update(float dt)
         {
             level.toggleFloor(mouseGridPos);
             saved = false;
+            levelChanged = true;
         }
 
         if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
         {
             level.toggleStartFinish(mouseGridPos);
             saved = false;
+            levelChanged = true;
         }
     }
 
@@ -81,31 +104,46 @@ void LevelEditScene::update(float dt)
         level.addColumn();
         saved = false;
         resize();
+        levelChanged = true;
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_8)) {
         level.removeRow();
         saved = false;
         resize();
+        levelChanged = true;
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_4)) {
         level.removeColumn();
         saved = false;
         resize();
+        levelChanged = true;
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_2)) {
         level.addRow();
         saved = false;
         resize();
+        levelChanged = true;
     }
 
-    // save
     if (Input::JustPressed(SDL_SCANCODE_S) && level.isValid())
     {
-        LevelData ld = {};
-        level.toLevelData(&ld);
-        Game::SaveLevelData(ld, lvlIdx);
+        // save current
+        save_level(level, lvlIdx, false);
         saved = true;
+        levelChanged = true;
     }
+    else if (Input::JustPressed(SDL_SCANCODE_N) && level.isValid())
+    {
+        // save new
+        save_level(level, lvlIdx, true);
+        Game::SetState("next_level", std::to_string(lvlIdx + 1));
+        saved = true;
+        levelChanged = true;
+    }
+
+    if (levelChanged)
+        mLevelText.setText(std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
+
 
     // normal op
     moveDir = vec2(0, 0);
@@ -200,5 +238,6 @@ void LevelEditScene::draw()
         SDL_RenderDrawRect(Game::GetRenderer(), &tileSelect);
     }
 
-    mLevelText.draw(Game::GetRenderer(), 10, 10);
+    mEditInstruction.draw(Game::GetRenderer(), 10, 10);
+    mLevelText.draw(Game::GetRenderer(), 10, Game::ScreenHeight() - 35);
 }

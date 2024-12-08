@@ -70,6 +70,20 @@ void load_game_data(GameData *data)
     // levels
     data->DefaultLevels[0] =
         {
+            .rows = 7,
+            .cols = 1,
+            .data = {
+                "3",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "2",
+            }};
+
+    data->DefaultLevels[1] =
+        {
             .rows = 10,
             .cols = 10,
             .data = {
@@ -85,7 +99,7 @@ void load_game_data(GameData *data)
                 "1111110111",
             }};
 
-    data->DefaultLevels[1] =
+    data->DefaultLevels[2] =
         {
             .rows = 6,
             .cols = 4,
@@ -100,7 +114,7 @@ void load_game_data(GameData *data)
 
         };
 
-    data->DefaultLevels[2] =
+    data->DefaultLevels[3] =
         {
             .rows = 6,
             .cols = 4,

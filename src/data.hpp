@@ -41,10 +41,11 @@ struct LevelData
 
 // Game data context
 
+#define NUM_LEVELS 4
 struct GameData
 {
     Sprite Sprites[SpriteID::NUM_SPRITES];
-    std::array<LevelData, 3> DefaultLevels;
+    std::array<LevelData, NUM_LEVELS> DefaultLevels;
 };
 
 void load_game_data(GameData* d);

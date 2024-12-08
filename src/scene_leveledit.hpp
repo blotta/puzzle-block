@@ -27,6 +27,7 @@ private:
     vec2 mousePos;
     vec2 mouseGridPos;
     bool saved = true;
+    StaticText mEditInstruction;
     StaticText mLevelText;
 };
 

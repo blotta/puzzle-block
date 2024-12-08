@@ -126,6 +126,11 @@ void Game::SetState(const std::string &name, const std::string &value)
     Game::get().mState[name] = value;
 }
 
+const int Game::GetLevelsSize()
+{
+    return Game::get().mLevels.size();
+}
+
 const LevelData &Game::GetLevelData(int idx)
 {
     return Game::get().mLevels[idx];
@@ -134,6 +139,12 @@ const LevelData &Game::GetLevelData(int idx)
 void Game::SaveLevelData(const LevelData &ld, int idx)
 {
     Game::get().mLevels[idx] = ld;
+}
+
+int Game::AddLevelData(const LevelData &ld)
+{
+    Game::get().mLevels.emplace_back(ld);
+    return Game::get().mLevels.size() - 1;
 }
 
 const Sprite &Game::GetSprite(SpriteID id)
@@ -206,7 +217,7 @@ void Game::tick()
 
 void Game::loadAssets()
 {
-    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 28);
+    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 20);
 
     // preload spritesheet
     pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");
