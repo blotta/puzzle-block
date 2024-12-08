@@ -12,6 +12,8 @@ class StaticText{
 public:
     StaticText();
     ~StaticText();
+    StaticText(const StaticText&) = delete;
+    StaticText(StaticText&& other) noexcept; // move constructor
     void clearText();
     void setText(std::string text);
     void setColor(SDL_Color color);

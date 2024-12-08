@@ -18,6 +18,8 @@ void IsoLevelScene::reset()
     auto lvlIdx = std::stoi(lvl) - 1;
     level.load(Game::GetLevelData(lvlIdx));
 
+    mText.setText("Level " + lvl);
+
     // view sizes
     cellSize = 64;
     vec2 boundLeft, boundRight;
@@ -92,5 +94,7 @@ void IsoLevelScene::draw()
         SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 255, 100, 255);
     SDL_Rect r = {mousePos.x - 10, mousePos.y - 10, 20, 20};
     SDL_RenderDrawRect(Game::GetRenderer(), &r);
+
+    mText.draw(Game::GetRenderer(), 10, 10);
 }
 

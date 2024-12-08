@@ -25,6 +25,7 @@ private:
     vec2 mousePos;
     bool playerLost;
     void reset();
+    StaticText mText;
 };
 
 #endif

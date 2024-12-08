@@ -4,11 +4,25 @@ StaticText::StaticText()
 {
     setText(mText);
     setColor(mColor);
+    SDL_Log("Create Static Text\n");
 }
 
 StaticText::~StaticText()
 {
     SDL_DestroyTexture(mTextTexture);
+    SDL_Log("Destroy Static Text\n");
+}
+
+StaticText::StaticText(StaticText &&other) noexcept
+{
+    this->mText = other.mText;
+    this->mColor = other.mColor;
+    this->mPropsChanged = other.mPropsChanged;
+    this->mWidth = other.mWidth;
+    this->mHeight = other.mHeight;
+    this->mTextTexture = other.mTextTexture;
+
+    other.mTextTexture = nullptr;
 }
 
 void StaticText::clearText()
