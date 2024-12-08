@@ -15,7 +15,6 @@ public:
     void draw() override;
     void input() override;
 private:
-    int timer;
     Level level;
     Block block;
     int offsetX = 100;
@@ -23,7 +22,6 @@ private:
     int cellSize = 64;
     vec2 moveDir;
     vec2 mousePos;
-    bool playerLost;
     void reset();
     StaticText mText;
 };

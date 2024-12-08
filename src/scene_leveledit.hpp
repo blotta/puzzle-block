@@ -14,7 +14,6 @@ public:
     void draw() override;
     void input() override;
 private:
-    int timer;
     Level level;
     int lvlIdx;
     Block block;

@@ -1,11 +1,10 @@
-CC := g++
+# CC := g++
+CC := clang++
 LIBS := sdl2 sdl2_image sdl2_ttf
 PKG_CONFIG := pkg-config
 
-CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS))
-LDFLAGS := $(shell $(PKG_CONFIG) --libs $(LIBS))
-
-CFLAGS := $(CFLAGS) -Werror -Wall -std=c++20
+CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS)) -Werror -Wall -std=c++20
+LDFLAGS := $(shell $(PKG_CONFIG) --libs-only-L --libs-only-l $(LIBS))
 
 EXE := .\build\game.exe
 SRCS := $(wildcard src/*.cpp)
@@ -14,12 +13,12 @@ OBJS := $(SRCS:src/%.cpp=obj/%.o)
 all: debug
 
 .PHONY: debug
-debug: CFLAGS += -g -mconsole
-debug: LDFLAGS += -g -mconsole
+debug: CFLAGS += -g
 debug: $(EXE)
 
 .PHONY: release
 release: CFLAGS += -O2
+release: LDFLAGS += $(shell $(PKG_CONFIG) --libs-only-other $(LIBS))
 release: clean $(EXE)
 
 $(EXE): $(OBJS)
