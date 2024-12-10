@@ -21,22 +21,6 @@ void Level::set(int x, int y, CellType value)
     grid[y][x] = value;
 }
 
-void Level::load(const std::span<std::string_view> &ld)
-{
-    this->clear();
-    this->rows = ld.size();
-    this->cols = ld[0].size();
-    for (size_t row = 0; row < ld.size(); ++row)
-    {
-        for (size_t col = 0; col < ld[row].size(); ++col)
-        {
-            auto v = ld[row][col];
-            CellType vi = (CellType)atoi(&v);
-            this->set(col, row, vi);
-        }
-    }
-}
-
 void Level::load(const LevelData &ld)
 {
     this->clear();
@@ -46,7 +30,8 @@ void Level::load(const LevelData &ld)
     {
         for (int col = 0; col < ld.cols; ++col)
         {
-            auto v = ld.data[row][col];
+            int p = row * cols + col;
+            auto v = ld.data[p];
             CellType vi = (CellType)atoi(&v);
             this->set(col, row, vi);
         }
@@ -58,10 +43,11 @@ void printLevel(const LevelData &lvl)
     SDL_Log("===LevelData===\n");
     SDL_Log("rows: %d    cols:%d\n", lvl.rows, lvl.cols);
     SDL_Log("data:\n");
-    char row[MAX_GRID_SIZE + 1] = {};
+    char row[lvl.cols + 1] = {};
     for (int j = 0; j < lvl.rows; j++)
     {
-        memcpy(&row, lvl.data[j], lvl.cols);
+        int p = j * lvl.cols;
+        memcpy(&row, &lvl.data[p], lvl.cols);
         SDL_Log("%s\n", row);
     }
 }
@@ -71,29 +57,32 @@ void Level::toLevelData(LevelData *ld)
     ld->cols = cols;
     ld->rows = rows;
 
-    for (int j = 0; j < MAX_GRID_SIZE; j++)
+    memset(&ld->data, 0, sizeof(ld->data));
+
+    for (int j = 0; j < rows; j++)
     {
-        for (int i = 0; i < MAX_GRID_SIZE; i++)
+        for (int i = 0; i < cols; i++)
         {
+            int p = j * this->cols + i;
             if (j >= this->rows || i >= this->cols)
             {
-                ld->data[j][i] = '0';
+                ld->data[p] = '0';
                 continue;
             }
 
             switch (grid[j][i])
             {
             case CellType::EMPTY:
-                ld->data[j][i] = '0';
+                ld->data[p] = '0';
                 break;
             case CellType::FLOOR:
-                ld->data[j][i] = '1';
+                ld->data[p] = '1';
                 break;
             case CellType::START:
-                ld->data[j][i] = '2';
+                ld->data[p] = '2';
                 break;
             case CellType::FINISH:
-                ld->data[j][i] = '3';
+                ld->data[p] = '3';
                 break;
             }
         }

@@ -9,7 +9,6 @@
 #include "game.hpp"
 #include "util.hpp"
 
-const int MAX_GRID_SIZE = 10;
 
 class Game;
 struct LevelData;
@@ -30,7 +29,6 @@ struct Level
 
     void clear();
     void set(int x, int y, CellType value);
-    void load(const std::span<std::string_view> &ld);
     void load(const LevelData &ld);
     void toLevelData(LevelData* ld);
     vec2 getStartPos();

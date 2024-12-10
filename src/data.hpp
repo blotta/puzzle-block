@@ -32,11 +32,13 @@ struct Sprite
 
 // LEVELS
 
+const int MAX_GRID_SIZE = 10;
+
 struct LevelData
 {
-    int rows;
     int cols;
-    char data[10][11];
+    int rows;
+    char data[MAX_GRID_SIZE * MAX_GRID_SIZE + 1];
 };
 
 // Game data context
