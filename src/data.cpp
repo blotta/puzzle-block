@@ -70,36 +70,20 @@ void load_game_data(GameData *data)
     // levels
     data->DefaultLevels[0] =
         {
-            .cols = 1,
+            .cols = 2,
             .rows = 7,
             .data = {
-                "3"
-                "1"
-                "1"
-                "1"
-                "1"
-                "1"
-                "2"
-            }};
+                "03"
+                "11"
+                "11"
+                "10"
+                "10"
+                "10"
+                "20"
+            }
+        };
 
     data->DefaultLevels[1] =
-        {
-            .cols = 10,
-            .rows = 10,
-            .data = {
-                "1111113111"
-                "1111110001"
-                "1111110111"
-                "1111110111"
-                "1111110001"
-                "1111112111"
-                "1111110111"
-                "1111110111"
-                "1111110111"
-                "1111110111"
-            }};
-
-    data->DefaultLevels[2] =
         {
             .cols = 4,
             .rows = 6,
@@ -114,18 +98,33 @@ void load_game_data(GameData *data)
 
         };
 
-    data->DefaultLevels[3] =
+    data->DefaultLevels[2] =
         {
             .cols = 4,
-            .rows = 6,
+            .rows = 9,
             .data = {
-                "1311"
+                "3111"
+                "0001"
+                "0111"
+                "0111"
                 "0001"
                 "0111"
                 "0111"
                 "0001"
                 "2111"
             }
+        };
 
+    data->DefaultLevels[3] =
+        {
+            .cols = 4,
+            .rows = 5,
+            .data = {
+                "0030"
+                "0111"
+                "0111"
+                "0111"
+                "2111"
+            }
         };
 }

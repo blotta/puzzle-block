@@ -35,6 +35,7 @@ struct Level
     bool isValidPos(const vec2 &pos);
     bool isValid();
     bool hasFloorAt(const vec2 &pos);
+    CellType cellAt(const vec2 &pos);
     void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);

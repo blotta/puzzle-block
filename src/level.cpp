@@ -149,6 +149,11 @@ bool Level::hasFloorAt(const vec2 &pos)
     return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH;
 }
 
+CellType Level::cellAt(const vec2 &pos)
+{
+    return grid[pos.y][pos.x];
+}
+
 void Level::draw(int x, int y, int cellSize)
 {
     for (int i = 0; i < cols; i++)

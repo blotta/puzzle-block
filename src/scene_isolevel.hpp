@@ -19,10 +19,14 @@ private:
     int offsetX = 100;
     int offsetY = 100;
     int cellSize = 64;
+    int lvlIdx;
     vec2 moveDir;
     vec2 mousePos;
     void reset();
-    StaticText mText;
+    StaticText mTitleText;
+    bool mLevelCleared = false;
+    StaticText mLevelClearedText;
+    Timer mLevelClearedTimer;
 };
 
 #endif
