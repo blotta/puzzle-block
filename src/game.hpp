@@ -16,10 +16,6 @@
 
 #include "timer.hpp"
 
-class Scene;
-enum class Scenes;
-struct LevelData;
-
 class Game
 {
 public:
@@ -75,6 +71,7 @@ private:
 
     const Texture* pActiveTexture;
 
+    Scenes mNextScene = Scenes::BOOT;
     std::shared_ptr<Scene> mCurrentScene;
     std::map<std::string, std::string> mState;
 

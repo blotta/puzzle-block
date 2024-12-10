@@ -9,10 +9,10 @@
 class LevelEditScene : public Scene
 {
 public:
-    LevelEditScene();
-    ~LevelEditScene();
+    void init() override;
     void update(float dt) override;
     void draw() override;
+    void dispose() override;
 private:
     void reset();
     void resize();

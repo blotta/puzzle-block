@@ -7,10 +7,10 @@
 class SplashScene : public Scene
 {
 public:
-    SplashScene();
-    ~SplashScene();
+    void init() override;
     void update(float dt) override;
     void draw() override;
+    void dispose() override;
 private:
     const Texture* pSplashTexture;
     StaticText mText;

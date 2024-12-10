@@ -1,11 +1,14 @@
-#include "scene_boot.hpp"
+#include <SDL2/SDL.h>
 
-BootScene::BootScene()
+#include "scene_boot.hpp"
+#include "game.hpp"
+
+void BootScene::init()
 {
     SDL_Log("Loading boot scene\n");
 }
 
-BootScene::~BootScene()
+void BootScene::dispose()
 {
     SDL_Log("Unloading boot scene\n");
 }

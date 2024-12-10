@@ -1,14 +1,14 @@
 #include "scene_isolevel.hpp"
 
-IsoLevelScene::IsoLevelScene()
+void IsoLevelScene::init()
 {
     SDL_Log("Loading IsoLevel scene\n");
-
     this->reset();
 }
 
-IsoLevelScene::~IsoLevelScene()
+void IsoLevelScene::dispose()
 {
+    SDL_Log("Unloading IsoLevel scene\n");
 }
 
 void IsoLevelScene::reset()

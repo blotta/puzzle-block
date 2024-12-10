@@ -6,10 +6,10 @@
 class BootScene : public Scene
 {
 public:
-    BootScene();
-    ~BootScene();
+    void init() override;
     void update(float dt) override;
     void draw() override;
+    void dispose() override;
 };
 
 #endif

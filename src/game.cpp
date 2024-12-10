@@ -99,7 +99,7 @@ int Game::TargetFPS()
 
 void Game::LoadScene(Scenes sceneName)
 {
-    Game::get().loadScene(sceneName);
+    Game::get().mNextScene = sceneName;
 }
 
 
@@ -188,7 +188,7 @@ void Game::run()
     mRunning = true;
 
     loadAssets();
-    loadScene(Scenes::BOOT);
+
     while (mRunning)
     {
         tick();
@@ -202,6 +202,16 @@ void Game::tick()
     mUpdateTimer.reset();
 
     Input::Update(dt);
+
+    if (Input::QuitRequested())
+    {
+        mRunning = false;
+        return;
+    }
+
+    // check scene changed
+    if (mNextScene != Scenes::NONE)
+        loadScene(mNextScene);
 
     update(dt);
     draw();
@@ -235,35 +245,38 @@ void Game::loadLevels()
 
 void Game::loadScene(Scenes scene)
 {
+    if (scene == Scenes::NONE)
+        return;
+    
+    if (mCurrentScene != nullptr)
+        mCurrentScene->dispose();
+
     switch (scene)
     {
     case Scenes::SPLASH:
-        SDL_Log("Loading Splash scene\n");
         mCurrentScene = std::make_shared<SplashScene>();
         break;
     case Scenes::LEVEL_EDIT:
-        SDL_Log("Loading Level scene\n");
         mCurrentScene = std::make_shared<LevelEditScene>();
         break;
     case Scenes::ISOLEVEL:
-        SDL_Log("Loading ISO Level scene\n");
         mCurrentScene = std::make_shared<IsoLevelScene>();
         break;
     case Scenes::BOOT:
-        SDL_Log("Loading BOOT scene\n");
         mCurrentScene = std::make_shared<BootScene>();
         break;
     default:
         mCurrentScene = nullptr;
         break;
     }
+
+    mCurrentScene->init();
+
+    mNextScene = Scenes::NONE;
 }
 
 void Game::update(float dt)
 {
-    if (Input::QuitRequested())
-        mRunning = false;
-
     mCurrentScene->update(dt);
 }
 

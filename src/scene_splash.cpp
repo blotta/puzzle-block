@@ -1,7 +1,7 @@
 #include "scene_splash.hpp"
 #include "input_manager.hpp"
 
-SplashScene::SplashScene()
+void SplashScene::init()
 {
     SDL_Log("Loading splash scene\n");
     pSplashTexture = Asset::GetTexture("assets/images/splash.png");
@@ -9,7 +9,7 @@ SplashScene::SplashScene()
     mText.clearText();
 }
 
-SplashScene::~SplashScene()
+void SplashScene::dispose()
 {
     SDL_Log("Unloading splash scene\n");
 }

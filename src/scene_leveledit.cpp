@@ -4,15 +4,15 @@
 
 #include "scene_leveledit.hpp"
 
-LevelEditScene::LevelEditScene()
+void LevelEditScene::init()
 {
-    SDL_Log("Loading Level scene\n");
-
+    SDL_Log("Loading Editor scene\n");
     this->reset();
 }
 
-LevelEditScene::~LevelEditScene()
+void LevelEditScene::dispose()
 {
+    SDL_Log("Unloading Editor scene\n");
 }
 
 void LevelEditScene::reset()
@@ -241,3 +241,4 @@ void LevelEditScene::draw()
     mEditInstruction.draw(Game::GetRenderer(), 10, 10);
     mLevelText.draw(Game::GetRenderer(), 10, Game::ScreenHeight() - 35);
 }
+

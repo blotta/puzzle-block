@@ -9,10 +9,10 @@
 class IsoLevelScene : public Scene
 {
 public:
-    IsoLevelScene();
-    ~IsoLevelScene();
+    void init() override;
     void update(float dt) override;
     void draw() override;
+    void dispose() override;
 private:
     Level level;
     Block block;

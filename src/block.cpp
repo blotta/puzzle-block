@@ -47,7 +47,7 @@ void Block::move(const vec2 &dir)
         }
     }
 
-    SDL_Log("block %d %d\n", x, y);
+    // SDL_Log("block %d %d\n", x, y);
 }
 
 void Block::undoMove()
