@@ -29,6 +29,8 @@ private:
     bool saved = true;
     StaticText mEditInstruction;
     StaticText mLevelText;
+    bool switchEditing = false;
+    LevelSwitch tmpSwitch = {};
 };
 
 #endif

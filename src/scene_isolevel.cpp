@@ -79,17 +79,33 @@ void IsoLevelScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-
-    block.move(moveDir);
-    auto positions = block.getPositions();
-    if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
-        block.undoMove();
-    
-    if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
+    bool blockMoved = false;
+    if (moveDir.x != 0 || moveDir.y != 0)
     {
-        mLevelCleared = true;
-        mLevelClearedTimer.reset();
+        blockMoved = true;
+        block.move(moveDir);
+        auto positions = block.getPositions();
+        if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
+        {
+            block.undoMove();
+            blockMoved = false;
+        }
+
+        if (blockMoved) {
+            LevelSwitch* sw;
+            if (level.hasSwitchAt(positions.first, &sw) || level.hasSwitchAt(positions.second, &sw))
+            {
+                level.toggleGhostFloor({sw->floorX, sw->floorY});
+            }
+
+            if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
+            {
+                mLevelCleared = true;
+                mLevelClearedTimer.reset();
+            }
+        }
     }
+    
 
     if (mLevelCleared && mLevelClearedTimer.isDone())
     {

@@ -36,6 +36,12 @@ void Level::load(const LevelData &ld)
             this->set(col, row, vi);
         }
     }
+
+    for (int s = 0; s < ld.switchCount; s++)
+    {
+        this->switches[s] = ld.switches[s];
+    }
+    this->switchCount = ld.switchCount;
 }
 
 void printLevel(const LevelData &lvl)
@@ -84,9 +90,17 @@ void Level::toLevelData(LevelData *ld)
             case CellType::FINISH:
                 ld->data[p] = '3';
                 break;
+            case CellType::GHOST:
+                ld->data[p] = '4';
+                break;
             }
         }
     }
+
+    for (int i = 0; i < this->switchCount; i++) {
+        ld->switches[i] = this->switches[i];
+    }
+    ld->switchCount = this->switchCount;
     printLevel(*ld);
 }
 
@@ -146,7 +160,37 @@ bool Level::hasFloorAt(const vec2 &pos)
 
     CellType type = grid[pos.y][pos.x];
 
-    return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH;
+    return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH || type == CellType::GHOST;
+}
+
+bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
+{
+    for (int i = 0; i < this->switchCount; i++)
+    {
+        auto& _sw = this->switches[i];
+        if (_sw.x == pos.x && _sw.y == pos.y)
+        {
+            *sw = &this->switches[i];
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Level::toggleGhostFloor(const vec2 &pos)
+{
+    CellType &cell = grid[pos.y][pos.x];
+    switch (cell)
+    {
+    case CellType::EMPTY:
+        cell = CellType::GHOST;
+        break;
+    default:
+        cell = CellType::EMPTY;
+        break;
+    }
+
 }
 
 CellType Level::cellAt(const vec2 &pos)
@@ -177,6 +221,9 @@ void Level::draw(int x, int y, int cellSize)
             case CellType::FINISH:
                 sprId = SpriteID::FLOOR_FINISH;
                 break;
+            case CellType::GHOST:
+                sprId = SpriteID::FLOOR_HIGHLIGHT;
+                break;
             default:
                 sprId = SpriteID::FLOOR;
                 break;
@@ -184,6 +231,15 @@ void Level::draw(int x, int y, int cellSize)
 
             Game::DrawSprite(x + sx, y + sy, sprId);
         }
+    }
+
+    for (int sidx = 0; sidx < this->switchCount; sidx++)
+    {
+        auto& sw = this->switches[sidx];
+        int sx;
+        int sy;
+        toISO(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
+        Game::DrawSprite(x + sx, y + sy, SpriteID::SWITCH);
     }
 }
 
@@ -247,4 +303,42 @@ void Level::removeColumn()
 {
     if (cols > 1)
         cols--;
+}
+
+void Level::addSwitch(LevelSwitch sw)
+{
+    if (this->switchCount == MAX_SWITCH_COUNT)
+        return;
+    this->switches[this->switchCount] = sw;
+    this->switchCount++;
+}
+
+void Level::removeSwitch(const vec2 &pos)
+{
+    bool removed = false;
+    for (int i = 0; i < this->switchCount; i++)
+    {
+        if (removed)
+        {
+            this->switches[i-1] = this->switches[i];
+            this->switches[i] = {};
+            continue;
+        }
+
+        if (this->switches[i].x == pos.x && this->switches[i].y == pos.y) {
+            removed = true;
+        }
+    }
+
+    if (removed) {
+        this->switchCount--;
+        for (int j = 0; j < MAX_GRID_SIZE; j++)
+        {
+            for (int i = 0; i < MAX_GRID_SIZE; i++)
+            {
+                if (grid[j][i] == CellType::GHOST)
+                    grid[j][i] = CellType::EMPTY;
+            }
+        }
+    }
 }

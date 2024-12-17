@@ -15,6 +15,7 @@ enum SpriteID
     BLOCK_UP,
     BLOCK_LONG,
     BLOCK_WIDE,
+    SWITCH,
 
     NUM_SPRITES
 };
@@ -32,13 +33,32 @@ struct Sprite
 
 // LEVELS
 
-const int MAX_GRID_SIZE = 10;
+const int MAX_GRID_SIZE = 15;
+const int MAX_SWITCH_COUNT = 2;
+
+
+enum class LevelSwitchType
+{
+    SINGLE = 0,
+    DOUBLE
+};
+
+struct LevelSwitch
+{
+    int x;
+    int y;
+    LevelSwitchType type;
+    int floorX;
+    int floorY;
+};
 
 struct LevelData
 {
     int cols;
     int rows;
     char data[MAX_GRID_SIZE * MAX_GRID_SIZE + 1];
+    int switchCount = 0;
+    LevelSwitch switches[MAX_SWITCH_COUNT];
 };
 
 // Game data context

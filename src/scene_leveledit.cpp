@@ -29,7 +29,7 @@ void LevelEditScene::reset()
     block.y = startPos.y;
     block.state = BlockState::UP;
 
-    mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    S: save curr    N: save new    NUMPAD Arrows: resize grid");
+    mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    F2: save curr    F3: save new    NUMPAD Arrows: resize grid");
     mLevelText.setText(
         std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
 
@@ -69,7 +69,39 @@ void save_level(Level& level, int& lvlIdx, bool newLevel)
 
 void LevelEditScene::update(float dt)
 {
+    Input::MousePosition(&mousePos.x, &mousePos.y);
+    toGrid(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, level.cols, level.rows, &mouseGridPos.x, &mouseGridPos.y);
+
     bool levelChanged = false;
+
+    if (switchEditing)
+    {
+
+        if (Input::JustPressed(SDL_SCANCODE_S))
+        {
+            switchEditing = false;
+        }
+
+        tmpSwitch.floorX = mouseGridPos.x;
+        tmpSwitch.floorY = mouseGridPos.y;
+
+        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+        {
+            level.toggleFloor(mouseGridPos);
+            saved = false;
+            levelChanged = true;
+        }
+
+        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT)) {
+            if (level.grid[mouseGridPos.y][mouseGridPos.x] == CellType::EMPTY) {
+                level.addSwitch(tmpSwitch);
+                switchEditing = false;
+            }
+        }
+
+        return;
+    }
+
 
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
@@ -80,8 +112,6 @@ void LevelEditScene::update(float dt)
         return;
     }
 
-    Input::MousePosition(&mousePos.x, &mousePos.y);
-    toGrid(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, level.cols, level.rows, &mouseGridPos.x, &mouseGridPos.y);
 
     if (level.isValidPos(mouseGridPos))
     {
@@ -97,6 +127,21 @@ void LevelEditScene::update(float dt)
             level.toggleStartFinish(mouseGridPos);
             saved = false;
             levelChanged = true;
+        }
+
+        if (level.grid[mouseGridPos.y][mouseGridPos.x] == CellType::FLOOR)
+        {
+            if (Input::JustPressed(SDL_SCANCODE_S)) {
+                // enter switch edit mode if no switch in gridpos
+                LevelSwitch* sw;
+                if (level.hasSwitchAt(mouseGridPos, &sw)) {
+                    level.removeSwitch(mouseGridPos);
+                } else {
+                    switchEditing = true;
+                    tmpSwitch.x = mouseGridPos.x;
+                    tmpSwitch.y = mouseGridPos.y;
+                }
+            }
         }
     }
 
@@ -125,14 +170,14 @@ void LevelEditScene::update(float dt)
         levelChanged = true;
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_S) && level.isValid())
+    if (Input::JustPressed(SDL_SCANCODE_F2) && level.isValid())
     {
         // save current
         save_level(level, lvlIdx, false);
         saved = true;
         levelChanged = true;
     }
-    else if (Input::JustPressed(SDL_SCANCODE_N) && level.isValid())
+    else if (Input::JustPressed(SDL_SCANCODE_F3) && level.isValid())
     {
         // save new
         save_level(level, lvlIdx, true);
@@ -156,10 +201,23 @@ void LevelEditScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-    block.move(moveDir);
-    // auto positions = block.getPositions();
-    // if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
-    //     block.undoMove();
+    bool blockMoved = false;
+    if (moveDir.x != 0 || moveDir.y != 0)
+    {
+        blockMoved = true;
+        block.move(moveDir);
+        auto positions = block.getPositions();
+
+        /* allow any movement */
+
+        if (blockMoved) {
+            LevelSwitch* sw;
+            if (level.hasSwitchAt(positions.first, &sw) || level.hasSwitchAt(positions.second, &sw))
+            {
+                level.toggleGhostFloor({sw->floorX, sw->floorY});
+            }
+        }
+    }
 }
 
 
@@ -196,6 +254,9 @@ void LevelEditScene::draw()
             case CellType::FINISH: // finish
                 SDL_SetRenderDrawColor(Game::GetRenderer(), 100, 200, 100, 255);
                 break;
+            case CellType::GHOST: // ghost
+                SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
+                break;
             case CellType::EMPTY:
             default: // empty
                 SDL_SetRenderDrawColor(Game::GetRenderer(), 10, 10, 10, 255);
@@ -205,6 +266,42 @@ void LevelEditScene::draw()
             SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, 255);
             SDL_RenderDrawRect(Game::GetRenderer(), &r);
         }
+    }
+
+    // level switches
+    for (int i = 0; i < level.switchCount; i++) {
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
+        LevelSwitch& sw = level.switches[i];
+        SDL_Rect r = {
+            offsetX + cellSize * sw.x + cellSize/4,
+            offsetY + cellSize * sw.y + cellSize/4,
+            cellSize - cellSize/2,
+            cellSize - cellSize/2};
+        SDL_RenderFillRect(Game::GetRenderer(), &r);
+        SDL_RenderDrawLine(Game::GetRenderer(),
+            offsetX + sw.x * cellSize + cellSize/2,
+            offsetY + sw.y * cellSize + cellSize/2,
+            offsetX + sw.floorX * cellSize + cellSize/2,
+            offsetY + sw.floorY * cellSize + cellSize/2
+            );
+    }
+
+    // switch editing
+    if (switchEditing)
+    {
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 120, 0, 255);
+        SDL_Rect r = {
+            offsetX + cellSize * tmpSwitch.x + cellSize/4,
+            offsetY + cellSize * tmpSwitch.y + cellSize/4,
+            cellSize - cellSize/2,
+            cellSize - cellSize/2};
+        SDL_RenderFillRect(Game::GetRenderer(), &r);
+        SDL_RenderDrawLine(Game::GetRenderer(),
+            offsetX + tmpSwitch.x * cellSize + cellSize/2,
+            offsetY + tmpSwitch.y * cellSize + cellSize/2,
+            offsetX + tmpSwitch.floorX * cellSize + cellSize/2,
+            offsetY + tmpSwitch.floorY * cellSize + cellSize/2
+            );
     }
 
     // draw block

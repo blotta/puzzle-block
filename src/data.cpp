@@ -67,6 +67,16 @@ void load_game_data(GameData *data)
             .originY = 32,
             .originX = 0};
 
+    data->Sprites[SpriteID::SWITCH] =
+        {
+            .id = SpriteID::SWITCH,
+            .tx = 64,
+            .ty = 160,
+            .tw = 64,
+            .th = 64,
+            .originY = 0,
+            .originX = 0};
+
     // levels
     data->DefaultLevels[0] =
         {
@@ -80,6 +90,10 @@ void load_game_data(GameData *data)
                 "10"
                 "10"
                 "20"
+            },
+            .switchCount = 1,
+            .switches = {
+                0, 1, LevelSwitchType::SINGLE, 0, 0
             }
         };
 

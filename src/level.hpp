@@ -18,7 +18,8 @@ enum class CellType
     EMPTY = 0,
     FLOOR = 1,
     START = 2,
-    FINISH = 3
+    FINISH = 3,
+    GHOST = 4,
 };
 struct Level
 {
@@ -26,6 +27,8 @@ struct Level
     int cols = 4;
 
     std::array<std::array<CellType, MAX_GRID_SIZE>, MAX_GRID_SIZE> grid = {{}};
+    int switchCount = 0;
+    LevelSwitch switches[MAX_SWITCH_COUNT] = {};
 
     void clear();
     void set(int x, int y, CellType value);
@@ -35,6 +38,8 @@ struct Level
     bool isValidPos(const vec2 &pos);
     bool isValid();
     bool hasFloorAt(const vec2 &pos);
+    bool hasSwitchAt(const vec2 &pos, LevelSwitch** sw);
+    void toggleGhostFloor(const vec2 &pos);
     CellType cellAt(const vec2 &pos);
     void draw(int x, int y, int cellSize);
 
@@ -44,6 +49,8 @@ struct Level
     void removeRow();
     void addColumn();
     void removeColumn();
+    void addSwitch(LevelSwitch sw);
+    void removeSwitch(const vec2& pos);
 };
 
 #endif
