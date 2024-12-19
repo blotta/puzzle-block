@@ -42,6 +42,7 @@ void IsoLevelScene::reset()
     block.state = BlockState::UP;
 
     mLevelClearedText.setText("LEVEL CLEARED!");
+    mLevelClearedText.hAlign = 1;
     mLevelClearedTimer.setDuration(3);
 }
 
@@ -129,9 +130,9 @@ void IsoLevelScene::draw()
     SDL_Rect r = {mousePos.x - 10, mousePos.y - 10, 20, 20};
     SDL_RenderDrawRect(Game::GetRenderer(), &r);
 
-    mTitleText.draw(Game::GetRenderer(), 10, 10);
+    mTitleText.draw(10, 10);
 
     if (mLevelCleared)
-        mLevelClearedText.draw(Game::GetRenderer(), Game::ScreenWidth() / 2 - mLevelClearedText.width / 2, Game::ScreenHeight() / 4);
+        mLevelClearedText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4);
 }
 

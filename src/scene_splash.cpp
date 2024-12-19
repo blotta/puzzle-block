@@ -5,8 +5,10 @@ void SplashScene::init()
 {
     SDL_Log("Loading splash scene\n");
     pSplashTexture = Asset::GetTexture("assets/images/splash.png");
-    mTimer = 0;
     mText.clearText();
+    mText.hAlign = 1; // center
+    mTimer.setDuration(1.0);
+    mTimer.reset();
 }
 
 void SplashScene::dispose()
@@ -18,34 +20,37 @@ void SplashScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_RETURN))
     {
-        Game::LoadScene(Scenes::LEVEL_EDIT);
+        Game::LoadScene(Scenes::ISOLEVEL);
+        return;
     }
 
-    mTimer += dt;
-    if (mTimer > 3)
+    if (mTimer.isDone())
     {
-        mText.setText("BLT Games");
-    }
-    else if (mTimer > 2)
-    {
-        mText.setText("BLT");
-    }
-    else if (mTimer > 1.5)
-    {
-        mText.setText("BL");
-    }
-    else if (mTimer > 1)
-    {
-        mText.setText("B");
-    }
+        mIteration += 1;
+        switch (mIteration)
+        {
+            case 1:
+                mText.setText("B");
+                break;
+            case 2:
+                mText.setText("BL");
+                break;
+            case 3:
+                mText.setText("BLT");
+                break;
+            case 4:
+                mText.setText("BLT GAMES");
+                break;
+            default:
+                Game::LoadScene(Scenes::ISOLEVEL);
+                break;
+        }
 
-    if (mTimer > 4)
-    {
-        Game::LoadScene(Scenes::LEVEL_EDIT);
+        mTimer.reset();
     }
 }
 
 void SplashScene::draw()
 {
-    mText.draw(Game::GetRenderer(), Game::ScreenWidth()/2 - mText.getWidth()/2, Game::ScreenHeight()/2 - mText.getHeight()/2);
+    mText.draw(Game::ScreenWidth()/2, Game::ScreenHeight()/2);
 }

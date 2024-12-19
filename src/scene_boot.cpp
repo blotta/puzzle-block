@@ -15,7 +15,7 @@ void BootScene::dispose()
 
 void BootScene::update(float dt)
 {
-    Game::LoadScene(Scenes::ISOLEVEL);
+    Game::LoadScene(Scenes::SPLASH);
 }
 
 void BootScene::draw()

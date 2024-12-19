@@ -35,6 +35,7 @@ public:
 
     static void LoadFont(const std::string& path, int ptsize);
     static TTF_Font* GetFont();
+    static int GetFontPointSize();
 
     static void UnloadAssets();
 private:
@@ -44,6 +45,7 @@ private:
     SDL_Renderer* pRenderer = nullptr;
     std::unordered_map<std::string, Texture> mTextures;
     TTF_Font* mFont = nullptr;
+    int mFontPointSize = 32;
 };
 
 #endif

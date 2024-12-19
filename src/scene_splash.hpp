@@ -14,7 +14,8 @@ public:
 private:
     const Texture* pSplashTexture;
     StaticText mText;
-    float mTimer;
+    Timer mTimer;
+    int mIteration = 0;
 };
 
 #endif

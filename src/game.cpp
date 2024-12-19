@@ -227,7 +227,7 @@ void Game::tick()
 
 void Game::loadAssets()
 {
-    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 20);
+    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 32);
 
     // preload spritesheet
     pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");

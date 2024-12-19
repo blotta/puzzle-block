@@ -31,6 +31,11 @@ void StaticText::clearText()
     mPropsChanged = true;
 }
 
+const std::string &StaticText::getText()
+{
+    return mText;
+}
+
 void StaticText::setText(std::string text)
 {
     if (text.compare(mText) == 0)
@@ -49,9 +54,15 @@ void StaticText::setColor(SDL_Color color)
     mPropsChanged = true;
 }
 
-void StaticText::draw(SDL_Renderer* rend, int x, int y)
+void StaticText::setPointSize(float ptSize)
 {
-    if (!sync(rend))
+    int currPtSize = Asset::GetFontPointSize();
+    scale = (float)ptSize / (float)currPtSize;
+}
+
+void StaticText::draw(int x, int y)
+{
+    if (!sync())
         return;
 
     SDL_Rect r = {
@@ -59,14 +70,19 @@ void StaticText::draw(SDL_Renderer* rend, int x, int y)
         (int)SDL_floor(width * scale),
         (int)SDL_floor(height * scale)
     };
-    SDL_RenderCopy(rend, mTextTexture, NULL, &r);
+
+    if (hAlign == 1)
+        r.x = r.x - (int)SDL_floor(width/2 * scale);
+    if (hAlign == 2)
+        r.x = r.x - (int)SDL_floor(width * scale);
+    SDL_RenderCopy(Game::GetRenderer(), mTextTexture, NULL, &r);
 }
 
 int StaticText::getWidth() { return width; }
 
 int StaticText::getHeight() { return height; }
 
-bool StaticText::sync(SDL_Renderer* rend)
+bool StaticText::sync()
 {
     if (!mPropsChanged && mTextTexture != NULL)
         return true;
@@ -92,7 +108,7 @@ bool StaticText::sync(SDL_Renderer* rend)
         SDL_DestroyTexture(mTextTexture);
         mTextTexture = NULL;
     }
-    mTextTexture = SDL_CreateTextureFromSurface(rend, surf);
+    mTextTexture = SDL_CreateTextureFromSurface(Game::GetRenderer(), surf);
     if (!mTextTexture)
     {
         SDL_Log("Error creating text texture: %s\n", SDL_GetError());

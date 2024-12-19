@@ -51,6 +51,7 @@ void Asset::LoadFont(const std::string &path, int ptsize)
     {
         SDL_Log("Failed to load font: %s\n", TTF_GetError());
     }
+    mgr.mFontPointSize = ptsize;
 }
 
 TTF_Font *Asset::GetFont()
@@ -58,7 +59,10 @@ TTF_Font *Asset::GetFont()
     return Asset::get().mFont;
 }
 
-
+int Asset::GetFontPointSize()
+{
+    return Asset::get().mFontPointSize;
+}
 
 /////////////
 // Texture //

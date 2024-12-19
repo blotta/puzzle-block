@@ -15,19 +15,22 @@ public:
     StaticText(const StaticText&) = delete;
     StaticText(StaticText&& other) noexcept; // move constructor
     void clearText();
+    const std::string& getText();
     void setText(std::string text);
     void setColor(SDL_Color color);
-    void draw(SDL_Renderer* rend, int x, int y);
+    void setPointSize(float ptSize);
+    void draw(int x, int y);
     int getWidth();
     int getHeight();
-    int width, height = 0;
     float scale = 1.0f;
+    int hAlign = 0;
 private:
     std::string mText;
     SDL_Color mColor = {255, 255, 255, 255};
     SDL_Texture* mTextTexture = NULL;
+    int width, height = 0;
     bool mPropsChanged = true;
-    bool sync(SDL_Renderer* rend);
+    bool sync();
 };
 
 #endif

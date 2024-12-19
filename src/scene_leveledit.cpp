@@ -29,6 +29,7 @@ void LevelEditScene::reset()
     block.y = startPos.y;
     block.state = BlockState::UP;
 
+    mEditInstruction.setPointSize(16);
     mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    F2: save curr    F3: save new    NUMPAD Arrows: resize grid");
     mLevelText.setText(
         std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
@@ -335,7 +336,7 @@ void LevelEditScene::draw()
         SDL_RenderDrawRect(Game::GetRenderer(), &tileSelect);
     }
 
-    mEditInstruction.draw(Game::GetRenderer(), 10, 10);
-    mLevelText.draw(Game::GetRenderer(), 10, Game::ScreenHeight() - 35);
+    mEditInstruction.draw(10, 10);
+    mLevelText.draw(10, Game::ScreenHeight() - 35);
 }
 
