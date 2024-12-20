@@ -4,6 +4,9 @@
 
 #include "scene_leveledit.hpp"
 
+const char* NORMAL_MODE_INSTRUCTIONS = "LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    NUMPAD Arrows: resize grid";
+const char* SWITCH_MODE_INSTRUCTIONS = "SWITCH MODE --> LMB: set switch destination    RMB: toggle floor ";
+
 void LevelEditScene::init()
 {
     SDL_Log("Loading Editor scene\n");
@@ -17,9 +20,9 @@ void LevelEditScene::dispose()
 
 void LevelEditScene::reset()
 {
-    auto lvl = Game::GetOrCreateState("next_level", "1");
+    auto lvl = Game::GetOrCreateState("curr_level", "0");
     SDL_Log("Loading level %s\n", lvl.c_str());
-    lvlIdx = std::stoi(lvl) - 1;
+    lvlIdx = std::stoi(lvl);
     if (lvlIdx >= Game::GetLevelsSize())
         lvlIdx = 0;
     level.load(Game::GetLevelData(lvlIdx));
@@ -30,9 +33,10 @@ void LevelEditScene::reset()
     block.state = BlockState::UP;
 
     mEditInstruction.setPointSize(16);
-    mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    F2: save curr    F3: save new    NUMPAD Arrows: resize grid");
+    // mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    NUMPAD Arrows: resize grid");
+    mEditInstruction.setText(NORMAL_MODE_INSTRUCTIONS);
     mLevelText.setText(
-        std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
+        std::format("Level {} {}x{}", lvlIdx, level.cols, level.rows));
 
     resize();
 }
@@ -47,17 +51,7 @@ void LevelEditScene::resize()
     offsetY = Game::ScreenHeight() / 2 - level.rows * cellSize / 2;
 }
 
-void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y)
-{
-    *x = SDL_floor(worldX / cellSize);
-    if (worldX < 0)
-        *x -= 1;
-    *y = SDL_floor(worldY / cellSize);
-    if (worldY < 0)
-        *y -= 1;
-}
-
-void save_level(Level& level, int& lvlIdx, bool newLevel)
+void LevelEditScene::save(bool newLevel, bool saveToFile)
 {
     // save current
     LevelData ld = {};
@@ -66,6 +60,25 @@ void save_level(Level& level, int& lvlIdx, bool newLevel)
         lvlIdx = Game::AddLevelData(ld);
     else
         Game::SaveLevelData(ld, lvlIdx);
+    
+    if (saveToFile)
+    {
+        char fileName[50] = {};
+        sprintf(fileName, "assets/levels/%d.txt", lvlIdx);
+        FILE* f = fopen(fileName, "w");
+        ld.print(f);
+        fclose(f);
+    }
+}
+
+void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y)
+{
+    *x = SDL_floor(worldX / cellSize);
+    if (worldX < 0)
+        *x -= 1;
+    *y = SDL_floor(worldY / cellSize);
+    if (worldY < 0)
+        *y -= 1;
 }
 
 void LevelEditScene::update(float dt)
@@ -81,19 +94,20 @@ void LevelEditScene::update(float dt)
         if (Input::JustPressed(SDL_SCANCODE_S))
         {
             switchEditing = false;
+            mEditInstruction.setText(NORMAL_MODE_INSTRUCTIONS);
         }
 
         tmpSwitch.floorX = mouseGridPos.x;
         tmpSwitch.floorY = mouseGridPos.y;
 
-        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
         {
             level.toggleFloor(mouseGridPos);
             saved = false;
             levelChanged = true;
         }
 
-        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT)) {
+        if (Input::MouseJustPressed(SDL_BUTTON_LEFT)) {
             if (level.grid[mouseGridPos.y][mouseGridPos.x] == CellType::EMPTY) {
                 level.addSwitch(tmpSwitch);
                 switchEditing = false;
@@ -108,7 +122,7 @@ void LevelEditScene::update(float dt)
     {
         // exit level edit
         if (level.isValid())
-            save_level(level, lvlIdx, false);
+            save(false, false);
         Game::LoadScene(Scenes::ISOLEVEL);
         return;
     }
@@ -139,6 +153,7 @@ void LevelEditScene::update(float dt)
                     level.removeSwitch(mouseGridPos);
                 } else {
                     switchEditing = true;
+                    mEditInstruction.setText(SWITCH_MODE_INSTRUCTIONS);
                     tmpSwitch.x = mouseGridPos.x;
                     tmpSwitch.y = mouseGridPos.y;
                 }
@@ -174,21 +189,21 @@ void LevelEditScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_F2) && level.isValid())
     {
         // save current
-        save_level(level, lvlIdx, false);
+        save(false, true);
         saved = true;
         levelChanged = true;
     }
     else if (Input::JustPressed(SDL_SCANCODE_F3) && level.isValid())
     {
         // save new
-        save_level(level, lvlIdx, true);
-        Game::SetState("next_level", std::to_string(lvlIdx + 1));
+        save(true, true);
+        Game::SetState("curr_level", std::to_string(lvlIdx));
         saved = true;
         levelChanged = true;
     }
 
     if (levelChanged)
-        mLevelText.setText(std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
+        mLevelText.setText(std::format("Level {} {}x{} {}", lvlIdx, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
 
 
     // normal op

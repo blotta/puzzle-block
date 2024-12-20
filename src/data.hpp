@@ -59,6 +59,8 @@ struct LevelData
     char data[MAX_GRID_SIZE * MAX_GRID_SIZE + 1];
     int switchCount = 0;
     LevelSwitch switches[MAX_SWITCH_COUNT];
+
+    void print(FILE* f) const;
 };
 
 // Game data context

@@ -13,9 +13,9 @@ void IsoLevelScene::dispose()
 
 void IsoLevelScene::reset()
 {
-    auto lvl = Game::GetOrCreateState("next_level", "1");
+    auto lvl = Game::GetOrCreateState("curr_level", "0");
     SDL_Log("Loading level %s\n", lvl.c_str());
-    lvlIdx = std::stoi(lvl) - 1;
+    lvlIdx = std::stoi(lvl);
     level.load(Game::GetLevelData(lvlIdx));
 
     mTitleText.setText("Level " + lvl);
@@ -57,14 +57,19 @@ void IsoLevelScene::update(float dt)
 
     if (Input::JustPressed(SDL_SCANCODE_L))
     {
-        auto idx = std::stoi(Game::GetState("next_level"));
-        Game::SetState("next_level", std::to_string(idx + 1));
+        // next level
+        auto idx = std::stoi(Game::GetState("curr_level")) + 1;
+        if (idx > Game::GetLevelsSize() - 1)
+            idx = 0;
+        Game::SetState("curr_level", std::to_string(idx));
         reset();
     }
     else if (Input::JustPressed(SDL_SCANCODE_H))
     {
-        auto idx = std::stoi(Game::GetState("next_level"));
-        Game::SetState("next_level", std::to_string(idx - 1));
+        // previous level
+        int idx = std::stoi(Game::GetState("curr_level")) - 1;
+        idx = idx < 0 ? Game::GetLevelsSize() - 1 : idx;
+        Game::SetState("curr_level", std::to_string(idx));
         reset();
     }
 
@@ -111,8 +116,8 @@ void IsoLevelScene::update(float dt)
     if (mLevelCleared && mLevelClearedTimer.isDone())
     {
         int nextLevelIdx = lvlIdx + 1;
-        nextLevelIdx =  nextLevelIdx < Game::GetLevelsSize() ? nextLevelIdx : 0;
-        Game::SetState("next_level", std::to_string(nextLevelIdx + 1));
+        nextLevelIdx =  nextLevelIdx < Game::GetLevelsSize() - 1 ? nextLevelIdx : 0;
+        Game::SetState("curr_level", std::to_string(nextLevelIdx));
         Game::LoadScene(Scenes::ISOLEVEL);
     }
 

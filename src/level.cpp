@@ -44,19 +44,6 @@ void Level::load(const LevelData &ld)
     this->switchCount = ld.switchCount;
 }
 
-void printLevel(const LevelData &lvl)
-{
-    SDL_Log("===LevelData===\n");
-    SDL_Log("rows: %d    cols:%d\n", lvl.rows, lvl.cols);
-    SDL_Log("data:\n");
-    char row[lvl.cols + 1] = {};
-    for (int j = 0; j < lvl.rows; j++)
-    {
-        int p = j * lvl.cols;
-        memcpy(&row, &lvl.data[p], lvl.cols);
-        SDL_Log("%s\n", row);
-    }
-}
 
 void Level::toLevelData(LevelData *ld)
 {
@@ -101,7 +88,6 @@ void Level::toLevelData(LevelData *ld)
         ld->switches[i] = this->switches[i];
     }
     ld->switchCount = this->switchCount;
-    printLevel(*ld);
 }
 
 vec2 Level::getStartPos()

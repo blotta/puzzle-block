@@ -8,6 +8,7 @@
 
 #include "game.hpp"
 #include "util.hpp"
+#include "data.hpp"
 
 
 class Game;

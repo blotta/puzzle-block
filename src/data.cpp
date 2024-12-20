@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string>
 
 #include "data.hpp"
 
@@ -58,87 +60,96 @@ void load_game_data(GameData *data)
          .originX = 32};
 
     data->Sprites[SpriteID::BLOCK_WIDE] =
-        {
-            .id = SpriteID::BLOCK_WIDE,
-            .tx = 160,
-            .ty = 80,
-            .tw = 96,
-            .th = 80,
-            .originY = 32,
-            .originX = 0};
+        {.id = SpriteID::BLOCK_WIDE,
+         .tx = 160,
+         .ty = 80,
+         .tw = 96,
+         .th = 80,
+         .originY = 32,
+         .originX = 0};
 
     data->Sprites[SpriteID::SWITCH] =
-        {
-            .id = SpriteID::SWITCH,
-            .tx = 64,
-            .ty = 160,
-            .tw = 64,
-            .th = 64,
-            .originY = 0,
-            .originX = 0};
+        {.id = SpriteID::SWITCH,
+         .tx = 64,
+         .ty = 160,
+         .tw = 64,
+         .th = 64,
+         .originY = 0,
+         .originX = 0};
 
     // levels
     data->DefaultLevels[0] =
-        {
-            .cols = 2,
-            .rows = 7,
-            .data = {
-                "03"
-                "11"
-                "11"
-                "10"
-                "10"
-                "10"
-                "20"
-            },
-            .switchCount = 1,
-            .switches = {
-                0, 1, LevelSwitchType::SINGLE, 0, 0
-            }
-        };
+    #include "./../assets/levels/0.txt"
+    ;
 
     data->DefaultLevels[1] =
-        {
-            .cols = 4,
-            .rows = 6,
-            .data = {
-                "3111"
-                "0001"
-                "0111"
-                "0111"
-                "0001"
-                "2111"
-            }
-
-        };
+    #include "./../assets/levels/1.txt"
+    ;
 
     data->DefaultLevels[2] =
-        {
-            .cols = 4,
-            .rows = 9,
-            .data = {
-                "3111"
-                "0001"
-                "0111"
-                "0111"
-                "0001"
-                "0111"
-                "0111"
-                "0001"
-                "2111"
-            }
-        };
+    #include "./../assets/levels/2.txt"
+    ;
 
     data->DefaultLevels[3] =
+    #include "./../assets/levels/3.txt"
+    ;
+
+}
+
+void LevelData::print(FILE *file) const
+{
+    FILE* f = file;
+    bool needClose = false;
+    if (f == nullptr)
+    {
+        f = fopen("level.txt", "w");
+        needClose = true;
+    }
+
+    fprintf(stderr, "===LevelData===\n");
+    fprintf(f, "{\n");
+    fprintf(f, "    .cols = %d,\n", cols);
+    fprintf(f, "    .rows = %d,\n", rows);
+
+    // data
+    fprintf(f, "    .data = {\n");
+    char row[cols + 1] = {};
+    for (int j = 0; j < rows; j++)
+    {
+        int p = j * cols;
+        memcpy(&row, &data[p], cols);
+        fprintf(f, "        \"%s\"\n", row);
+    }
+
+    if (switchCount > 0)
+        fprintf(f, "    },\n");
+    else
+        fprintf(f, "    }\n");
+
+    // switches
+    if (switchCount > 0)
+    {
+        fprintf(f, "    .switchCount = %d,\n", switchCount);
+        fprintf(f, "    .switches = {\n");
+        for (int i = 0; i < switchCount; i++)
         {
-            .cols = 4,
-            .rows = 5,
-            .data = {
-                "0030"
-                "0111"
-                "0111"
-                "0111"
-                "2111"
-            }
-        };
+            auto& sw = switches[i];
+            std::string swtype = "SINGLE";
+            if (sw.type == LevelSwitchType::DOUBLE)
+                swtype = "DOUBLE";
+
+            fprintf(f, "        {.x = %d, .y = %d, .type = LevelSwitchType::%s, .floorX = %d, .floorY = %d}"
+                , sw.x, sw.y, swtype.c_str(), sw.floorX, sw.floorY);
+            
+            if (i + 1 < switchCount)
+                fprintf(f, ",\n");
+            else
+                fprintf(f, "\n");
+        }
+        fprintf(f, "    }\n");
+    }
+    fprintf(f, "}\n");
+
+    if (needClose)
+        fclose(f);
 }
