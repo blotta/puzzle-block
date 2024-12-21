@@ -14,6 +14,7 @@ enum class Scenes
 class Scene
 {
 public:
+    virtual ~Scene() = 0;
     virtual void init();
     virtual void update(float dt) = 0;
     virtual void draw() = 0;

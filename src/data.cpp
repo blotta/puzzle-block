@@ -113,7 +113,7 @@ void LevelData::print(FILE *file) const
 
     // data
     fprintf(f, "    .data = {\n");
-    char row[cols + 1] = {};
+    char row[MAX_GRID_SIZE] = {};
     for (int j = 0; j < rows; j++)
     {
         int p = j * cols;
