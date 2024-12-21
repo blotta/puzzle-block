@@ -33,4 +33,15 @@ private:
     bool sync();
 };
 
+class DynamicText{
+public:
+    void Init();
+    void Draw(int x, int y, const std::string& text);
+    void Destroy();
+    SDL_Texture* mTexture = nullptr;
+    SDL_Rect atlas[127] = {};
+    int lineSkip = 0;
+    int tabWidth = 4;
+};
+
 #endif

@@ -121,3 +121,74 @@ bool StaticText::sync()
     mPropsChanged = false;
     return true;
 }
+
+void DynamicText::Init()
+{
+    char chars[128] = {};
+    for (int i = 0; i < 127; i++)
+    {
+        chars[i] = 32 + i;
+    }
+
+    SDL_Surface* surf = TTF_RenderUTF8_Blended(Asset::GetFont(), chars, {255, 255, 255, 255});
+
+    char offset[128] = {};
+    for (int i = 0; i < 127; i++)
+    {
+        char single[2] = {};
+        single[0] = chars[i];
+        int w, h, ow, oh;
+        TTF_SizeUTF8(Asset::GetFont(), offset, &ow, &oh);
+        TTF_SizeUTF8(Asset::GetFont(), single, &w, &h);
+        atlas[i] = {ow, 0, w, h};
+        offset[i] = chars[i];
+    }
+
+    mTexture = SDL_CreateTextureFromSurface(Game::GetRenderer(), surf);
+
+    SDL_FreeSurface(surf);
+
+    lineSkip = TTF_FontLineSkip(Asset::GetFont());
+}
+
+void DynamicText::Draw(int x, int y, const std::string &text)
+{
+    auto ctext = text.c_str();
+
+    int hpos = 0;
+    int vpos = y;
+    for (size_t i = 0; i < text.length(); i++)
+    {
+        char c = ctext[i];
+        if (c == '\n')
+        {
+            vpos += lineSkip;
+            hpos = 0;
+        }
+        else if (c == '\t')
+        {
+            hpos += tabWidth * atlas[' ' - 32].w;
+        }
+        
+        if (c < 32) {
+            continue;
+        }
+
+        SDL_Rect src = atlas[c - 32];
+        SDL_Rect dest = {
+            .x = x + hpos,
+            .y = vpos,
+            .w = src.w,
+            .h = src.h
+        };
+
+        SDL_RenderCopy(Game::GetRenderer(), mTexture, &src, &dest);
+
+        hpos += src.w;
+    }
+}
+
+void DynamicText::Destroy()
+{
+    SDL_DestroyTexture(mTexture);
+}

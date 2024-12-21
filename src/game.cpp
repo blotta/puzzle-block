@@ -193,6 +193,12 @@ void Game::run()
     {
         tick();
     }
+
+    // TODO: move this somewhere else
+    if (mCurrentScene != nullptr)
+    {
+        mCurrentScene->dispose();
+    }
 }
 
 void Game::tick()
@@ -207,6 +213,11 @@ void Game::tick()
     {
         mRunning = false;
         return;
+    }
+
+    if (Input::JustPressed(SDL_SCANCODE_F12))
+    {
+        LoadScene(Scenes::BOOT);
     }
 
     // check scene changed

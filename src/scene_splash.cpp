@@ -7,7 +7,7 @@ void SplashScene::init()
     pSplashTexture = Asset::GetTexture("assets/images/splash.png");
     mText.clearText();
     mText.hAlign = 1; // center
-    mTimer.setDuration(1.0);
+    mTimer.setDuration(0);
     mTimer.reset();
 }
 
@@ -27,6 +27,9 @@ void SplashScene::update(float dt)
     if (mTimer.isDone())
     {
         mIteration += 1;
+        mTimer.reset();
+        mTimer.setDuration(1.0);
+
         switch (mIteration)
         {
             case 1:
@@ -45,8 +48,6 @@ void SplashScene::update(float dt)
                 Game::LoadScene(Scenes::ISOLEVEL);
                 break;
         }
-
-        mTimer.reset();
     }
 }
 
