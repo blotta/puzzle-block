@@ -31,9 +31,26 @@ void Level::load(const LevelData &ld)
         for (int col = 0; col < ld.cols; ++col)
         {
             int p = row * cols + col;
-            auto v = ld.data[p];
-            CellType vi = (CellType)atoi(&v);
-            this->set(col, row, vi);
+            char v = ld.data[p];
+            switch (v)
+            {
+                case '0':
+                    this->set(col, row, CellType::EMPTY);
+                    break;
+                case '1':
+                    this->set(col, row, CellType::FLOOR);
+                    break;
+                case '2':
+                    this->set(col, row, CellType::START);
+                    break;
+                case '3':
+                    this->set(col, row, CellType::FINISH);
+                    break;
+                case '4':
+                    this->set(col, row, CellType::GHOST);
+                    break;
+            }
+
         }
     }
 
@@ -240,6 +257,7 @@ void Level::toggleFloor(const vec2 &pos)
     case CellType::FLOOR:
     case CellType::START:
     case CellType::FINISH:
+    case CellType::GHOST:
         cell = CellType::EMPTY;
         break;
     default:
@@ -247,7 +265,7 @@ void Level::toggleFloor(const vec2 &pos)
     }
 }
 
-void Level::toggleStartFinish(const vec2 &pos)
+void Level::toggleSpecialFloor(const vec2 &pos)
 {
     CellType &cell = grid[pos.y][pos.x];
     switch (cell)
@@ -256,6 +274,9 @@ void Level::toggleStartFinish(const vec2 &pos)
         cell = CellType::FINISH;
         break;
     case CellType::FINISH:
+        cell = CellType::GHOST;
+        break;
+    case CellType::GHOST:
         cell = CellType::EMPTY;
         break;
     case CellType::EMPTY:
@@ -270,7 +291,11 @@ void Level::toggleStartFinish(const vec2 &pos)
 void Level::addRow()
 {
     if (rows < MAX_GRID_SIZE)
+    {
         rows++;
+        for (int i = 0; i < cols; i++)
+            grid[rows-1][i] = CellType::EMPTY;
+    }
 }
 
 void Level::removeRow()
@@ -282,7 +307,11 @@ void Level::removeRow()
 void Level::addColumn()
 {
     if (cols < MAX_GRID_SIZE)
+    {
         cols++;
+        for (int i = 0; i < rows; i++)
+            grid[i][cols-1] = CellType::EMPTY;
+    }
 }
 
 void Level::removeColumn()

@@ -17,6 +17,7 @@ private:
     void reset();
     void resize();
     void save(bool newLevel, bool saveToFile);
+    void levelChanged();
 
     Level level;
     int lvlIdx;

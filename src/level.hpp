@@ -45,7 +45,7 @@ struct Level
     void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);
-    void toggleStartFinish(const vec2& pos);
+    void toggleSpecialFloor(const vec2& pos);
     void addRow();
     void removeRow();
     void addColumn();
