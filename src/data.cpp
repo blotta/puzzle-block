@@ -102,7 +102,8 @@ void LevelData::print(FILE *file) const
     bool needClose = false;
     if (f == nullptr)
     {
-        f = fopen("level.txt", "w");
+        errno_t err;
+        err = fopen_s(&f, "level.txt", "w");
         needClose = true;
     }
 

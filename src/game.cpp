@@ -52,7 +52,7 @@ Game::Game()
         success = false;
     }
 
-    mUpdateTimer.setDuration(1.0 / mTargetFPS);
+    mUpdateTimer.setDuration(1.0f / mTargetFPS);
     mUpdateTimer.reset();
 
     mFPSTimer.setDuration(1.0);
@@ -128,7 +128,7 @@ void Game::SetState(const std::string &name, const std::string &value)
 
 const int Game::GetLevelsSize()
 {
-    return Game::get().mLevels.size();
+    return (int)Game::get().mLevels.size();
 }
 
 const LevelData &Game::GetLevelData(int idx)
@@ -144,7 +144,7 @@ void Game::SaveLevelData(const LevelData &ld, int idx)
 int Game::AddLevelData(const LevelData &ld)
 {
     Game::get().mLevels.emplace_back(ld);
-    return Game::get().mLevels.size() - 1;
+    return (int)Game::get().mLevels.size() - 1;
 }
 
 const Sprite &Game::GetSprite(SpriteID id)

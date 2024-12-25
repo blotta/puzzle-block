@@ -44,8 +44,8 @@ void LevelEditScene::reset()
 void LevelEditScene::resize()
 {
     // view sizes
-    int hor = SDL_floorf(Game::ScreenWidth() * 0.8) / level.cols;
-    int vert = SDL_floorf(Game::ScreenHeight() * 0.8) / level.rows;
+    int hor = (int)SDL_floorf(Game::ScreenWidth() * 0.8f) / level.cols;
+    int vert = (int)SDL_floorf(Game::ScreenHeight() * 0.8f) / level.rows;
     cellSize = hor > vert ? vert : hor;
     offsetX = Game::ScreenWidth() / 2 - level.cols * cellSize / 2;
     offsetY = Game::ScreenHeight() / 2 - level.rows * cellSize / 2;
@@ -66,8 +66,12 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
     if (saveToFile)
     {
         char fileName[50] = {};
-        sprintf(fileName, "assets/levels/%d.txt", lvlIdx);
-        FILE* f = fopen(fileName, "w");
+        // sprintf(fileName, "assets/levels/%d.txt", lvlIdx);
+        sprintf_s(fileName, "assets/levels/%d.txt", lvlIdx);
+        // FILE* f = fopen(fileName, "w");
+        FILE* f;
+        errno_t err;
+        err = fopen_s(&f, fileName, "w");
         ld.print(f);
         fclose(f);
     }
@@ -81,10 +85,10 @@ void LevelEditScene::levelChanged()
 
 void toGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y)
 {
-    *x = SDL_floor(worldX / cellSize);
+    *x = (int)SDL_floor(worldX / cellSize);
     if (worldX < 0)
         *x -= 1;
-    *y = SDL_floor(worldY / cellSize);
+    *y = (int)SDL_floor(worldY / cellSize);
     if (worldY < 0)
         *y -= 1;
 }

@@ -26,7 +26,7 @@ void Timer::setDuration(float duration)
 float Timer::elapsed() const
 {
     int currentTicks = SDL_GetTicks();
-    return (currentTicks - mStartTicks) / 1000.0;
+    return (currentTicks - mStartTicks) / 1000.0f;
 }
 
 void Timer::reset()
@@ -51,7 +51,7 @@ float Timer::waitUntilDone() const
     float remaining = mDuration - elapsed();
     if (remaining > 0)
     {
-        SDL_Delay(remaining * 1000);
+        SDL_Delay((Uint32)(remaining * 1000));
     }
     return remaining;
 }
