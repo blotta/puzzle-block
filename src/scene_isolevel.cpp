@@ -116,7 +116,7 @@ void IsoLevelScene::update(float dt)
     if (mLevelCleared && mLevelClearedTimer.isDone())
     {
         int nextLevelIdx = lvlIdx + 1;
-        nextLevelIdx =  nextLevelIdx < Game::GetLevelsSize() - 1 ? nextLevelIdx : 0;
+        nextLevelIdx =  nextLevelIdx <= (Game::GetLevelsSize() - 1) ? nextLevelIdx : 0;
         Game::SetState("curr_level", std::to_string(nextLevelIdx));
         Game::LoadScene(Scenes::ISOLEVEL);
     }
