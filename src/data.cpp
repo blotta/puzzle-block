@@ -78,25 +78,7 @@ void load_game_data(GameData *data)
          .originX = 0};
 
     // levels
-    data->DefaultLevels[0] =
-    #include "./../assets/levels/0.txt"
-    ;
-
-    data->DefaultLevels[1] =
-    #include "./../assets/levels/1.txt"
-    ;
-
-    data->DefaultLevels[2] =
-    #include "./../assets/levels/2.txt"
-    ;
-
-    data->DefaultLevels[3] =
-    #include "./../assets/levels/3.txt"
-    ;
-
-    data->DefaultLevels[4] =
-    #include "./../assets/levels/4.txt"
-    ;
+    #include "./../assets/levels/gen_level_data.cpp.part"
 }
 
 void LevelData::print(FILE *file) const

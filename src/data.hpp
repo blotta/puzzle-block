@@ -65,7 +65,8 @@ struct LevelData
 
 // Game data context
 
-#define NUM_LEVELS 5
+#include "./../assets/levels/gen_level_data.hpp"
+
 struct GameData
 {
     Sprite Sprites[SpriteID::NUM_SPRITES];
