@@ -94,6 +94,9 @@ void load_game_data(GameData *data)
     #include "./../assets/levels/3.txt"
     ;
 
+    data->DefaultLevels[4] =
+    #include "./../assets/levels/4.txt"
+    ;
 }
 
 void LevelData::print(FILE *file) const

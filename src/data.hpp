@@ -65,7 +65,7 @@ struct LevelData
 
 // Game data context
 
-#define NUM_LEVELS 4
+#define NUM_LEVELS 5
 struct GameData
 {
     Sprite Sprites[SpriteID::NUM_SPRITES];
