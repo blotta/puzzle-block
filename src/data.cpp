@@ -47,32 +47,112 @@ void load_game_data(GameData *data)
 
     data->Sprites[SpriteID::SPR_BLOCK_UP] =
         {.id = SpriteID::SPR_BLOCK_UP,
-         .tx = 0,
-         .ty = 64,
+         .tx = 128 * 0,
+         .ty = 64 + 128 * 0,
          .tw = 128,
          .th = 128,
          .originX = 32,
          .originY = 84
          };
 
+    data->Sprites[SpriteID::SPR_BLOCK_UP_LONG_30] =
+        {.id = SpriteID::SPR_BLOCK_UP_LONG_30,
+         .tx = 128 * 1,
+         .ty = 64 + 128 * 0,
+         .tw = 128,
+         .th = 128,
+         .originX = 20,
+         .originY = 90
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_UP_LONG_60] =
+        {.id = SpriteID::SPR_BLOCK_UP_LONG_60,
+         .tx = 128 * 2,
+         .ty = 64 + 128 * 0,
+         .tw = 128,
+         .th = 128,
+         .originX = -3,
+         .originY = 102
+         };
+
     data->Sprites[SpriteID::SPR_BLOCK_LONG] =
         {.id = SpriteID::SPR_BLOCK_LONG,
-         .tx = 128,
-         .ty = 64,
+         .tx = 128 * 3,
+         .ty = 64 + 128 * 0,
          .tw = 128,
          .th = 128,
          .originX = 48,
          .originY = 76,
          };
 
+    data->Sprites[SpriteID::SPR_BLOCK_LONG_LONG_30] =
+        {.id = SpriteID::SPR_BLOCK_LONG_LONG_30,
+         .tx = 128 * 4,
+         .ty = 64 + 128 * 0,
+         .tw = 128,
+         .th = 128,
+         .originX = 41,
+         .originY = 71,
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_LONG_LONG_60] =
+        {.id = SpriteID::SPR_BLOCK_LONG_LONG_60,
+         .tx = 128 * 5,
+         .ty = 64 + 128 * 0,
+         .tw = 128,
+         .th = 128,
+         .originX = 24,
+         .originY = 64,
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_UP_WIDE_30] =
+        {.id = SpriteID::SPR_BLOCK_UP_WIDE_30,
+         .tx = 128 * 0,
+         .ty = 64 + 128 * 1,
+         .tw = 128,
+         .th = 128,
+         .originX = 20,
+         .originY = 78,
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_UP_WIDE_60] =
+        {.id = SpriteID::SPR_BLOCK_UP_WIDE_60,
+         .tx = 128 * 1,
+         .ty = 64 + 128 * 1,
+         .tw = 128,
+         .th = 128,
+         .originX = -2,
+         .originY = 67,
+         };
+
     data->Sprites[SpriteID::SPR_BLOCK_WIDE] =
         {.id = SpriteID::SPR_BLOCK_WIDE,
-         .tx = 256,
-         .ty = 64,
+         .tx = 128 * 2,
+         .ty = 64 + 128 * 1,
          .tw = 128,
          .th = 128,
          .originX = 16,
          .originY = 76,
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_WIDE_WIDE_30] =
+        {.id = SpriteID::SPR_BLOCK_WIDE_WIDE_30,
+         .tx = 128 * 3,
+         .ty = 64 + 128 * 1,
+         .tw = 128,
+         .th = 128,
+         .originX = 8,
+         .originY = 80,
+         };
+
+    data->Sprites[SpriteID::SPR_BLOCK_WIDE_WIDE_60] =
+        {.id = SpriteID::SPR_BLOCK_WIDE_WIDE_60,
+         .tx = 128 * 4,
+         .ty = 64 + 128 * 1,
+         .tw = 128,
+         .th = 128,
+         .originX = -8,
+         .originY = 87,
          };
 
     data->Sprites[SpriteID::SPR_SWITCH_OFF] =
