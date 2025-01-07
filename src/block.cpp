@@ -73,11 +73,11 @@ std::pair<vec2, vec2> Block::getPositions()
 
 void Block::draw(int levelX, int levelY, int cellSize)
 {
-    SpriteID sprId = SpriteID::BLOCK_UP;
+    SpriteID sprId = SpriteID::SPR_BLOCK_UP;
     if (state == BlockState::LONG)
-        sprId = SpriteID::BLOCK_LONG;
+        sprId = SpriteID::SPR_BLOCK_LONG;
     if (state == BlockState::WIDE)
-        sprId = SpriteID::BLOCK_WIDE;
+        sprId = SpriteID::SPR_BLOCK_WIDE;
     
     int sx, sy;
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);

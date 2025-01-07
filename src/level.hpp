@@ -40,6 +40,7 @@ struct Level
     bool isValid();
     bool hasFloorAt(const vec2 &pos);
     bool hasSwitchAt(const vec2 &pos, LevelSwitch** sw);
+    void checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2);
     void toggleGhostFloor(const vec2 &pos);
     CellType cellAt(const vec2 &pos);
     void draw(int x, int y, int cellSize);

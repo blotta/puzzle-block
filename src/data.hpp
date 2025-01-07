@@ -8,16 +8,17 @@
 
 enum SpriteID
 {
-    FLOOR = 0,
-    FLOOR_FINISH,
-    FLOOR_START,
-    FLOOR_HIGHLIGHT,
-    BLOCK_UP,
-    BLOCK_LONG,
-    BLOCK_WIDE,
-    SWITCH,
+    SPR_FLOOR = 0,
+    SPR_FLOOR_FINISH,
+    SPR_FLOOR_START,
+    SPR_FLOOR_HIGHLIGHT,
+    SPR_BLOCK_UP,
+    SPR_BLOCK_LONG,
+    SPR_BLOCK_WIDE,
+    SPR_SWITCH_OFF,
+    SPR_SWITCH_ON,
 
-    NUM_SPRITES
+    SPR_NUM_SPRITES
 };
 
 struct Sprite
@@ -27,8 +28,8 @@ struct Sprite
     int ty = 0;
     int tw = 0;
     int th = 0;
-    int originY = 0;
     int originX = 0;
+    int originY = 0;
 };
 
 // LEVELS
@@ -50,6 +51,7 @@ struct LevelSwitch
     LevelSwitchType type;
     int floorX;
     int floorY;
+    bool on = false;
 };
 
 struct LevelData
@@ -69,7 +71,7 @@ struct LevelData
 
 struct GameData
 {
-    Sprite Sprites[SpriteID::NUM_SPRITES];
+    Sprite Sprites[SpriteID::SPR_NUM_SPRITES];
     std::array<LevelData, NUM_LEVELS> DefaultLevels;
 };
 

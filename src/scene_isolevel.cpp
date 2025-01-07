@@ -98,11 +98,7 @@ void IsoLevelScene::update(float dt)
         }
 
         if (blockMoved) {
-            LevelSwitch* sw;
-            if (level.hasSwitchAt(positions.first, &sw) || level.hasSwitchAt(positions.second, &sw))
-            {
-                level.toggleGhostFloor({sw->floorX, sw->floorY});
-            }
+            level.checkAndTriggerSwitches(positions.first, positions.second);
 
             if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
             {

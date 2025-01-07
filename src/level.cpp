@@ -181,6 +181,19 @@ bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
     return false;
 }
 
+void Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
+{
+    LevelSwitch* sw;
+    if (this->hasSwitchAt(pos1, &sw) || this->hasSwitchAt(pos2, &sw))
+    {
+        if (sw->on)
+            this->set(sw->floorX, sw->floorY, CellType::EMPTY);
+        else
+            this->set(sw->floorX, sw->floorY, CellType::GHOST);
+        sw->on = !sw->on;
+    }
+}
+
 void Level::toggleGhostFloor(const vec2 &pos)
 {
     CellType &cell = grid[pos.y][pos.x];
@@ -214,21 +227,21 @@ void Level::draw(int x, int y, int cellSize)
             int sy;
             toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
 
-            SpriteID sprId = SpriteID::FLOOR;
+            SpriteID sprId = SpriteID::SPR_FLOOR;
 
             switch (grid[j][i])
             {
             case CellType::START:
-                sprId = SpriteID::FLOOR_START;
+                sprId = SpriteID::SPR_FLOOR_START;
                 break;
             case CellType::FINISH:
-                sprId = SpriteID::FLOOR_FINISH;
+                sprId = SpriteID::SPR_FLOOR_FINISH;
                 break;
             case CellType::GHOST:
-                sprId = SpriteID::FLOOR_HIGHLIGHT;
+                sprId = SpriteID::SPR_FLOOR_HIGHLIGHT;
                 break;
             default:
-                sprId = SpriteID::FLOOR;
+                sprId = SpriteID::SPR_FLOOR;
                 break;
             }
 
@@ -242,7 +255,7 @@ void Level::draw(int x, int y, int cellSize)
         int sx;
         int sy;
         toISO(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(x + sx, y + sy, SpriteID::SWITCH);
+        Game::DrawSprite(x + sx, y + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
     }
 }
 

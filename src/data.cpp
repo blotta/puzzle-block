@@ -5,77 +5,95 @@
 
 void load_game_data(GameData *data)
 {
-    data->Sprites[SpriteID::FLOOR] =
-        {.id = SpriteID::FLOOR,
+    data->Sprites[SpriteID::SPR_FLOOR] =
+        {.id = SpriteID::SPR_FLOOR,
          .tx = 0,
          .ty = 0,
          .tw = 64,
          .th = 64,
+         .originX = 0,
          .originY = 0,
-         .originX = 0};
+         };
 
-    data->Sprites[SpriteID::FLOOR_FINISH] =
-        {.id = SpriteID::FLOOR_FINISH,
+    data->Sprites[SpriteID::SPR_FLOOR_FINISH] =
+        {.id = SpriteID::SPR_FLOOR_FINISH,
          .tx = 64,
          .ty = 0,
          .tw = 64,
          .th = 64,
+         .originX = 0,
          .originY = 0,
-         .originX = 0};
+         };
 
-    data->Sprites[SpriteID::FLOOR_START] =
-        {.id = SpriteID::FLOOR_START,
+    data->Sprites[SpriteID::SPR_FLOOR_START] =
+        {.id = SpriteID::SPR_FLOOR_START,
          .tx = 64 * 2,
          .ty = 0,
          .tw = 64,
          .th = 64,
+         .originX = 0,
          .originY = 0,
-         .originX = 0};
+         };
 
-    data->Sprites[SpriteID::FLOOR_HIGHLIGHT] =
-        {.id = SpriteID::FLOOR_HIGHLIGHT,
+    data->Sprites[SpriteID::SPR_FLOOR_HIGHLIGHT] =
+        {.id = SpriteID::SPR_FLOOR_HIGHLIGHT,
          .tx = 64 * 3,
          .ty = 0,
          .tw = 64,
          .th = 64,
+         .originX = 0,
          .originY = 0,
-         .originX = 0};
+         };
 
-    data->Sprites[SpriteID::BLOCK_UP] =
-        {.id = SpriteID::BLOCK_UP,
+    data->Sprites[SpriteID::SPR_BLOCK_UP] =
+        {.id = SpriteID::SPR_BLOCK_UP,
          .tx = 0,
          .ty = 64,
-         .tw = 64,
-         .th = 96,
-         .originY = 64,
-         .originX = 0};
+         .tw = 128,
+         .th = 128,
+         .originX = 32,
+         .originY = 84
+         };
 
-    data->Sprites[SpriteID::BLOCK_LONG] =
-        {.id = SpriteID::BLOCK_LONG,
-         .tx = 64,
-         .ty = 80,
-         .tw = 96,
-         .th = 80,
-         .originY = 32,
-         .originX = 32};
+    data->Sprites[SpriteID::SPR_BLOCK_LONG] =
+        {.id = SpriteID::SPR_BLOCK_LONG,
+         .tx = 128,
+         .ty = 64,
+         .tw = 128,
+         .th = 128,
+         .originX = 48,
+         .originY = 76,
+         };
 
-    data->Sprites[SpriteID::BLOCK_WIDE] =
-        {.id = SpriteID::BLOCK_WIDE,
-         .tx = 160,
-         .ty = 80,
-         .tw = 96,
-         .th = 80,
-         .originY = 32,
-         .originX = 0};
+    data->Sprites[SpriteID::SPR_BLOCK_WIDE] =
+        {.id = SpriteID::SPR_BLOCK_WIDE,
+         .tx = 256,
+         .ty = 64,
+         .tw = 128,
+         .th = 128,
+         .originX = 16,
+         .originY = 76,
+         };
 
-    data->Sprites[SpriteID::SWITCH] =
-        {.id = SpriteID::SWITCH,
-         .tx = 64,
-         .ty = 160,
-         .tw = 64,
-         .th = 64,
+    data->Sprites[SpriteID::SPR_SWITCH_OFF] =
+        {.id = SpriteID::SPR_SWITCH_OFF,
+         .tx = 320,
+         .ty = 0,
+         .tw = 32,
+         .th = 32,
+         .originX = -16,
          .originY = 0,
-         .originX = 0};
+         };
+
+    data->Sprites[SpriteID::SPR_SWITCH_ON] =
+        {.id = SpriteID::SPR_SWITCH_ON,
+         .tx = 352,
+         .ty = 0,
+         .tw = 32,
+         .th = 32,
+         .originX = -16,
+         .originY = 0,
+         };
 
     // levels
     #include "./../assets/levels/gen_level_data.cpp.part"

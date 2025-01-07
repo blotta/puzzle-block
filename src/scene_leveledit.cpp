@@ -224,11 +224,7 @@ void LevelEditScene::update(float dt)
         /* allow any movement */
 
         if (blockMoved) {
-            LevelSwitch* sw;
-            if (level.hasSwitchAt(positions.first, &sw) || level.hasSwitchAt(positions.second, &sw))
-            {
-                level.toggleGhostFloor({sw->floorX, sw->floorY});
-            }
+            level.checkAndTriggerSwitches(positions.first, positions.second);
         }
     }
 }
@@ -283,8 +279,10 @@ void LevelEditScene::draw()
 
     // level switches
     for (int i = 0; i < level.switchCount; i++) {
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
         LevelSwitch& sw = level.switches[i];
+        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
+        if (sw.on)
+            SDL_SetRenderDrawColor(Game::GetRenderer(), 180, 255, 0, 255);
         SDL_Rect r = {
             offsetX + cellSize * sw.x + cellSize/4,
             offsetY + cellSize * sw.y + cellSize/4,
