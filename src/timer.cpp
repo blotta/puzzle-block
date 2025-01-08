@@ -55,3 +55,8 @@ float Timer::waitUntilDone() const
     }
     return remaining;
 }
+
+void Timer::forwardBy(float seconds)
+{
+    mStartTicks -= seconds * 1000.0f;
+}

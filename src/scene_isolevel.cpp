@@ -1,3 +1,4 @@
+#include "input_manager.hpp"
 #include "scene_isolevel.hpp"
 
 void IsoLevelScene::init()

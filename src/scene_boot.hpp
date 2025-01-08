@@ -2,7 +2,7 @@
 #define SCENE_BOOT_HPP
 
 #include "scene.hpp"
-#include "text.hpp"
+#include "timer.hpp"
 
 class BootScene : public Scene
 {
@@ -15,7 +15,6 @@ private:
     Timer timer;
     bool loadFirstScene;
     bool debugMode;
-    DynamicText text;
 };
 
 #endif

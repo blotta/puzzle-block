@@ -1,10 +1,10 @@
+#include "game.hpp"
 #include "scene_splash.hpp"
 #include "input_manager.hpp"
 
 void SplashScene::init()
 {
     SDL_Log("Loading splash scene\n");
-    pSplashTexture = Asset::GetTexture("assets/images/splash.png");
     mText.clearText();
     mText.hAlign = 1; // center
     mTimer.setDuration(0);

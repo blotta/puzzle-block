@@ -3,6 +3,7 @@
 
 #include "scene.hpp"
 #include "text.hpp"
+#include "timer.hpp"
 
 class SplashScene : public Scene
 {
@@ -12,7 +13,6 @@ public:
     void draw() override;
     void dispose() override;
 private:
-    const Texture* pSplashTexture;
     StaticText mText;
     Timer mTimer;
     int mIteration = 0;

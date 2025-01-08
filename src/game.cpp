@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "game.hpp"
-#include "scene.hpp"
+#include "input_manager.hpp"
 #include "scene_splash.hpp"
 #include "scene_boot.hpp"
 #include "scene_leveledit.hpp"
@@ -70,6 +70,8 @@ Game::~Game()
 
     // unload scene
     loadScene(Scenes::NONE);
+
+    this->mDynText.Destroy();
 
     // make sure to deinit assets before deiniting systems
     Asset::UnloadAssets();
@@ -172,6 +174,12 @@ void Game::DrawSprite(int x, int y, SpriteID sprId)
     SDL_RenderCopy(g.mRenderer, g.pActiveTexture->get(), &src, &dest);
 }
 
+void Game::DrawText(int x, int y, const std::string &txt)
+{
+    auto& g = Game::get();
+    g.mDynText.Draw(x, y, txt);
+}
+
 void Game::Run()
 {
     Game::get().run();
@@ -242,6 +250,8 @@ void Game::loadAssets()
 
     // preload spritesheet
     pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");
+
+    mDynText.Init();
 
     loadLevels();
 }

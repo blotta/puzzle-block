@@ -9,12 +9,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "scene.hpp"
-#include "input_manager.hpp"
-#include "asset_manager.hpp"
-#include "level.hpp"
-
 #include "timer.hpp"
+#include "text.hpp"
+#include "asset_manager.hpp"
+#include "scene.hpp"
 
 class Game
 {
@@ -41,6 +39,7 @@ public:
 
     static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);
+    static void DrawText(int x, int y, const std::string& txt);
 
 private:
     Game();
@@ -70,6 +69,7 @@ private:
     bool mRunning = false;
 
     const Texture* pActiveTexture;
+    DynamicText mDynText;
 
     Scenes mNextScene = Scenes::BOOT;
     std::shared_ptr<Scene> mCurrentScene;

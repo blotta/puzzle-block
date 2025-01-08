@@ -1,4 +1,6 @@
 #include "text.hpp"
+#include "asset_manager.hpp"
+#include "game.hpp"
 
 StaticText::StaticText()
 {

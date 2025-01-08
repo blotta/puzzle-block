@@ -1,12 +1,10 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
 
+#include <string>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-
-#include "game.hpp"
-
-class Game;
 
 class StaticText{
 public:

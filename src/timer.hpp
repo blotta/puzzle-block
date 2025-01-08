@@ -24,6 +24,7 @@ struct Timer
     /// @return 
     bool isDone() const;
     float waitUntilDone() const;
+    void forwardBy(float seconds);
 };
 
 #endif
