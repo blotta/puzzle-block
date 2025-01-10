@@ -7,6 +7,7 @@
 #include "game.hpp"
 #include "util.hpp"
 #include "level.hpp"
+#include "animation.hpp"
 
 enum BlockState
 {
@@ -27,7 +28,9 @@ struct Block
     int y;
     BlockState state = BlockState::UP; 
     BlockAnimationState animState = BlockAnimationState::IDLE; 
+    AnimationSprite* animation;
 
+    void init(const vec2& pos, BlockState state);
     bool move(const vec2& dir, const Level& level, bool collide);
     std::pair<vec2, vec2> getPositions();
 

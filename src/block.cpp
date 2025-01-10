@@ -1,15 +1,69 @@
 #include "block.hpp"
+#include "animation.hpp"
 
-bool Block::move(const vec2 &dir, const Level& level, bool collide)
+
+SpriteID idle_up_frames[1] = {SPR_BLOCK_UP};
+AnimationSprite anim_idle_up = {
+    .duration = 1.0f,
+    .frameCount = 1,
+    .frames = idle_up_frames,
+    .loop = false,
+};
+
+SpriteID idle_long_frames[1] = {SPR_BLOCK_LONG};
+AnimationSprite anim_idle_long = {
+    .duration = 1.0f,
+    .frameCount = 1,
+    .frames = idle_long_frames,
+    .loop = false,
+};
+
+SpriteID idle_wide_frames[1] = {SPR_BLOCK_WIDE};
+AnimationSprite anim_idle_wide = {
+    .duration = 1.0f,
+    .frameCount = 1,
+    .frames = idle_wide_frames,
+    .loop = false,
+};
+
+SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
+AnimationSprite anim_up_long = {
+    .duration = 2.0f,
+    .frameCount = 3,
+    .frames = up_long_frames,
+    .loop = true,
+};
+
+void Block::init(const vec2 &pos, BlockState state)
 {
+    x = pos.x;
+    y = pos.y;
+    state = state;
+    animState = BlockAnimationState::IDLE;
+    animation = &anim_idle_up;
+    if (state == BlockState::LONG)
+        animation = &anim_idle_long;
+    else if (state == BlockState::WIDE)
+        animation = &anim_idle_wide;
+}
+
+bool Block::move(const vec2 &dir, const Level &level, bool collide)
+{
+    if (animState != BlockAnimationState::IDLE)
+    {
+        if (animation->isDone())
+            animState = BlockAnimationState::IDLE;
+        return false;
+    }
+
+    if (dir.x == 0 && dir.y == 0)
+        return false;
+
     vec2 prevPos(x,y);
     BlockState prevState = this->state;
 
     vec2 newPos(x,y);
     BlockState newState = this->state;
-
-    if (dir.x == 0 && dir.y == 0)
-        return false;
     
     if (state == BlockState::UP)
     {
@@ -65,6 +119,15 @@ bool Block::move(const vec2 &dir, const Level& level, bool collide)
         }
     }
 
+    if (state == BlockState::UP)
+        animation = &anim_idle_up;
+    else if (state == BlockState::LONG)
+        animation = &anim_idle_long;
+    else if (state == BlockState::WIDE)
+        animation = &anim_idle_wide;
+    
+    animation->start();
+
     return true;
 }
 
@@ -84,12 +147,8 @@ std::pair<vec2, vec2> Block::getPositions()
 
 void Block::draw(int levelX, int levelY, int cellSize)
 {
-    SpriteID sprId = SpriteID::SPR_BLOCK_UP;
-    if (state == BlockState::LONG)
-        sprId = SpriteID::SPR_BLOCK_LONG;
-    if (state == BlockState::WIDE)
-        sprId = SpriteID::SPR_BLOCK_WIDE;
-    
+    SpriteID sprId = animation->tick();
+
     int sx, sy;
     toISO(x, y, cellSize, cellSize/2, &sx, &sy);
 

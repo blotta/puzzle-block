@@ -10,12 +10,12 @@
 int startX, startY = 0;
 Sprite spr = {};
 
-SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
+SpriteID up_long_frames0[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
 
-AnimationSprite anim_up_long = {
+AnimationSprite anim_up_long0 = {
     .duration = 2.0f,
     .frameCount = 3,
-    .frames = up_long_frames,
+    .frames = up_long_frames0,
     .loop = true,
 };
 
@@ -29,7 +29,7 @@ void BootScene::init()
     startY = Game::ScreenHeight()/2;
     spr = Game::GetSprite(SPR_BLOCK_UP);
 
-    anim_up_long.start();
+    anim_up_long0.start();
 }
 
 void BootScene::dispose()
@@ -119,7 +119,7 @@ void debug_animation_draw()
     }
 
     // draw animation
-    Game::DrawSprite(startX, startY, anim_up_long.tick());
+    Game::DrawSprite(startX, startY, anim_up_long0.tick());
 }
 
 void BootScene::update(float dt)
@@ -129,7 +129,7 @@ void BootScene::update(float dt)
         // debug enter
         debugMode = true;
 
-        anim_up_long.start();
+        anim_up_long0.start();
     }
     
     if (!debugMode && timer.isDone())

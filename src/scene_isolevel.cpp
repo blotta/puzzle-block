@@ -38,9 +38,7 @@ void IsoLevelScene::reset()
 
     // block setup
     auto startPos = level.getStartPos();
-    block.x = startPos.x;
-    block.y = startPos.y;
-    block.state = BlockState::UP;
+    block.init(startPos, BlockState::UP);
 
     mLevelClearedText.setText("LEVEL CLEARED!");
     mLevelClearedText.hAlign = 1;

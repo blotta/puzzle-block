@@ -29,9 +29,7 @@ void LevelEditScene::reset()
     level.load(Game::GetLevelData(lvlIdx));
 
     auto startPos = level.getStartPos();
-    block.x = startPos.x;
-    block.y = startPos.y;
-    block.state = BlockState::UP;
+    block.init(startPos, BlockState::UP);
 
     mEditInstruction.setPointSize(16);
     // mEditInstruction.setText("LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    NUMPAD Arrows: resize grid");

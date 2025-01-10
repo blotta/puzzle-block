@@ -15,6 +15,7 @@ struct AnimationSprite
 
     void start();
     SpriteID tick();
+    bool isDone() const;
 };
 
 #endif

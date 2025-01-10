@@ -32,3 +32,16 @@ SpriteID AnimationSprite::tick()
 
     return frames[currFrame];
 }
+
+bool AnimationSprite::isDone() const
+{
+    if (loop)
+        return false;
+    
+    float elapsed = timer.elapsed();
+    float perc = elapsed / duration;
+    if (perc > 1.0f)
+        return true;
+    
+    return false;
+}
