@@ -89,16 +89,10 @@ void IsoLevelScene::update(float dt)
     bool blockMoved = false;
     if (moveDir.x != 0 || moveDir.y != 0)
     {
-        blockMoved = true;
-        block.move(moveDir);
-        auto positions = block.getPositions();
-        if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
-        {
-            block.undoMove();
-            blockMoved = false;
-        }
+        blockMoved = block.move(moveDir, level, true);
 
         if (blockMoved) {
+            auto positions = block.getPositions();
             level.checkAndTriggerSwitches(positions.first, positions.second);
 
             if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)

@@ -218,13 +218,12 @@ void LevelEditScene::update(float dt)
     bool blockMoved = false;
     if (moveDir.x != 0 || moveDir.y != 0)
     {
-        blockMoved = true;
-        block.move(moveDir);
-        auto positions = block.getPositions();
-
         /* allow any movement */
+        blockMoved = block.move(moveDir, level, false);
+
 
         if (blockMoved) {
+            auto positions = block.getPositions();
             level.checkAndTriggerSwitches(positions.first, positions.second);
         }
     }

@@ -121,7 +121,7 @@ vec2 Level::getStartPos()
     return vec2();
 }
 
-bool Level::isValidPos(const vec2 &pos)
+bool Level::isValidPos(const vec2 &pos) const
 {
     return pos.x >= 0 && pos.x < cols && pos.y >= 0 && pos.y < rows;
 }
@@ -156,7 +156,7 @@ bool Level::isValid()
     return valid;
 }
 
-bool Level::hasFloorAt(const vec2 &pos)
+bool Level::hasFloorAt(const vec2 &pos) const
 {
     if (!isValidPos(pos))
         return false;

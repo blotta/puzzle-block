@@ -36,9 +36,9 @@ struct Level
     void load(const LevelData &ld);
     void toLevelData(LevelData* ld);
     vec2 getStartPos();
-    bool isValidPos(const vec2 &pos);
+    bool isValidPos(const vec2 &pos) const;
     bool isValid();
-    bool hasFloorAt(const vec2 &pos);
+    bool hasFloorAt(const vec2 &pos) const;
     bool hasSwitchAt(const vec2 &pos, LevelSwitch** sw);
     void checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2);
     void toggleGhostFloor(const vec2 &pos);

@@ -1,60 +1,71 @@
 #include "block.hpp"
 
-void Block::move(const vec2 &dir)
+bool Block::move(const vec2 &dir, const Level& level, bool collide)
 {
+    vec2 prevPos(x,y);
+    BlockState prevState = this->state;
+
+    vec2 newPos(x,y);
+    BlockState newState = this->state;
+
     if (dir.x == 0 && dir.y == 0)
-        return;
-
-    prevX = x;
-    prevY = y;
-    prevState = state;
-
+        return false;
+    
     if (state == BlockState::UP)
     {
         if (dir.x != 0)
         {
-            state = BlockState::WIDE;
-            x = dir.x > 0 ? x + 1 : x - 2;
+            newState = BlockState::WIDE;
+            newPos.x = dir.x > 0 ? x + 1 : x - 2;
         }
         else if (dir.y != 0)
         {
-            state = BlockState::LONG;
-            y = dir.y > 0 ? y + 1 : y - 2;
+            newState = BlockState::LONG;
+            newPos.y = dir.y > 0 ? y + 1 : y - 2;
         }
     }
     else if (state == BlockState::WIDE)
     {
         if (dir.x != 0)
         {
-            state = BlockState::UP;
-            x = dir.x > 0 ? x + 2 : x - 1;
+            newState = BlockState::UP;
+            newPos.x = dir.x > 0 ? x + 2 : x - 1;
         }
         else if (dir.y != 0)
         {
-            y += dir.y;
+            newPos.y += dir.y;
         }
     }
     else if (state == BlockState::LONG)
     {
         if (dir.x != 0)
         {
-            x += dir.x;
+            newPos.x += dir.x;
         }
         else if (dir.y != 0)
         {
-            state = BlockState::UP;
-            y = dir.y > 0 ? y + 2 : y - 1;
+            newState = BlockState::UP;
+            newPos.y = dir.y > 0 ? y + 2 : y - 1;
         }
     }
 
-    // SDL_Log("block %d %d\n", x, y);
-}
+    this->x = newPos.x;
+    this->y = newPos.y;
+    this->state = newState;
 
-void Block::undoMove()
-{
-    x = prevX;
-    y = prevY;
-    state = prevState;
+    if (collide)
+    {
+        auto positions = this->getPositions();
+        if (!level.hasFloorAt(positions.first) || !level.hasFloorAt(positions.second))
+        {
+            this->x = prevPos.x;
+            this->y = prevPos.y;
+            this->state = prevState;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 std::pair<vec2, vec2> Block::getPositions()
