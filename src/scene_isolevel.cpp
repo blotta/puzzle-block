@@ -84,20 +84,16 @@ void IsoLevelScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-    bool blockMoved = false;
-    if (moveDir.x != 0 || moveDir.y != 0)
-    {
-        blockMoved = block.move(moveDir, level, true);
+    bool blockMoved = block.move(moveDir, level, true);
 
-        if (blockMoved) {
-            auto positions = block.getPositions();
-            level.checkAndTriggerSwitches(positions.first, positions.second);
+    if (blockMoved) {
+        auto positions = block.getPositions();
+        level.checkAndTriggerSwitches(positions.first, positions.second);
 
-            if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
-            {
-                mLevelCleared = true;
-                mLevelClearedTimer.reset();
-            }
+        if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
+        {
+            mLevelCleared = true;
+            mLevelClearedTimer.reset();
         }
     }
     

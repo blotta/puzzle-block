@@ -19,6 +19,15 @@ AnimationSprite anim_up_long0 = {
     .loop = true,
 };
 
+enum class BootDebugType
+{
+    DYNAMIC_TEXT_DRAW,
+    SPRITE_POSITIONING_UPDATE,
+    ANIMATION,
+};
+
+static BootDebugType bootDebugType = BootDebugType::SPRITE_POSITIONING_UPDATE;
+
 void BootScene::init()
 {
     SDL_Log("Loading boot scene\n");
@@ -47,9 +56,9 @@ void debug_dynamic_text_draw()
 void debug_sprite_positioning_update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
-        spr = (int)spr.id + 1 > (int)SPR_BLOCK_WIDE_WIDE_60 ? Game::GetSprite(SPR_BLOCK_UP) : Game::GetSprite((SpriteID)((int)spr.id + 1));
+        spr = (int)spr.id + 1 > (int)SPR_BLOCK_WIDE_UP_60 ? Game::GetSprite(SPR_BLOCK_UP) : Game::GetSprite((SpriteID)((int)spr.id + 1));
     if (Input::JustPressed(SDL_SCANCODE_LEFT))
-        spr = (int)spr.id - 1 < (int)SPR_BLOCK_UP ? Game::GetSprite(SPR_BLOCK_WIDE_WIDE_60) : Game::GetSprite((SpriteID)((int)spr.id - 1));
+        spr = (int)spr.id - 1 < (int)SPR_BLOCK_UP ? Game::GetSprite(SPR_BLOCK_WIDE_UP_60) : Game::GetSprite((SpriteID)((int)spr.id - 1));
 
     if (Input::JustPressed(SDL_SCANCODE_L))
         spr.originX -= 1;
@@ -72,7 +81,9 @@ void debug_sprite_positioning_draw()
     sprintf(buf, "start: %d %d", startX, startY);
     Game::DrawText(10, 10, buf);
     sprintf(buf, "origin: %d %d", spr.originX, spr.originY);
-    Game::DrawText(10, 45, buf);
+    Game::DrawText(10, 10 + 35 * 1, buf);
+    sprintf(buf, "spritesheet: %d %d", spr.tx / 128, (spr.ty - 64) / 128);
+    Game::DrawText(10, 10 + 35 * 2, buf);
 
     for (int y = -2; y < 3; y++) {
         for (int x = -2; x < 3; x++) {
@@ -143,7 +154,8 @@ void BootScene::update(float dt)
     
     if (debugMode)
     {
-        //debug_sprite_positioning_update(dt);
+        if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
+            debug_sprite_positioning_update(dt);
     }
 }
 
@@ -155,7 +167,11 @@ void BootScene::draw()
 
     if (debugMode)
     {
-        // debug_sprite_positioning_draw();
-        debug_animation_draw();
+        if (bootDebugType == BootDebugType::DYNAMIC_TEXT_DRAW)
+            debug_dynamic_text_draw();
+        else if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
+            debug_sprite_positioning_draw();
+        else if (bootDebugType == BootDebugType::ANIMATION)
+            debug_animation_draw();
     }
 }

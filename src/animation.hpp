@@ -10,6 +10,7 @@ struct AnimationSprite
     int frameCount;
     SpriteID* frames;
     bool loop = false;
+    bool reverse = false;
 
     Timer timer;
 

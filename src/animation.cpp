@@ -26,6 +26,9 @@ SpriteID AnimationSprite::tick()
     
     float step = 1.0f / frameCount;
 
+    if (reverse)
+        perc = 1.0f - perc;
+
     int currFrame = (int)SDL_floorf(perc / step);
     if (currFrame > frameCount - 1)
         currFrame = frameCount - 1;
