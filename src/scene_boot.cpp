@@ -21,12 +21,13 @@ AnimationSprite anim_up_long0 = {
 
 enum class BootDebugType
 {
+    INPUT_TEST,
     DYNAMIC_TEXT_DRAW,
     SPRITE_POSITIONING_UPDATE,
     ANIMATION,
 };
 
-static BootDebugType bootDebugType = BootDebugType::SPRITE_POSITIONING_UPDATE;
+static BootDebugType bootDebugType = BootDebugType::INPUT_TEST;
 
 void BootScene::init()
 {
@@ -44,6 +45,36 @@ void BootScene::init()
 void BootScene::dispose()
 {
     SDL_Log("Unloading boot scene\n");
+}
+
+// 0 not pressed
+// 1 pressed
+// 2 just pressed
+// 3 just released
+static int spaceKey = 0;
+void debug_input_test_update(float dt)
+{
+    if (Input::Pressed(SDL_SCANCODE_SPACE))
+        spaceKey = 1;
+    else
+        spaceKey = 0;
+    if (Input::JustPressed(SDL_SCANCODE_SPACE))
+    {
+        spaceKey = 2;
+        SDL_Log("Just Pressed\n");
+    }
+    if (Input::JustReleased(SDL_SCANCODE_SPACE))
+    {
+        spaceKey = 3;
+        SDL_Log("Just Released\n");
+    }
+}
+
+void debug_input_test_draw()
+{
+    char buf[50] = {};
+    sprintf(buf, "space key: %d", spaceKey);
+    Game::DrawText(20, 20, buf);
 }
 
 // Dynamic Text
@@ -154,7 +185,9 @@ void BootScene::update(float dt)
     
     if (debugMode)
     {
-        if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
+        if (bootDebugType == BootDebugType::INPUT_TEST)
+            debug_input_test_update(dt);
+        else if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
             debug_sprite_positioning_update(dt);
     }
 }
@@ -167,7 +200,9 @@ void BootScene::draw()
 
     if (debugMode)
     {
-        if (bootDebugType == BootDebugType::DYNAMIC_TEXT_DRAW)
+        if (bootDebugType == BootDebugType::INPUT_TEST)
+            debug_input_test_draw();
+        else if (bootDebugType == BootDebugType::DYNAMIC_TEXT_DRAW)
             debug_dynamic_text_draw();
         else if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
             debug_sprite_positioning_draw();

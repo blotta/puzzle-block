@@ -52,7 +52,8 @@ void Input::Update(float dt)
             }
             case SDL_KEYDOWN:
             {
-                mgr.mKeyState[event.key.keysym.scancode] = 2; // just pressed
+                if (mgr.mKeyState[event.key.keysym.scancode] == 0)
+                    mgr.mKeyState[event.key.keysym.scancode] = 2; // just pressed
             }
             break;
             case SDL_KEYUP:
