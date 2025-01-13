@@ -213,14 +213,15 @@ void LevelEditScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         moveDir = vec2(1, 0);
 
-    bool blockMoved = false;
     if (moveDir.x != 0 || moveDir.y != 0)
     {
         /* allow any movement */
-        blockMoved = block.move(moveDir, level, false);
+        block.updateMovementIntent(moveDir);
+        block.x = block.moveIntent.newPos.x;
+        block.y = block.moveIntent.newPos.y;
+        block.state = block.moveIntent.newState;
 
-
-        if (blockMoved) {
+        if (block.moveIntent.moved) {
             auto positions = block.getPositions();
             level.checkAndTriggerSwitches(positions.first, positions.second);
         }
