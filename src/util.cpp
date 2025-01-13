@@ -5,3 +5,21 @@ void toISO(int x, int y, int tile_width, int tile_height, int* sx, int* sy)
     *sx = ((x * tile_width / 2) - (y * tile_width / 2));
     *sy = ((y * tile_height / 2) + (x * tile_height / 2));
 }
+
+int cycleIndex(int currIdx, int length, int amount)
+{
+    if (amount == 0)
+        return currIdx;
+
+    int next = currIdx + amount;
+
+    while (next >= length || next < 0)
+    {
+        if (next >= length)
+            next = next - length;
+        else if (next < 0)
+            next = next + length;
+    }
+
+    return next;
+}

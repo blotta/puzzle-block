@@ -14,7 +14,7 @@ public:
 private:
     Timer timer;
     bool loadFirstScene;
-    bool debugMode;
+    bool debugModeActive;
 };
 
 #endif

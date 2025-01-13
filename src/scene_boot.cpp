@@ -7,27 +7,29 @@
 
 #include "animation.hpp"
 
-int startX, startY = 0;
-Sprite spr = {};
-
-SpriteID up_long_frames0[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
-
-AnimationSprite anim_up_long0 = {
-    .duration = 2.0f,
-    .frameCount = 3,
-    .frames = up_long_frames0,
-    .loop = true,
-};
 
 enum class BootDebugType
 {
-    INPUT_TEST,
-    DYNAMIC_TEXT_DRAW,
-    SPRITE_POSITIONING_UPDATE,
-    ANIMATION,
+    DEBUG_TYPE_INPUT_TEST,
+    DEBUG_TYPE_DYNAMIC_TEXT_DRAW,
+    DEBUG_TYPE_SPRITE_POSITIONING_UPDATE,
+    DEBUG_TYPE_ANIMATION,
+
+    DEBUG_TYPE_COUNT
 };
 
-static BootDebugType bootDebugType = BootDebugType::INPUT_TEST;
+static BootDebugType bootDebugType = BootDebugType::DEBUG_TYPE_INPUT_TEST;
+
+static int startX, startY = 0;
+static Sprite spr = {};
+
+static SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
+static AnimationSprite anim_up_long = {
+    .duration = 2.0f,
+    .frameCount = 3,
+    .frames = up_long_frames,
+    .loop = true,
+};
 
 void BootScene::init()
 {
@@ -39,7 +41,7 @@ void BootScene::init()
     startY = Game::ScreenHeight()/2;
     spr = Game::GetSprite(SPR_BLOCK_UP);
 
-    anim_up_long0.start();
+    anim_up_long.start();
 }
 
 void BootScene::dispose()
@@ -86,10 +88,19 @@ void debug_dynamic_text_draw()
 // Sprite positioning
 void debug_sprite_positioning_update(float dt)
 {
+    int dir = 0;
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
-        spr = (int)spr.id + 1 > (int)SPR_BLOCK_WIDE_UP_60 ? Game::GetSprite(SPR_BLOCK_UP) : Game::GetSprite((SpriteID)((int)spr.id + 1));
+        dir = 1;
     if (Input::JustPressed(SDL_SCANCODE_LEFT))
-        spr = (int)spr.id - 1 < (int)SPR_BLOCK_UP ? Game::GetSprite(SPR_BLOCK_WIDE_UP_60) : Game::GetSprite((SpriteID)((int)spr.id - 1));
+        dir = -1;
+    
+    if (dir != 0)
+    {
+        int offset = (int)SPR_BLOCK_UP;
+        int sprCount = (int)SPR_BLOCK_WIDE_UP_60 - offset + 1;
+        int sprIdx = offset + cycleIndex((int)spr.id - offset, sprCount, dir);
+        spr = Game::GetSprite((SpriteID)sprIdx);
+    }
 
     if (Input::JustPressed(SDL_SCANCODE_L))
         spr.originX -= 1;
@@ -161,7 +172,7 @@ void debug_animation_draw()
     }
 
     // draw animation
-    Game::DrawSprite(startX, startY, anim_up_long0.tick());
+    Game::DrawSprite(startX, startY, anim_up_long.tick());
 }
 
 void BootScene::update(float dt)
@@ -169,12 +180,12 @@ void BootScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_D))
     {
         // debug enter
-        debugMode = true;
+        debugModeActive = true;
 
-        anim_up_long0.start();
+        anim_up_long.start();
     }
     
-    if (!debugMode && timer.isDone())
+    if (!debugModeActive && timer.isDone())
         loadFirstScene = true;
     
     if (Input::JustPressed(SDL_SCANCODE_RETURN))
@@ -183,11 +194,20 @@ void BootScene::update(float dt)
     if (loadFirstScene)
         Game::LoadScene(Scenes::SPLASH);
     
-    if (debugMode)
+    if (debugModeActive)
     {
-        if (bootDebugType == BootDebugType::INPUT_TEST)
+        if (Input::JustPressed(SDL_SCANCODE_F10))
+        {
+            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, -1);
+        }
+        if (Input::JustPressed(SDL_SCANCODE_F11))
+        {
+            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, 1);
+        }
+
+        if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
             debug_input_test_update(dt);
-        else if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
+        else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
             debug_sprite_positioning_update(dt);
     }
 }
@@ -195,18 +215,18 @@ void BootScene::update(float dt)
 
 void BootScene::draw()
 {
-    if (!debugMode && !timer.isDone())
+    if (!debugModeActive && !timer.isDone())
         Game::DrawText(10, 10, "d: debug mode");
 
-    if (debugMode)
+    if (debugModeActive)
     {
-        if (bootDebugType == BootDebugType::INPUT_TEST)
+        if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
             debug_input_test_draw();
-        else if (bootDebugType == BootDebugType::DYNAMIC_TEXT_DRAW)
+        else if (bootDebugType == BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW)
             debug_dynamic_text_draw();
-        else if (bootDebugType == BootDebugType::SPRITE_POSITIONING_UPDATE)
+        else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
             debug_sprite_positioning_draw();
-        else if (bootDebugType == BootDebugType::ANIMATION)
+        else if (bootDebugType == BootDebugType::DEBUG_TYPE_ANIMATION)
             debug_animation_draw();
     }
 }
