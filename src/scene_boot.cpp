@@ -131,7 +131,7 @@ void debug_sprite_positioning_draw()
         for (int x = -2; x < 3; x++) {
             int sx;
             int sy;
-            toISO(x, y, 64, 32, &sx, &sy);
+            IsoToWorld(x, y, 64, 32, &sx, &sy);
             Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
         }
     }
@@ -166,7 +166,7 @@ void debug_animation_draw()
         for (int x = -2; x < 3; x++) {
             int sx;
             int sy;
-            toISO(x, y, 64, 32, &sx, &sy);
+            IsoToWorld(x, y, 64, 32, &sx, &sy);
             Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
         }
     }

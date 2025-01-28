@@ -27,7 +27,7 @@ private:
     int cellSize = 64;
     vec2 moveDir;
     vec2 mousePos;
-    vec2 mouseGridPos;
+    vec2 mouseIsoPos;
     bool saved = true;
     StaticText mEditInstruction;
     StaticText mLevelText;

@@ -24,13 +24,13 @@ void IsoLevelScene::reset()
     // view sizes
     cellSize = 64;
     vec2 boundLeft, boundRight;
-    toISO(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
-    toISO(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
+    IsoToWorld(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
+    IsoToWorld(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
     int width = boundRight.x + cellSize/2 - boundLeft.x;
 
     vec2 boundTop, boundBottom;
-    toISO(0, 0, cellSize, cellSize/2, &boundTop.x, &boundTop.y);
-    toISO(level.cols - 1, level.rows - 1, cellSize, cellSize/2, &boundBottom.x, &boundBottom.y);
+    IsoToWorld(0, 0, cellSize, cellSize/2, &boundTop.x, &boundTop.y);
+    IsoToWorld(level.cols - 1, level.rows - 1, cellSize, cellSize/2, &boundBottom.x, &boundBottom.y);
     int height = boundBottom.y + cellSize/2/2 - boundTop.y;
 
     offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
@@ -109,12 +109,6 @@ void IsoLevelScene::draw()
 {
     level.draw(offsetX, offsetY, cellSize);
     block.draw(offsetX, offsetY, cellSize);
-
-    SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 0, 0, 255);
-    if (Input::MousePressed(SDL_BUTTON_LEFT))
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 255, 100, 255);
-    SDL_Rect r = {mousePos.x - 10, mousePos.y - 10, 20, 20};
-    SDL_RenderDrawRect(Game::GetRenderer(), &r);
 
     mTitleText.draw(10, 10);
 

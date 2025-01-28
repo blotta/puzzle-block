@@ -298,7 +298,7 @@ void Block::draw(int levelX, int levelY, int cellSize)
     SpriteID sprId = animation->tick();
 
     int sx, sy;
-    toISO(x, y, cellSize, cellSize/2, &sx, &sy);
+    IsoToWorld(x, y, cellSize, cellSize/2, &sx, &sy);
 
     Game::DrawSprite(levelX + sx, levelY + sy, sprId);
 }

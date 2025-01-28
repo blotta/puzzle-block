@@ -225,7 +225,7 @@ void Level::draw(int x, int y, int cellSize)
 
             int sx;
             int sy;
-            toISO(i, j, cellSize, cellSize / 2, &sx, &sy);
+            IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
 
             SpriteID sprId = SpriteID::SPR_FLOOR;
 
@@ -254,7 +254,7 @@ void Level::draw(int x, int y, int cellSize)
         auto& sw = this->switches[sidx];
         int sx;
         int sy;
-        toISO(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
+        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
         Game::DrawSprite(x + sx, y + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
     }
 }
