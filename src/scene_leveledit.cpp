@@ -262,7 +262,7 @@ void LevelEditScene::draw()
             case CellType::FINISH: // finish
                 SDL_SetRenderDrawColor(Game::GetRenderer(), 100, 200, 100, 255);
                 break;
-            case CellType::GHOST: // ghost
+            case CellType::THIN: // thin
                 SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
                 break;
             case CellType::EMPTY:

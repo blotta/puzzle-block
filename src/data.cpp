@@ -35,13 +35,43 @@ void load_game_data(GameData *data)
          .originY = 0,
          };
 
-    data->Sprites[SpriteID::SPR_FLOOR_HIGHLIGHT] =
-        {.id = SpriteID::SPR_FLOOR_HIGHLIGHT,
+    data->Sprites[SpriteID::SPR_FLOOR_THIN] =
+        {.id = SpriteID::SPR_FLOOR_THIN,
          .tx = 64 * 3,
          .ty = 0,
          .tw = 64,
          .th = 64,
          .originX = 0,
+         .originY = 0,
+         };
+
+    data->Sprites[SpriteID::SPR_FLOOR_HIGHLIGHT] =
+        {.id = SpriteID::SPR_FLOOR_HIGHLIGHT,
+         .tx = 64 * 6,
+         .ty = 0,
+         .tw = 64,
+         .th = 64,
+         .originX = 0,
+         .originY = 0,
+         };
+
+    data->Sprites[SpriteID::SPR_SWITCH_OFF] =
+        {.id = SpriteID::SPR_SWITCH_OFF,
+         .tx = 512 + 32 * 0,
+         .ty = 0,
+         .tw = 32,
+         .th = 32,
+         .originX = -16,
+         .originY = 0,
+         };
+
+    data->Sprites[SpriteID::SPR_SWITCH_ON] =
+        {.id = SpriteID::SPR_SWITCH_ON,
+         .tx = 512 + 32 * 1,
+         .ty = 0,
+         .tw = 32,
+         .th = 32,
+         .originX = -16,
          .originY = 0,
          };
 
@@ -195,25 +225,6 @@ void load_game_data(GameData *data)
          .originY = 90,
          };
 
-    data->Sprites[SpriteID::SPR_SWITCH_OFF] =
-        {.id = SpriteID::SPR_SWITCH_OFF,
-         .tx = 320,
-         .ty = 0,
-         .tw = 32,
-         .th = 32,
-         .originX = -16,
-         .originY = 0,
-         };
-
-    data->Sprites[SpriteID::SPR_SWITCH_ON] =
-        {.id = SpriteID::SPR_SWITCH_ON,
-         .tx = 352,
-         .ty = 0,
-         .tw = 32,
-         .th = 32,
-         .originX = -16,
-         .originY = 0,
-         };
 
     // levels
     #include "./../assets/levels/gen_level_data.cpp.part"

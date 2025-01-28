@@ -20,7 +20,7 @@ enum class CellType
     FLOOR = 1,
     START = 2,
     FINISH = 3,
-    GHOST = 4,
+    THIN = 4,
 };
 struct Level
 {
@@ -41,7 +41,7 @@ struct Level
     bool hasFloorAt(const vec2 &pos) const;
     bool hasSwitchAt(const vec2 &pos, LevelSwitch** sw);
     void checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2);
-    void toggleGhostFloor(const vec2 &pos);
+    void toggleThinFloor(const vec2 &pos);
     CellType cellAt(const vec2 &pos);
     void draw(int x, int y, int cellSize);
 

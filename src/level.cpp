@@ -47,7 +47,7 @@ void Level::load(const LevelData &ld)
                     this->set(col, row, CellType::FINISH);
                     break;
                 case '4':
-                    this->set(col, row, CellType::GHOST);
+                    this->set(col, row, CellType::THIN);
                     break;
             }
 
@@ -94,7 +94,7 @@ void Level::toLevelData(LevelData *ld)
             case CellType::FINISH:
                 ld->data[p] = '3';
                 break;
-            case CellType::GHOST:
+            case CellType::THIN:
                 ld->data[p] = '4';
                 break;
             }
@@ -163,7 +163,7 @@ bool Level::hasFloorAt(const vec2 &pos) const
 
     CellType type = grid[pos.y][pos.x];
 
-    return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH || type == CellType::GHOST;
+    return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH || type == CellType::THIN;
 }
 
 bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
@@ -189,18 +189,18 @@ void Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
         if (sw->on)
             this->set(sw->floorX, sw->floorY, CellType::EMPTY);
         else
-            this->set(sw->floorX, sw->floorY, CellType::GHOST);
+            this->set(sw->floorX, sw->floorY, CellType::THIN);
         sw->on = !sw->on;
     }
 }
 
-void Level::toggleGhostFloor(const vec2 &pos)
+void Level::toggleThinFloor(const vec2 &pos)
 {
     CellType &cell = grid[pos.y][pos.x];
     switch (cell)
     {
     case CellType::EMPTY:
-        cell = CellType::GHOST;
+        cell = CellType::THIN;
         break;
     default:
         cell = CellType::EMPTY;
@@ -237,8 +237,8 @@ void Level::draw(int x, int y, int cellSize)
             case CellType::FINISH:
                 sprId = SpriteID::SPR_FLOOR_FINISH;
                 break;
-            case CellType::GHOST:
-                sprId = SpriteID::SPR_FLOOR_HIGHLIGHT;
+            case CellType::THIN:
+                sprId = SpriteID::SPR_FLOOR_THIN;
                 break;
             default:
                 sprId = SpriteID::SPR_FLOOR;
@@ -270,7 +270,7 @@ void Level::toggleFloor(const vec2 &pos)
     case CellType::FLOOR:
     case CellType::START:
     case CellType::FINISH:
-    case CellType::GHOST:
+    case CellType::THIN:
         cell = CellType::EMPTY;
         break;
     default:
@@ -287,16 +287,13 @@ void Level::toggleSpecialFloor(const vec2 &pos)
         cell = CellType::FINISH;
         break;
     case CellType::FINISH:
-        cell = CellType::GHOST;
+        cell = CellType::THIN;
         break;
-    case CellType::GHOST:
+    case CellType::THIN:
         cell = CellType::EMPTY;
         break;
-    case CellType::EMPTY:
-    case CellType::FLOOR:
-        cell = CellType::START;
-        break;
     default:
+        cell = CellType::START;
         break;
     }
 }
@@ -364,7 +361,7 @@ void Level::removeSwitch(const vec2 &pos)
         {
             for (int i = 0; i < MAX_GRID_SIZE; i++)
             {
-                if (grid[j][i] == CellType::GHOST)
+                if (grid[j][i] == CellType::THIN)
                     grid[j][i] = CellType::EMPTY;
             }
         }
