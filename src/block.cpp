@@ -293,12 +293,12 @@ std::pair<vec2, vec2> Block::getPositions()
     return Block::GetBlockPositionsForState(vec2(this->x, this->y), this->state);
 }
 
-void Block::draw(int levelX, int levelY, int cellSize)
+void Block::draw(int offsetX, int offsetY, int cellSize)
 {
     SpriteID sprId = animation->tick();
 
     int sx, sy;
     IsoToWorld(x, y, cellSize, cellSize/2, &sx, &sy);
 
-    Game::DrawSprite(levelX + sx, levelY + sy, sprId);
+    Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
 }

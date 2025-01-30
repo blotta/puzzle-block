@@ -5,6 +5,7 @@
 #include "scene.hpp"
 #include "level.hpp"
 #include "block.hpp"
+#include "camera.hpp"
 
 class IsoLevelScene : public Scene
 {
@@ -16,8 +17,7 @@ public:
 private:
     Level level;
     Block block;
-    int offsetX = 100;
-    int offsetY = 100;
+    Camera camera;
     int cellSize = 64;
     vec2 moveDir;
     vec2 mousePos;

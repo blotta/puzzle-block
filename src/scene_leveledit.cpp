@@ -5,7 +5,7 @@
 #include "scene_leveledit.hpp"
 #include "input_manager.hpp"
 
-const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    NUMPAD Arrows: resize grid";
+const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    F5: reset level    NUMPAD Arrows: resize grid";
 const char* SWITCH_MODE_INSTRUCTIONS = "[SWITCH] LMB: set switch destination    RMB: toggle floor ";
 
 void LevelEditScene::init()

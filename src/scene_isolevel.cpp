@@ -21,24 +21,15 @@ void IsoLevelScene::reset()
 
     mTitleText.setText("Level " + lvl);
 
-    // view sizes
-    cellSize = 64;
-    vec2 boundLeft, boundRight;
-    IsoToWorld(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
-    IsoToWorld(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
-    int width = boundRight.x + cellSize/2 - boundLeft.x;
-
-    vec2 boundTop, boundBottom;
-    IsoToWorld(0, 0, cellSize, cellSize/2, &boundTop.x, &boundTop.y);
-    IsoToWorld(level.cols - 1, level.rows - 1, cellSize, cellSize/2, &boundBottom.x, &boundBottom.y);
-    int height = boundBottom.y + cellSize/2/2 - boundTop.y;
-
-    offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
-    offsetY = (Game::ScreenHeight() - height) / 2;
-
     // block setup
     auto startPos = level.getStartPos();
     block.init(startPos, BlockState::UP);
+
+    camera.offset = vec2( Game::ScreenWidth()/2, Game::ScreenHeight()/2 );
+    int tx, ty;
+    IsoToWorld(block.x, block.y, cellSize, cellSize/2, &tx, &ty);
+    camera.target.x = tx;
+    camera.target.y = ty;
 
     mLevelClearedText.setText("LEVEL CLEARED!");
     mLevelClearedText.hAlign = 1;
@@ -93,7 +84,21 @@ void IsoLevelScene::update(float dt)
             mLevelClearedTimer.reset();
         }
     }
-    
+
+    if (Input::MousePressed(SDL_BUTTON_LEFT))
+    {
+        camera.target.x = mousePos.x - camera.offset.x;
+        camera.target.y = mousePos.y - camera.offset.y;
+    }
+    else
+    {
+        int tx, ty;
+        IsoToWorld(block.moveIntent.newPos.x, block.moveIntent.newPos.y, cellSize, cellSize/2, &tx, &ty);
+        camera.target.x = (float)tx;
+        camera.target.y = (float)ty;
+        camera.target.x += cellSize/2;
+    }
+    camera.update(dt);
 
     if (mLevelCleared && mLevelClearedTimer.isDone())
     {
@@ -101,18 +106,22 @@ void IsoLevelScene::update(float dt)
         Game::SetState("curr_level", std::to_string(idx));
         Game::LoadScene(Scenes::ISOLEVEL);
     }
-
-    
 }
 
 void IsoLevelScene::draw()
 {
-    level.draw(offsetX, offsetY, cellSize);
-    block.draw(offsetX, offsetY, cellSize);
+    // level.draw(offsetX, offsetY, cellSize);
+    // block.draw(offsetX, offsetY, cellSize);
+    level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
+    block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
 
     mTitleText.draw(10, 10);
 
     if (mLevelCleared)
         mLevelClearedText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4);
+    
+    // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
+    // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());
+    // SDL_RenderDrawLine(Game::GetRenderer(), 0, Game::ScreenHeight()/2, Game::ScreenWidth(), Game::ScreenHeight()/2);
 }
 

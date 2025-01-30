@@ -214,7 +214,7 @@ CellType Level::cellAt(const vec2 &pos)
     return grid[pos.y][pos.x];
 }
 
-void Level::draw(int x, int y, int cellSize)
+void Level::draw(int offsetX, int offsetY, int cellSize)
 {
     for (int i = 0; i < cols; i++)
     {
@@ -245,7 +245,7 @@ void Level::draw(int x, int y, int cellSize)
                 break;
             }
 
-            Game::DrawSprite(x + sx, y + sy, sprId);
+            Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
         }
     }
 
@@ -255,7 +255,7 @@ void Level::draw(int x, int y, int cellSize)
         int sx;
         int sy;
         IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(x + sx, y + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
+        Game::DrawSprite(offsetX + sx, offsetY + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
     }
 }
 
