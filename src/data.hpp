@@ -2,6 +2,7 @@
 #define DATA_HPP
 
 #include <array>
+#include <cstdio>
 
 
 // SPRITES

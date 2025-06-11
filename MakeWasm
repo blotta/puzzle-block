@@ -1,0 +1,22 @@
+CC := emcc
+CFLAGS := -O2 -s WASM=1 -std=c++20 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' -s USE_SDL_TTF=2
+SRCS := $(wildcard src/*.cpp)
+OBJS := $(SRCS:src/%.cpp=obj/%.o)
+
+EXE := build\web\index.html
+ASSETS := --preload-file assets --shell-file template.html
+
+all: $(EXE)
+
+$(EXE): $(OBJS)
+	mkdir -p build\web
+	$(CC) -o $@ $^ $(CFLAGS) $(ASSETS)
+
+obj/%.o: src/%.cpp
+	mkdir -p obj
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+.PHONY: clean
+clean:
+	rm -f build/web/*
+	rm -f obj/*.o

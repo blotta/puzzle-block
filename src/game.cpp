@@ -7,6 +7,10 @@
 #include "scene_leveledit.hpp"
 #include "scene_isolevel.hpp"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 Game &Game::get()
 {
     static Game instance;
@@ -40,7 +44,8 @@ Game::Game()
     }
     Asset::SetRenderer(mRenderer);
 
-    if (!IMG_Init(IMG_INIT_PNG))
+    int imgFlags = IMG_INIT_PNG;
+    if (!(IMG_Init(imgFlags) & imgFlags))
     {
         SDL_Log("Failed to initialize SDL_image: %s\n", IMG_GetError());
         success = false;
@@ -197,10 +202,16 @@ void Game::run()
 
     loadAssets();
 
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop([]() {
+        Game::get().tick();
+    }, 0, 1);
+#else
     while (mRunning)
     {
         tick();
     }
+#endif
 
     // TODO: move this somewhere else
     if (mCurrentScene != nullptr)
@@ -223,7 +234,7 @@ void Game::tick()
         return;
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_F12))
+    if (Input::JustPressed(SDL_SCANCODE_F11))
     {
         LoadScene(Scenes::BOOT);
     }
