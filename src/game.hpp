@@ -41,6 +41,8 @@ public:
     static void DrawSprite(int x, int y, SpriteID sprId);
     static void DrawText(int x, int y, const std::string& txt);
 
+    static void PlaySound(const std::string& path);
+
 private:
     Game();
     ~Game();

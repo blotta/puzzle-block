@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include "game.hpp"
 #include "input_manager.hpp"
 #include "scene_splash.hpp"
@@ -57,6 +58,14 @@ Game::Game()
         success = false;
     }
 
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        SDL_Log("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
+        success = false;
+    }
+
+    Asset::LoadSound("assets/sfx/block_move.ogg");
+
     mUpdateTimer.setDuration(1.0 / mTargetFPS);
     mUpdateTimer.reset();
 
@@ -81,6 +90,8 @@ Game::~Game()
     // make sure to deinit assets before deiniting systems
     Asset::UnloadAssets();
 
+    Mix_CloseAudio();
+    Mix_Quit();
     TTF_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(mRenderer);
@@ -183,6 +194,13 @@ void Game::DrawText(int x, int y, const std::string &txt)
 {
     auto& g = Game::get();
     g.mDynText.Draw(x, y, txt);
+}
+
+
+void Game::PlaySound(const std::string& path)
+{
+    auto sound = Asset::GetSound(path);
+    Mix_PlayChannel(-1, sound, 0);
 }
 
 void Game::Run()

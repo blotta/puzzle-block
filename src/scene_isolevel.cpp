@@ -83,6 +83,7 @@ void IsoLevelScene::update(float dt)
             mLevelCleared = true;
             mLevelClearedTimer.reset();
         }
+        Game::PlaySound("assets/sfx/block_move.ogg");
     }
 
     if (Input::MousePressed(SDL_BUTTON_LEFT))

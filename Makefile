@@ -1,6 +1,6 @@
 CC := g++
 # CC := clang++
-LIBS := sdl2 sdl2_image sdl2_ttf
+LIBS := sdl2 sdl2_image sdl2_ttf sdl2_mixer
 PKG_CONFIG := pkg-config
 
 CFLAGS := $(shell $(PKG_CONFIG) --cflags $(LIBS)) -Werror -Wall -std=c++20

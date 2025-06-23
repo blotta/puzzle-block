@@ -24,6 +24,10 @@ void Asset::UnloadAssets()
 
     if (mgr.mFont)
         TTF_CloseFont(mgr.mFont);
+    
+    for (const auto& [path, sfx] : mgr.mSounds) {
+        Mix_FreeChunk(sfx);
+    }
 }
 
 const Texture *Asset::GetTexture(const std::string &path)
@@ -41,6 +45,23 @@ void Asset::LoadTexture(const std::string &path)
     auto &mgr = Asset::get();
     Texture t(mgr.pRenderer, path);
     mgr.mTextures.emplace(path, std::move(t));
+}
+
+Mix_Chunk* Asset::GetSound(const std::string &path)
+{
+    auto &mgr = Asset::get();
+    auto it = mgr.mSounds.find(path);
+    if (it == mgr.mSounds.end())
+        LoadSound(path);
+
+    return mgr.mSounds.at(path);
+}
+
+void Asset::LoadSound(const std::string &path)
+{
+    auto &mgr = Asset::get();
+    auto sfx = Mix_LoadWAV(path.c_str());
+    mgr.mSounds.emplace(path, sfx);
 }
 
 void Asset::LoadFont(const std::string &path, int ptsize)
