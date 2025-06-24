@@ -94,7 +94,7 @@ void LevelEditScene::update(float dt)
 {
     Input::MousePosition(&mousePos.x, &mousePos.y);
     WorldToIso(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
-    SDL_Log("mouseIso : %d %d\n", mouseIsoPos.x, mouseIsoPos.y);
+    // SDL_Log("mouseIso : %d %d\n", mouseIsoPos.x, mouseIsoPos.y);
 
     if (switchEditing)
     {
@@ -313,4 +313,7 @@ void LevelEditScene::draw()
 
     // Level Info
     mLevelText.draw(10, Game::ScreenHeight() - 35);
+
+    Game::SetFontSize(12);
+    Game::Text(10, Game::ScreenHeight() / 2, "heeey");
 }

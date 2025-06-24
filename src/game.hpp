@@ -44,6 +44,10 @@ class Game
     static void PlaySound(const std::string& path);
     static void PlayMusic(const std::string& path);
 
+    static void SetFont(const std::string& path, int ptsize);
+    static void SetFontSize(int ptsize);
+    static void Text(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255}, TextAlign align = TextAlign::LEFT);
+
   private:
     Game();
     ~Game();
@@ -73,6 +77,7 @@ class Game
 
     const Texture* pActiveTexture;
     DynamicText mDynText;
+    FontAtlas* mFontAtlas;
 
     Scenes mNextScene = Scenes::BOOT;
     std::shared_ptr<Scene> mCurrentScene;

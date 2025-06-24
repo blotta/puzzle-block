@@ -65,11 +65,6 @@ Game::Game()
         success = false;
     }
 
-    Asset::LoadSound("assets/sfx/block_move.ogg");
-    Asset::LoadSound("assets/sfx/switch.ogg");
-    Asset::LoadSound("assets/sfx/arrive.ogg");
-    Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
-
     mUpdateTimer.setDuration(1.0 / mTargetFPS);
     mUpdateTimer.reset();
 
@@ -200,6 +195,24 @@ void Game::PlayMusic(const std::string& path)
         Mix_PlayMusic(sound, -1);
 }
 
+void Game::SetFont(const std::string& path, int ptsize)
+{
+    auto& g = Game::get();
+    g.mFontAtlas = Asset::GetFontAtlas(path, ptsize);
+}
+
+void Game::SetFontSize(int ptsize)
+{
+    auto& g = Game::get();
+    g.mFontAtlas = Asset::GetFontAtlas(g.mFontAtlas->fontPath, ptsize);
+}
+
+void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align)
+{
+    auto& g = Game::get();
+    g.mFontAtlas->drawText(x, y, text, color, align);
+}
+
 void Game::Run()
 {
     Game::get().run();
@@ -270,11 +283,19 @@ void Game::tick()
 void Game::loadAssets()
 {
     Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 32);
+    Asset::LoadFontAtlas("assets/fonts/Cabin-Regular.ttf", 20);
+    Game::SetFont("assets/fonts/Cabin-Regular.ttf", 32);
 
     // preload spritesheet
     pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");
 
     mDynText.Init();
+
+    Asset::LoadSound("assets/sfx/block_move.ogg");
+    Asset::LoadSound("assets/sfx/switch.ogg");
+    Asset::LoadSound("assets/sfx/arrive.ogg");
+    Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
+
 
     loadLevels();
 }

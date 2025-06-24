@@ -11,6 +11,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "data.hpp"
+#include "text.hpp"
 
 class Texture
 {
@@ -44,6 +45,9 @@ class Asset
     static Mix_Music* GetMusic(const std::string& path);
     static void LoadMusic(const std::string& path);
 
+    static void LoadFontAtlas(const std::string& path, int ptsize);
+    static FontAtlas* GetFontAtlas(const std::string& path, int ptsize);
+
     static void UnloadAssets();
 
   private:
@@ -55,6 +59,7 @@ class Asset
     TTF_Font* mFont = nullptr;
     std::unordered_map<std::string, Mix_Chunk*> mSounds;
     std::unordered_map<std::string, Mix_Music*> mMusics;
+    std::unordered_map<std::string, FontAtlas*> mFontAtlases;
     int mFontPointSize = 32;
 };
 

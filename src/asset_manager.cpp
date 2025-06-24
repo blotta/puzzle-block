@@ -1,5 +1,7 @@
 #include "asset_manager.hpp"
+#include "text.hpp"
 #include <SDL2/SDL_image.h>
+#include <format>
 
 Asset& Asset::get()
 {
@@ -33,6 +35,11 @@ void Asset::UnloadAssets()
     for (const auto& [path, sfx] : mgr.mMusics)
     {
         Mix_FreeMusic(sfx);
+    }
+
+    for (const auto& [path, fa] : mgr.mFontAtlases)
+    {
+        delete fa;
     }
 }
 
@@ -153,4 +160,27 @@ Texture::~Texture()
 SDL_Texture* Texture::get() const
 {
     return mTexture;
+}
+
+////////////////
+// FONT ATLAS //
+////////////////
+void Asset::LoadFontAtlas(const std::string& path, int ptsize)
+{
+    auto& mgr = Asset::get();
+    auto fontAtlas = new FontAtlas(mgr.pRenderer, path, ptsize);
+    std::string key = std::format("{}:{}", path,ptsize);
+    mgr.mFontAtlases.emplace(key, fontAtlas);
+}
+
+FontAtlas* Asset::GetFontAtlas(const std::string& path, int ptsize)
+{
+    std::string key = std::format("{}:{}", path,ptsize);
+
+    auto& mgr = Asset::get();
+    auto it = mgr.mFontAtlases.find(key);
+    if (it == mgr.mFontAtlases.end())
+        LoadFontAtlas(path, ptsize);
+
+    return mgr.mFontAtlases.at(key);
 }
