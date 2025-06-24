@@ -65,6 +65,9 @@ Game::Game()
     }
 
     Asset::LoadSound("assets/sfx/block_move.ogg");
+    Asset::LoadSound("assets/sfx/switch.ogg");
+    Asset::LoadSound("assets/sfx/arrive.ogg");
+    Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
 
     mUpdateTimer.setDuration(1.0 / mTargetFPS);
     mUpdateTimer.reset();
@@ -201,6 +204,13 @@ void Game::PlaySound(const std::string& path)
 {
     auto sound = Asset::GetSound(path);
     Mix_PlayChannel(-1, sound, 0);
+}
+
+void Game::PlayMusic(const std::string& path)
+{
+    auto sound = Asset::GetMusic(path);
+    if (0 == Mix_PlayingMusic())
+        Mix_PlayMusic(sound, -1);
 }
 
 void Game::Run()

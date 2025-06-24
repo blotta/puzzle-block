@@ -181,7 +181,7 @@ bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
     return false;
 }
 
-void Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
+bool Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
 {
     LevelSwitch* sw;
     if (this->hasSwitchAt(pos1, &sw) || this->hasSwitchAt(pos2, &sw))
@@ -191,7 +191,9 @@ void Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
         else
             this->set(sw->floorX, sw->floorY, CellType::THIN);
         sw->on = !sw->on;
+        return true;
     }
+    return false;
 }
 
 void Level::toggleThinFloor(const vec2 &pos)

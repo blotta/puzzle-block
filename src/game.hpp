@@ -42,6 +42,7 @@ public:
     static void DrawText(int x, int y, const std::string& txt);
 
     static void PlaySound(const std::string& path);
+    static void PlayMusic(const std::string& path);
 
 private:
     Game();

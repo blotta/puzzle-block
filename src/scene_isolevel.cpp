@@ -5,6 +5,8 @@ void IsoLevelScene::init()
 {
     SDL_Log("Loading IsoLevel scene\n");
     this->reset();
+
+    Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
 }
 
 void IsoLevelScene::dispose()
@@ -76,12 +78,16 @@ void IsoLevelScene::update(float dt)
 
     if (blockMoved) {
         auto positions = block.getPositions();
-        level.checkAndTriggerSwitches(positions.first, positions.second);
+        if (level.checkAndTriggerSwitches(positions.first, positions.second))
+        {
+            Game::PlaySound("assets/sfx/switch.ogg");
+        }
 
         if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
         {
             mLevelCleared = true;
             mLevelClearedTimer.reset();
+            Game::PlaySound("assets/sfx/arrive.ogg");
         }
         Game::PlaySound("assets/sfx/block_move.ogg");
     }

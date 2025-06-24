@@ -41,6 +41,9 @@ public:
     static Mix_Chunk* GetSound(const std::string& path);
     static void LoadSound(const std::string& path);
 
+    static Mix_Music* GetMusic(const std::string& path);
+    static void LoadMusic(const std::string& path);
+
     static void UnloadAssets();
 private:
     Asset();
@@ -50,6 +53,7 @@ private:
     std::unordered_map<std::string, Texture> mTextures;
     TTF_Font* mFont = nullptr;
     std::unordered_map<std::string, Mix_Chunk*> mSounds;
+    std::unordered_map<std::string, Mix_Music*> mMusics;
     int mFontPointSize = 32;
 };
 

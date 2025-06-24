@@ -28,6 +28,10 @@ void Asset::UnloadAssets()
     for (const auto& [path, sfx] : mgr.mSounds) {
         Mix_FreeChunk(sfx);
     }
+
+    for (const auto& [path, sfx] : mgr.mMusics) {
+        Mix_FreeMusic(sfx);
+    }
 }
 
 const Texture *Asset::GetTexture(const std::string &path)
@@ -62,6 +66,23 @@ void Asset::LoadSound(const std::string &path)
     auto &mgr = Asset::get();
     auto sfx = Mix_LoadWAV(path.c_str());
     mgr.mSounds.emplace(path, sfx);
+}
+
+Mix_Music* Asset::GetMusic(const std::string &path)
+{
+    auto &mgr = Asset::get();
+    auto it = mgr.mMusics.find(path);
+    if (it == mgr.mMusics.end())
+        LoadSound(path);
+
+    return mgr.mMusics.at(path);
+}
+
+void Asset::LoadMusic(const std::string &path)
+{
+    auto &mgr = Asset::get();
+    auto sfx = Mix_LoadMUS(path.c_str());
+    mgr.mMusics.emplace(path, sfx);
 }
 
 void Asset::LoadFont(const std::string &path, int ptsize)
