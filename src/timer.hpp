@@ -18,10 +18,10 @@ struct Timer
     void mark();
 
     /// @brief delta time since timer was reset
-    /// @return 
+    /// @return
     float elapsed() const;
     /// @brief returns true if time elapsed is greater or equal to duration specified
-    /// @return 
+    /// @return
     bool isDone() const;
     float waitUntilDone() const;
     void forwardBy(float seconds);

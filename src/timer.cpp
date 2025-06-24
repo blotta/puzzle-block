@@ -17,7 +17,7 @@ Timer::~Timer()
 }
 
 /// @brief duration in seconds
-/// @param duration 
+/// @param duration
 void Timer::setDuration(float duration)
 {
     mDuration = duration;

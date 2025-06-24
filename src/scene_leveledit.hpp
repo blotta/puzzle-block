@@ -1,19 +1,20 @@
 #ifndef SCENE_LEVEL_HPP
 #define SCENE_LEVEL_HPP
 
-#include "scene.hpp"
-#include "level.hpp"
 #include "block.hpp"
+#include "level.hpp"
+#include "scene.hpp"
 #include "text.hpp"
 
 class LevelEditScene : public Scene
 {
-public:
+  public:
     void init() override;
     void update(float dt) override;
     void draw() override;
     void dispose() override;
-private:
+
+  private:
     void reset();
     void resize();
     void save(bool newLevel, bool saveToFile);

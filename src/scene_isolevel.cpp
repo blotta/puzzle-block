@@ -1,5 +1,5 @@
-#include "input_manager.hpp"
 #include "scene_isolevel.hpp"
+#include "input_manager.hpp"
 
 void IsoLevelScene::init()
 {
@@ -27,9 +27,9 @@ void IsoLevelScene::reset()
     auto startPos = level.getStartPos();
     block.init(startPos, BlockState::UP);
 
-    camera.offset = vec2( Game::ScreenWidth()/2, Game::ScreenHeight()/2 );
+    camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
-    IsoToWorld(block.x, block.y, cellSize, cellSize/2, &tx, &ty);
+    IsoToWorld(block.x, block.y, cellSize, cellSize / 2, &tx, &ty);
     camera.target.x = tx;
     camera.target.y = ty;
 
@@ -76,14 +76,16 @@ void IsoLevelScene::update(float dt)
 
     bool blockMoved = block.move(moveDir, level, true);
 
-    if (blockMoved) {
+    if (blockMoved)
+    {
         auto positions = block.getPositions();
         if (level.checkAndTriggerSwitches(positions.first, positions.second))
         {
             Game::PlaySound("assets/sfx/switch.ogg");
         }
 
-        if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH && level.cellAt(positions.second) == CellType::FINISH)
+        if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH &&
+            level.cellAt(positions.second) == CellType::FINISH)
         {
             mLevelCleared = true;
             mLevelClearedTimer.reset();
@@ -100,10 +102,10 @@ void IsoLevelScene::update(float dt)
     else
     {
         int tx, ty;
-        IsoToWorld(block.moveIntent.newPos.x, block.moveIntent.newPos.y, cellSize, cellSize/2, &tx, &ty);
+        IsoToWorld(block.moveIntent.newPos.x, block.moveIntent.newPos.y, cellSize, cellSize / 2, &tx, &ty);
         camera.target.x = (float)tx;
         camera.target.y = (float)ty;
-        camera.target.x += cellSize/2;
+        camera.target.x += cellSize / 2;
     }
     camera.update(dt);
 
@@ -126,9 +128,8 @@ void IsoLevelScene::draw()
 
     if (mLevelCleared)
         mLevelClearedText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4);
-    
+
     // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
     // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());
     // SDL_RenderDrawLine(Game::GetRenderer(), 0, Game::ScreenHeight()/2, Game::ScreenWidth(), Game::ScreenHeight()/2);
 }
-

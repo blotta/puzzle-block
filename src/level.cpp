@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <span>
+#include <stdlib.h>
 
 #include <SDL2/SDL.h>
 
@@ -7,9 +7,9 @@
 
 void Level::clear()
 {
-    for (auto &row : grid)
+    for (auto& row : grid)
     {
-        for (auto &cell : row)
+        for (auto& cell : row)
         {
             cell = CellType::EMPTY;
         }
@@ -21,7 +21,7 @@ void Level::set(int x, int y, CellType value)
     grid[y][x] = value;
 }
 
-void Level::load(const LevelData &ld)
+void Level::load(const LevelData& ld)
 {
     this->clear();
     this->rows = ld.rows;
@@ -34,23 +34,22 @@ void Level::load(const LevelData &ld)
             char v = ld.data[p];
             switch (v)
             {
-                case '0':
-                    this->set(col, row, CellType::EMPTY);
-                    break;
-                case '1':
-                    this->set(col, row, CellType::FLOOR);
-                    break;
-                case '2':
-                    this->set(col, row, CellType::START);
-                    break;
-                case '3':
-                    this->set(col, row, CellType::FINISH);
-                    break;
-                case '4':
-                    this->set(col, row, CellType::THIN);
-                    break;
+            case '0':
+                this->set(col, row, CellType::EMPTY);
+                break;
+            case '1':
+                this->set(col, row, CellType::FLOOR);
+                break;
+            case '2':
+                this->set(col, row, CellType::START);
+                break;
+            case '3':
+                this->set(col, row, CellType::FINISH);
+                break;
+            case '4':
+                this->set(col, row, CellType::THIN);
+                break;
             }
-
         }
     }
 
@@ -61,8 +60,7 @@ void Level::load(const LevelData &ld)
     this->switchCount = ld.switchCount;
 }
 
-
-void Level::toLevelData(LevelData *ld)
+void Level::toLevelData(LevelData* ld)
 {
     ld->cols = cols;
     ld->rows = rows;
@@ -101,7 +99,8 @@ void Level::toLevelData(LevelData *ld)
         }
     }
 
-    for (int i = 0; i < this->switchCount; i++) {
+    for (int i = 0; i < this->switchCount; i++)
+    {
         ld->switches[i] = this->switches[i];
     }
     ld->switchCount = this->switchCount;
@@ -121,7 +120,7 @@ vec2 Level::getStartPos()
     return vec2();
 }
 
-bool Level::isValidPos(const vec2 &pos) const
+bool Level::isValidPos(const vec2& pos) const
 {
     return pos.x >= 0 && pos.x < cols && pos.y >= 0 && pos.y < rows;
 }
@@ -156,7 +155,7 @@ bool Level::isValid()
     return valid;
 }
 
-bool Level::hasFloorAt(const vec2 &pos) const
+bool Level::hasFloorAt(const vec2& pos) const
 {
     if (!isValidPos(pos))
         return false;
@@ -166,7 +165,7 @@ bool Level::hasFloorAt(const vec2 &pos) const
     return type == CellType::FLOOR || type == CellType::START || type == CellType::FINISH || type == CellType::THIN;
 }
 
-bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
+bool Level::hasSwitchAt(const vec2& pos, LevelSwitch** sw)
 {
     for (int i = 0; i < this->switchCount; i++)
     {
@@ -181,7 +180,7 @@ bool Level::hasSwitchAt(const vec2 &pos, LevelSwitch** sw)
     return false;
 }
 
-bool Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
+bool Level::checkAndTriggerSwitches(const vec2& pos1, const vec2& pos2)
 {
     LevelSwitch* sw;
     if (this->hasSwitchAt(pos1, &sw) || this->hasSwitchAt(pos2, &sw))
@@ -196,9 +195,9 @@ bool Level::checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2)
     return false;
 }
 
-void Level::toggleThinFloor(const vec2 &pos)
+void Level::toggleThinFloor(const vec2& pos)
 {
-    CellType &cell = grid[pos.y][pos.x];
+    CellType& cell = grid[pos.y][pos.x];
     switch (cell)
     {
     case CellType::EMPTY:
@@ -208,10 +207,9 @@ void Level::toggleThinFloor(const vec2 &pos)
         cell = CellType::EMPTY;
         break;
     }
-
 }
 
-CellType Level::cellAt(const vec2 &pos)
+CellType Level::cellAt(const vec2& pos)
 {
     return grid[pos.y][pos.x];
 }
@@ -261,9 +259,9 @@ void Level::draw(int offsetX, int offsetY, int cellSize)
     }
 }
 
-void Level::toggleFloor(const vec2 &pos)
+void Level::toggleFloor(const vec2& pos)
 {
-    CellType &cell = grid[pos.y][pos.x];
+    CellType& cell = grid[pos.y][pos.x];
     switch (cell)
     {
     case CellType::EMPTY:
@@ -280,9 +278,9 @@ void Level::toggleFloor(const vec2 &pos)
     }
 }
 
-void Level::toggleSpecialFloor(const vec2 &pos)
+void Level::toggleSpecialFloor(const vec2& pos)
 {
-    CellType &cell = grid[pos.y][pos.x];
+    CellType& cell = grid[pos.y][pos.x];
     switch (cell)
     {
     case CellType::START:
@@ -306,7 +304,7 @@ void Level::addRow()
     {
         rows++;
         for (int i = 0; i < cols; i++)
-            grid[rows-1][i] = CellType::EMPTY;
+            grid[rows - 1][i] = CellType::EMPTY;
     }
 }
 
@@ -322,7 +320,7 @@ void Level::addColumn()
     {
         cols++;
         for (int i = 0; i < rows; i++)
-            grid[i][cols-1] = CellType::EMPTY;
+            grid[i][cols - 1] = CellType::EMPTY;
     }
 }
 
@@ -340,24 +338,26 @@ void Level::addSwitch(LevelSwitch sw)
     this->switchCount++;
 }
 
-void Level::removeSwitch(const vec2 &pos)
+void Level::removeSwitch(const vec2& pos)
 {
     bool removed = false;
     for (int i = 0; i < this->switchCount; i++)
     {
         if (removed)
         {
-            this->switches[i-1] = this->switches[i];
+            this->switches[i - 1] = this->switches[i];
             this->switches[i] = {};
             continue;
         }
 
-        if (this->switches[i].x == pos.x && this->switches[i].y == pos.y) {
+        if (this->switches[i].x == pos.x && this->switches[i].y == pos.y)
+        {
             removed = true;
         }
     }
 
-    if (removed) {
+    if (removed)
+    {
         this->switchCount--;
         for (int j = 0; j < MAX_GRID_SIZE; j++)
         {

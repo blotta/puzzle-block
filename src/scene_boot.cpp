@@ -1,12 +1,11 @@
 #include <SDL2/SDL.h>
 
+#include "game.hpp"
 #include "input_manager.hpp"
 #include "scene_boot.hpp"
-#include "game.hpp"
 #include "util.hpp"
 
 #include "animation.hpp"
-
 
 enum class BootDebugType
 {
@@ -37,8 +36,8 @@ void BootScene::init()
     timer.setDuration(3);
     timer.reset();
 
-    startX = Game::ScreenWidth()/2;
-    startY = Game::ScreenHeight()/2;
+    startX = Game::ScreenWidth() / 2;
+    startY = Game::ScreenHeight() / 2;
     spr = Game::GetSprite(SPR_BLOCK_UP);
 
     anim_up_long.start();
@@ -82,7 +81,9 @@ void debug_input_test_draw()
 // Dynamic Text
 void debug_dynamic_text_draw()
 {
-    Game::DrawText(30, 10, "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~");
+    Game::DrawText(
+        30, 10,
+        "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~");
 }
 
 // Sprite positioning
@@ -93,7 +94,7 @@ void debug_sprite_positioning_update(float dt)
         dir = 1;
     if (Input::JustPressed(SDL_SCANCODE_LEFT))
         dir = -1;
-    
+
     if (dir != 0)
     {
         int offset = (int)SPR_BLOCK_UP;
@@ -127,8 +128,10 @@ void debug_sprite_positioning_draw()
     sprintf(buf, "spritesheet: %d %d", spr.tx / 128, (spr.ty - 64) / 128);
     Game::DrawText(10, 10 + 35 * 2, buf);
 
-    for (int y = -2; y < 3; y++) {
-        for (int x = -2; x < 3; x++) {
+    for (int y = -2; y < 3; y++)
+    {
+        for (int x = -2; x < 3; x++)
+        {
             int sx;
             int sy;
             IsoToWorld(x, y, 64, 32, &sx, &sy);
@@ -137,18 +140,8 @@ void debug_sprite_positioning_draw()
     }
 
     // mimic Game::DrawSprite()
-    SDL_Rect src = {
-        spr.tx,
-        spr.ty,
-        spr.tw,
-        spr.th
-    };
-    SDL_Rect dest = {
-        startX - spr.originX,
-        startY - spr.originY,
-        spr.tw,
-        spr.th
-    };
+    SDL_Rect src = {spr.tx, spr.ty, spr.tw, spr.th};
+    SDL_Rect dest = {startX - spr.originX, startY - spr.originY, spr.tw, spr.th};
 
     SDL_RenderCopy(Game::GetRenderer(), Asset::GetTexture("assets/images/spritesheet.png")->get(), &src, &dest);
 
@@ -162,8 +155,10 @@ void debug_sprite_positioning_draw()
 void debug_animation_draw()
 {
     // draw floors
-    for (int y = -2; y < 3; y++) {
-        for (int x = -2; x < 3; x++) {
+    for (int y = -2; y < 3; y++)
+    {
+        for (int x = -2; x < 3; x++)
+        {
             int sx;
             int sy;
             IsoToWorld(x, y, 64, 32, &sx, &sy);
@@ -184,16 +179,16 @@ void BootScene::update(float dt)
 
         anim_up_long.start();
     }
-    
+
     if (!debugModeActive && timer.isDone())
         loadFirstScene = true;
-    
+
     if (Input::JustPressed(SDL_SCANCODE_RETURN))
         loadFirstScene = true;
 
     if (loadFirstScene)
         Game::LoadScene(Scenes::SPLASH);
-    
+
     if (debugModeActive)
     {
         if (Input::JustPressed(SDL_SCANCODE_F10))
@@ -211,7 +206,6 @@ void BootScene::update(float dt)
             debug_sprite_positioning_update(dt);
     }
 }
-
 
 void BootScene::draw()
 {

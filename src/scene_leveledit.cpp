@@ -1,11 +1,15 @@
-#include <math.h>
-#include <string>
-#include <format>
-
 #include "scene_leveledit.hpp"
+
+#include <math.h>
+
+#include <format>
+#include <string>
+
 #include "input_manager.hpp"
 
-const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file    F3: save new file    F5: reset level    NUMPAD Arrows: resize grid";
+const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file   "
+                                       " F3: save new file    F4: random    F5: reset level    NUMPAD Arrows: "
+                                       "resize grid";
 const char* SWITCH_MODE_INSTRUCTIONS = "[SWITCH] LMB: set switch destination    RMB: toggle floor ";
 
 void LevelEditScene::init()
@@ -34,8 +38,7 @@ void LevelEditScene::reset()
     saved = true;
     mEditInstruction.setPointSize(16);
     mEditInstruction.setText(NORMAL_MODE_INSTRUCTIONS);
-    mLevelText.setText(
-        std::format("Level {} {}x{}", lvlIdx, level.cols, level.rows));
+    mLevelText.setText(std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
 
     resize();
 }
@@ -45,14 +48,14 @@ void LevelEditScene::resize()
     // view sizes
     cellSize = 64;
     vec2 boundLeft, boundRight;
-    IsoToWorld(0, level.rows - 1, cellSize, cellSize/2, &boundLeft.x, &boundLeft.y);
-    IsoToWorld(level.cols - 1, 0, cellSize, cellSize/2, &boundRight.x, &boundRight.y);
-    int width = boundRight.x + cellSize/2 - boundLeft.x;
+    IsoToWorld(0, level.rows - 1, cellSize, cellSize / 2, &boundLeft.x, &boundLeft.y);
+    IsoToWorld(level.cols - 1, 0, cellSize, cellSize / 2, &boundRight.x, &boundRight.y);
+    int width = boundRight.x + cellSize / 2 - boundLeft.x;
 
     vec2 boundTop, boundBottom;
-    IsoToWorld(0, 0, cellSize, cellSize/2, &boundTop.x, &boundTop.y);
-    IsoToWorld(level.cols - 1, level.rows - 1, cellSize, cellSize/2, &boundBottom.x, &boundBottom.y);
-    int height = boundBottom.y + cellSize/2/2 - boundTop.y;
+    IsoToWorld(0, 0, cellSize, cellSize / 2, &boundTop.x, &boundTop.y);
+    IsoToWorld(level.cols - 1, level.rows - 1, cellSize, cellSize / 2, &boundBottom.x, &boundBottom.y);
+    int height = boundBottom.y + cellSize / 2 / 2 - boundTop.y;
 
     offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
     offsetY = (Game::ScreenHeight() - height) / 2;
@@ -67,9 +70,9 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
         lvlIdx = Game::AddLevelData(ld);
     else
         Game::SaveLevelData(ld, lvlIdx);
-    
+
     saved = true;
-    
+
     if (saveToFile)
     {
         char fileName[50] = {};
@@ -83,9 +86,9 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
 void LevelEditScene::levelChanged()
 {
     saved = false;
-    mLevelText.setText(std::format("Level {} {}x{} {}", lvlIdx, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
+    mLevelText.setText(
+        std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
 }
-
 
 void LevelEditScene::update(float dt)
 {
@@ -95,7 +98,6 @@ void LevelEditScene::update(float dt)
 
     if (switchEditing)
     {
-
         if (Input::JustPressed(SDL_SCANCODE_S))
         {
             switchEditing = false;
@@ -111,8 +113,10 @@ void LevelEditScene::update(float dt)
             levelChanged();
         }
 
-        if (Input::MouseJustPressed(SDL_BUTTON_LEFT)) {
-            if (level.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::EMPTY) {
+        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+        {
+            if (level.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::EMPTY)
+            {
                 level.addSwitch(tmpSwitch);
                 switchEditing = false;
                 levelChanged();
@@ -121,7 +125,6 @@ void LevelEditScene::update(float dt)
 
         return;
     }
-
 
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
@@ -133,7 +136,6 @@ void LevelEditScene::update(float dt)
             return;
         }
     }
-
 
     if (level.isValidPos(mouseIsoPos))
     {
@@ -151,13 +153,17 @@ void LevelEditScene::update(float dt)
 
         if (level.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::FLOOR)
         {
-            if (Input::JustPressed(SDL_SCANCODE_S)) {
+            if (Input::JustPressed(SDL_SCANCODE_S))
+            {
                 // enter switch edit mode if no switch in gridpos
                 LevelSwitch* sw;
-                if (level.hasSwitchAt(mouseIsoPos, &sw)) {
+                if (level.hasSwitchAt(mouseIsoPos, &sw))
+                {
                     level.removeSwitch(mouseIsoPos);
                     levelChanged();
-                } else {
+                }
+                else
+                {
                     switchEditing = true;
                     mEditInstruction.setText(SWITCH_MODE_INSTRUCTIONS);
                     tmpSwitch.x = mouseIsoPos.x;
@@ -167,22 +173,26 @@ void LevelEditScene::update(float dt)
         }
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_KP_6)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_6))
+    {
         level.addColumn();
         resize();
         levelChanged();
     }
-    if (Input::JustPressed(SDL_SCANCODE_KP_8)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_8))
+    {
         level.removeRow();
         resize();
         levelChanged();
     }
-    if (Input::JustPressed(SDL_SCANCODE_KP_4)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_4))
+    {
         level.removeColumn();
         resize();
         levelChanged();
     }
-    if (Input::JustPressed(SDL_SCANCODE_KP_2)) {
+    if (Input::JustPressed(SDL_SCANCODE_KP_2))
+    {
         level.addRow();
         resize();
         levelChanged();
@@ -199,7 +209,15 @@ void LevelEditScene::update(float dt)
         // save new
         levelChanged();
         save(true, true);
-        Game::SetState("curr_level", std::to_string(lvlIdx));
+        Game::SetState("curr_level", std::to_string(lvlIdx + 1));
+    }
+
+    if (Input::JustPressed(SDL_SCANCODE_F4))
+    {
+        auto randLvl = generateRandomLevel(20);
+        level.load(randLvl);
+        auto startPos = level.getStartPos();
+        block.init(startPos, BlockState::UP);
     }
 
     if (Input::JustPressed(SDL_SCANCODE_F5))
@@ -220,12 +238,12 @@ void LevelEditScene::update(float dt)
         moveDir = vec2(1, 0);
 
     bool blockMoved = block.move(moveDir, level, false);
-    if (blockMoved) {
+    if (blockMoved)
+    {
         auto positions = block.getPositions();
         level.checkAndTriggerSwitches(positions.first, positions.second);
     }
 }
-
 
 void LevelEditScene::draw()
 {
@@ -241,59 +259,58 @@ void LevelEditScene::draw()
             SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 20, 255); // yellow
 
         int topX, topY, rightX, rightY, botX, botY, leftX, leftY = 0;
-        IsoToWorld(0, 0, cellSize, cellSize/2, &topX, &topY);
-        IsoToWorld(level.cols, 0, cellSize, cellSize/2, &rightX, &rightY);
-        IsoToWorld(level.cols, level.rows, cellSize, cellSize/2, &botX, &botY);
-        IsoToWorld(0, level.rows, cellSize, cellSize/2, &leftX, &leftY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize/2, offsetY + topY, offsetX + rightX + cellSize/2, offsetY + rightY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize/2, offsetY + topY, offsetX + leftX  + cellSize/2, offsetY + leftY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize/2, offsetY + botY, offsetX + rightX + cellSize/2, offsetY + rightY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize/2, offsetY + botY, offsetX + leftX  + cellSize/2, offsetY + leftY);
+        IsoToWorld(0, 0, cellSize, cellSize / 2, &topX, &topY);
+        IsoToWorld(level.cols, 0, cellSize, cellSize / 2, &rightX, &rightY);
+        IsoToWorld(level.cols, level.rows, cellSize, cellSize / 2, &botX, &botY);
+        IsoToWorld(0, level.rows, cellSize, cellSize / 2, &leftX, &leftY);
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
+                           offsetX + rightX + cellSize / 2, offsetY + rightY);
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
+                           offsetX + leftX + cellSize / 2, offsetY + leftY);
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize / 2, offsetY + botY,
+                           offsetX + rightX + cellSize / 2, offsetY + rightY);
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize / 2, offsetY + botY,
+                           offsetX + leftX + cellSize / 2, offsetY + leftY);
     }
 
     // level switches
-    for (int i = 0; i < level.switchCount; i++) {
+    for (int i = 0; i < level.switchCount; i++)
+    {
         LevelSwitch& sw = level.switches[i];
         SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
         if (sw.on)
             SDL_SetRenderDrawColor(Game::GetRenderer(), 180, 255, 0, 255);
         int swX, swY, swfX, swfY;
-        IsoToWorld(sw.x, sw.y, cellSize, cellSize/2, &swX, &swY);
-        IsoToWorld(sw.floorX, sw.floorY, cellSize, cellSize/2, &swfX, &swfY);
-        SDL_RenderDrawLine(Game::GetRenderer(),
-            offsetX + swX + cellSize/2,
-            offsetY + swY + cellSize/4,
-            offsetX + swfX + cellSize/2,
-            offsetY + swfY + cellSize/4
-            );
+        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &swX, &swY);
+        IsoToWorld(sw.floorX, sw.floorY, cellSize, cellSize / 2, &swfX, &swfY);
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + swX + cellSize / 2, offsetY + swY + cellSize / 4,
+                           offsetX + swfX + cellSize / 2, offsetY + swfY + cellSize / 4);
     }
 
     // switch editing
     if (switchEditing)
     {
         int swX, swY, swfX, swfY;
-        IsoToWorld(tmpSwitch.x, tmpSwitch.y, cellSize, cellSize/2, &swX, &swY);
-        IsoToWorld(tmpSwitch.floorX, tmpSwitch.floorY, cellSize, cellSize/2, &swfX, &swfY);
+        IsoToWorld(tmpSwitch.x, tmpSwitch.y, cellSize, cellSize / 2, &swX, &swY);
+        IsoToWorld(tmpSwitch.floorX, tmpSwitch.floorY, cellSize, cellSize / 2, &swfX, &swfY);
         SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 120, 0, 255);
         Game::DrawSprite(swX + offsetX, swY + offsetY, SPR_FLOOR_HIGHLIGHT);
         Game::DrawSprite(swfX + offsetX, swfY + offsetY, SPR_FLOOR_HIGHLIGHT);
-        SDL_RenderDrawLine(Game::GetRenderer(),
-            offsetX + swX + cellSize/2,
-            offsetY + swY + cellSize/4,
-            offsetX + swfX + cellSize/2,
-            offsetY + swfY + cellSize/4
-            );
+        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + swX + cellSize / 2, offsetY + swY + cellSize / 4,
+                           offsetX + swfX + cellSize / 2, offsetY + swfY + cellSize / 4);
     }
 
     // editor
     if (level.isValidPos(mouseIsoPos))
     {
         int mix, miy;
-        IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize/2, &mix, &miy);
+        IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize / 2, &mix, &miy);
         Game::DrawSprite(mix + offsetX, miy + offsetY, SPR_FLOOR_HIGHLIGHT);
     }
 
+    // Mode
     mEditInstruction.draw(10, 10);
+
+    // Level Info
     mLevelText.draw(10, Game::ScreenHeight() - 35);
 }
-

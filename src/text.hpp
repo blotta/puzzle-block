@@ -6,8 +6,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-class StaticText{
-public:
+class StaticText
+{
+  public:
     StaticText();
     ~StaticText();
     StaticText(const StaticText&) = delete;
@@ -22,7 +23,8 @@ public:
     int getHeight();
     float scale = 1.0f;
     int hAlign = 0;
-private:
+
+  private:
     std::string mText;
     SDL_Color mColor = {255, 255, 255, 255};
     SDL_Texture* mTextTexture = NULL;
@@ -31,8 +33,9 @@ private:
     bool sync();
 };
 
-class DynamicText{
-public:
+class DynamicText
+{
+  public:
     void Init();
     void Draw(int x, int y, const std::string& text);
     void Destroy();

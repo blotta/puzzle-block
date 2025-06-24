@@ -5,7 +5,7 @@ Input::Input()
     SDL_Log("Input initialized\n");
 }
 
-Input &Input::get()
+Input& Input::get()
 {
     static Input instance;
     return instance;
@@ -45,32 +45,27 @@ void Input::Update(float dt)
     {
         switch (event.type)
         {
-            case SDL_QUIT:
-            {
-                mgr.mQuitEvent = true;
-                break;
-            }
-            case SDL_KEYDOWN:
-            {
-                if (mgr.mKeyState[event.key.keysym.scancode] == 0)
-                    mgr.mKeyState[event.key.keysym.scancode] = 2; // just pressed
-            }
+        case SDL_QUIT: {
+            mgr.mQuitEvent = true;
             break;
-            case SDL_KEYUP:
-            {
-                mgr.mKeyState[event.key.keysym.scancode] = 3; // just released
-            }
-            break;
-            case SDL_MOUSEBUTTONDOWN:
-            {
-                mgr.mMouse.button[event.button.button] = 2;
-            }
-            break;
-            case SDL_MOUSEBUTTONUP:
-            {
-                mgr.mMouse.button[event.button.button] = 3;
-            }
-            break;
+        }
+        case SDL_KEYDOWN: {
+            if (mgr.mKeyState[event.key.keysym.scancode] == 0)
+                mgr.mKeyState[event.key.keysym.scancode] = 2; // just pressed
+        }
+        break;
+        case SDL_KEYUP: {
+            mgr.mKeyState[event.key.keysym.scancode] = 3; // just released
+        }
+        break;
+        case SDL_MOUSEBUTTONDOWN: {
+            mgr.mMouse.button[event.button.button] = 2;
+        }
+        break;
+        case SDL_MOUSEBUTTONUP: {
+            mgr.mMouse.button[event.button.button] = 3;
+        }
+        break;
         }
     }
 }
@@ -116,7 +111,7 @@ bool Input::MouseJustReleased(uint8_t btn)
     return b == 3;
 }
 
-void Input::MousePosition(int *x, int *y)
+void Input::MousePosition(int* x, int* y)
 {
     *x = Input::get().mMouse.x;
     *y = Input::get().mMouse.y;

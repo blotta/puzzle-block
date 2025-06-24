@@ -33,7 +33,7 @@ void StaticText::clearText()
     mPropsChanged = true;
 }
 
-const std::string &StaticText::getText()
+const std::string& StaticText::getText()
 {
     return mText;
 }
@@ -51,7 +51,7 @@ void StaticText::setColor(SDL_Color color)
 {
     if (color.r == mColor.r && color.g == mColor.g && color.b == mColor.b && color.a == mColor.a)
         return;
-    
+
     mColor = color;
     mPropsChanged = true;
 }
@@ -67,28 +67,30 @@ void StaticText::draw(int x, int y)
     if (!sync())
         return;
 
-    SDL_Rect r = {
-        x, y,
-        (int)SDL_floor(width * scale),
-        (int)SDL_floor(height * scale)
-    };
+    SDL_Rect r = {x, y, (int)SDL_floor(width * scale), (int)SDL_floor(height * scale)};
 
     if (hAlign == 1)
-        r.x = r.x - (int)SDL_floor(width/2 * scale);
+        r.x = r.x - (int)SDL_floor(width / 2 * scale);
     if (hAlign == 2)
         r.x = r.x - (int)SDL_floor(width * scale);
     SDL_RenderCopy(Game::GetRenderer(), mTextTexture, NULL, &r);
 }
 
-int StaticText::getWidth() { return width; }
+int StaticText::getWidth()
+{
+    return width;
+}
 
-int StaticText::getHeight() { return height; }
+int StaticText::getHeight()
+{
+    return height;
+}
 
 bool StaticText::sync()
 {
     if (!mPropsChanged && mTextTexture != NULL)
         return true;
-    
+
     if (mText.empty())
     {
         if (mTextTexture != NULL)
@@ -98,7 +100,7 @@ bool StaticText::sync()
         }
         return false;
     }
-    
+
     SDL_Surface* surf = TTF_RenderUTF8_Blended(Asset::GetFont(), mText.c_str(), mColor);
     if (!surf)
     {
@@ -153,7 +155,7 @@ void DynamicText::Init()
     lineSkip = TTF_FontLineSkip(Asset::GetFont());
 }
 
-void DynamicText::Draw(int x, int y, const std::string &text)
+void DynamicText::Draw(int x, int y, const std::string& text)
 {
     auto ctext = text.c_str();
 
@@ -171,18 +173,14 @@ void DynamicText::Draw(int x, int y, const std::string &text)
         {
             hpos += tabWidth * atlas[' ' - 32].w;
         }
-        
-        if (c < 32) {
+
+        if (c < 32)
+        {
             continue;
         }
 
         SDL_Rect src = atlas[c - 32];
-        SDL_Rect dest = {
-            .x = x + hpos,
-            .y = vpos,
-            .w = src.w,
-            .h = src.h
-        };
+        SDL_Rect dest = {.x = x + hpos, .y = vpos, .w = src.w, .h = src.h};
 
         SDL_RenderCopy(Game::GetRenderer(), mTexture, &src, &dest);
 

@@ -1,19 +1,17 @@
 {
-    .cols = 4,
-    .rows = 9,
+    .cols = 2,
+    .rows = 7,
     .data = {
-        "3111"
-        "0001"
-        "0001"
-        "0011"
-        "0011"
-        "0011"
-        "0111"
-        "0001"
-        "2111"
+        "13"
+        "11"
+        "10"
+        "10"
+        "10"
+        "10"
+        "20"
     },
     .switchCount = 1,
     .switches = {
-        {.x = 2, .y = 4, .type = LevelSwitchType::SINGLE, .floorX = 1, .floorY = 5}
+        {.x = 0, .y = 0, .type = LevelSwitchType::SINGLE, .floorX = 1, .floorY = 2}
     }
 }

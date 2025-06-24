@@ -1,17 +1,11 @@
 {
-    .cols = 2,
-    .rows = 7,
+    .cols = 4,
+    .rows = 5,
     .data = {
-        "13"
-        "11"
-        "10"
-        "10"
-        "10"
-        "10"
-        "20"
-    },
-    .switchCount = 1,
-    .switches = {
-        {.x = 0, .y = 0, .type = LevelSwitchType::SINGLE, .floorX = 1, .floorY = 2}
+        "0030"
+        "0111"
+        "0111"
+        "0111"
+        "2111"
     }
 }

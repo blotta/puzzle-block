@@ -6,12 +6,13 @@
 
 class BootScene : public Scene
 {
-public:
+  public:
     void init() override;
     void update(float dt) override;
     void draw() override;
     void dispose() override;
-private:
+
+  private:
     Timer timer;
     bool loadFirstScene;
     bool debugModeActive;

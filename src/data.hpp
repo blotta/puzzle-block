@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdio>
 
-
 // SPRITES
 
 enum SpriteID
@@ -53,7 +52,6 @@ struct Sprite
 const int MAX_GRID_SIZE = 15;
 const int MAX_SWITCH_COUNT = 2;
 
-
 enum class LevelSwitchType
 {
     SINGLE = 0,
@@ -92,5 +90,9 @@ struct GameData
 };
 
 void load_game_data(GameData* d);
+
+LevelData generateRandomLevel(int pathLength);
+
+void trimLevel(LevelData& level);
 
 #endif

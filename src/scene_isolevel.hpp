@@ -1,20 +1,21 @@
 #ifndef SCENE_ISOLEVEL_HPP
 #define SCENE_ISOLEVEL_HPP
 
-#include "text.hpp"
-#include "scene.hpp"
-#include "level.hpp"
 #include "block.hpp"
 #include "camera.hpp"
+#include "level.hpp"
+#include "scene.hpp"
+#include "text.hpp"
 
 class IsoLevelScene : public Scene
 {
-public:
+  public:
     void init() override;
     void update(float dt) override;
     void draw() override;
     void dispose() override;
-private:
+
+  private:
     Level level;
     Block block;
     Camera camera;

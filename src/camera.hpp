@@ -3,7 +3,8 @@
 
 #include "util.hpp"
 
-struct Camera {
+struct Camera
+{
     vec2 offset;
     vec2f target;
     vec2f pos;

@@ -1,34 +1,34 @@
 #ifndef ASSET_HPP
 #define ASSET_HPP
 
-#include <vector>
-#include <string>
 #include <span>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "data.hpp"
 
 class Texture
 {
-public:
+  public:
     Texture(SDL_Renderer* rend, const std::string& path);
     Texture(const Texture& other) = delete; // disallows copying
     // Texture& operator=(const Texture& other) = delete;
     Texture(Texture&& other) noexcept; // move constructor
     ~Texture();
     SDL_Texture* get() const;
-private:
+
+  private:
     SDL_Texture* mTexture = NULL;
 };
 
-
 class Asset
 {
-public:
+  public:
     Asset(const Asset&) = delete;
     static void SetRenderer(SDL_Renderer* renderer);
     static const Texture* GetTexture(const std::string& path);
@@ -45,7 +45,8 @@ public:
     static void LoadMusic(const std::string& path);
 
     static void UnloadAssets();
-private:
+
+  private:
     Asset();
     static Asset& get();
 

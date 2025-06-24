@@ -1,18 +1,18 @@
+#include "game.hpp"
+#include "input_manager.hpp"
+#include "scene_boot.hpp"
+#include "scene_isolevel.hpp"
+#include "scene_leveledit.hpp"
+#include "scene_splash.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
-#include "game.hpp"
-#include "input_manager.hpp"
-#include "scene_splash.hpp"
-#include "scene_boot.hpp"
-#include "scene_leveledit.hpp"
-#include "scene_isolevel.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
-Game &Game::get()
+Game& Game::get()
 {
     static Game instance;
     return instance;
@@ -28,7 +28,8 @@ Game::Game()
         success = false;
     }
 
-    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth, this->mScreenHeight, SDL_WINDOW_SHOWN);
+    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth,
+                               this->mScreenHeight, SDL_WINDOW_SHOWN);
     if (!mWindow)
     {
         SDL_Log("Failed to initialize SDL Window\n");
@@ -117,32 +118,29 @@ int Game::TargetFPS()
     return Game::get().mTargetFPS;
 }
 
-
 void Game::LoadScene(Scenes sceneName)
 {
     Game::get().mNextScene = sceneName;
 }
 
-
-
-SDL_Renderer *Game::GetRenderer()
+SDL_Renderer* Game::GetRenderer()
 {
     return Game::get().mRenderer;
 }
 
-const std::string Game::GetState(const std::string &name)
+const std::string Game::GetState(const std::string& name)
 {
     return Game::get().mState.at(name);
 }
 
-const std::string Game::GetOrCreateState(const std::string &name, const std::string &value)
+const std::string Game::GetOrCreateState(const std::string& name, const std::string& value)
 {
     auto& g = Game::get();
     g.mState.try_emplace(name, value);
     return g.mState.at(name);
 }
 
-void Game::SetState(const std::string &name, const std::string &value)
+void Game::SetState(const std::string& name, const std::string& value)
 {
     Game::get().mState[name] = value;
 }
@@ -152,23 +150,23 @@ const int Game::GetLevelsSize()
     return Game::get().mLevels.size();
 }
 
-const LevelData &Game::GetLevelData(int idx)
+const LevelData& Game::GetLevelData(int idx)
 {
     return Game::get().mLevels[idx];
 }
 
-void Game::SaveLevelData(const LevelData &ld, int idx)
+void Game::SaveLevelData(const LevelData& ld, int idx)
 {
     Game::get().mLevels[idx] = ld;
 }
 
-int Game::AddLevelData(const LevelData &ld)
+int Game::AddLevelData(const LevelData& ld)
 {
     Game::get().mLevels.emplace_back(ld);
     return Game::get().mLevels.size() - 1;
 }
 
-const Sprite &Game::GetSprite(SpriteID id)
+const Sprite& Game::GetSprite(SpriteID id)
 {
     return Game::get().mData.Sprites[id];
 }
@@ -177,28 +175,17 @@ void Game::DrawSprite(int x, int y, SpriteID sprId)
 {
     auto& g = Game::get();
     const Sprite* spr = &g.mData.Sprites[sprId];
-    SDL_Rect src = {
-        spr->tx,
-        spr->ty,
-        spr->tw,
-        spr->th
-    };
-    SDL_Rect dest = {
-        x - spr->originX,
-        y - spr->originY,
-        spr->tw,
-        spr->th
-    };
+    SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
+    SDL_Rect dest = {x - spr->originX, y - spr->originY, spr->tw, spr->th};
 
     SDL_RenderCopy(g.mRenderer, g.pActiveTexture->get(), &src, &dest);
 }
 
-void Game::DrawText(int x, int y, const std::string &txt)
+void Game::DrawText(int x, int y, const std::string& txt)
 {
     auto& g = Game::get();
     g.mDynText.Draw(x, y, txt);
 }
-
 
 void Game::PlaySound(const std::string& path)
 {
@@ -218,7 +205,6 @@ void Game::Run()
     Game::get().run();
 }
 
-
 //////////////////////
 // Instance Methods //
 //////////////////////
@@ -231,9 +217,7 @@ void Game::run()
     loadAssets();
 
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop([]() {
-        Game::get().tick();
-    }, 0, 1);
+    emscripten_set_main_loop([]() { Game::get().tick(); }, 0, 1);
 #else
     while (mRunning)
     {
@@ -297,7 +281,7 @@ void Game::loadAssets()
 
 void Game::loadLevels()
 {
-    for (auto &lvl : mData.DefaultLevels)
+    for (auto& lvl : mData.DefaultLevels)
     {
         mLevels.emplace_back(lvl);
     }
@@ -307,7 +291,7 @@ void Game::loadScene(Scenes scene)
 {
     if (scene == Scenes::NONE)
         return;
-    
+
     if (mCurrentScene != nullptr)
         mCurrentScene->dispose();
 
@@ -349,7 +333,3 @@ void Game::draw()
 
     SDL_RenderPresent(mRenderer);
 }
-
-
-
-

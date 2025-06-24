@@ -7,12 +7,13 @@
 
 class SplashScene : public Scene
 {
-public:
+  public:
     void init() override;
     void update(float dt) override;
     void draw() override;
     void dispose() override;
-private:
+
+  private:
     StaticText mText;
     Timer mTimer;
     int mIteration = 0;

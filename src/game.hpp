@@ -2,21 +2,21 @@
 #define GAME_HPP
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "timer.hpp"
-#include "text.hpp"
 #include "asset_manager.hpp"
 #include "scene.hpp"
+#include "text.hpp"
+#include "timer.hpp"
 
 class Game
 {
-public:
+  public:
     Game(const Game&) = delete;
 
     static int ScreenWidth();
@@ -28,14 +28,14 @@ public:
 
     static SDL_Renderer* GetRenderer();
 
-    static const std::string GetState(const std::string &name);
-    static const std::string GetOrCreateState(const std::string &name, const std::string &value);
-    static void SetState(const std::string &name, const std::string &value);
+    static const std::string GetState(const std::string& name);
+    static const std::string GetOrCreateState(const std::string& name, const std::string& value);
+    static void SetState(const std::string& name, const std::string& value);
 
     static const int GetLevelsSize();
     static const LevelData& GetLevelData(int idx);
-    static void SaveLevelData(const LevelData &ld, int idx);
-    static int AddLevelData(const LevelData &ld);
+    static void SaveLevelData(const LevelData& ld, int idx);
+    static int AddLevelData(const LevelData& ld);
 
     static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);
@@ -44,7 +44,7 @@ public:
     static void PlaySound(const std::string& path);
     static void PlayMusic(const std::string& path);
 
-private:
+  private:
     Game();
     ~Game();
     static Game& get();

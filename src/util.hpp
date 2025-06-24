@@ -43,10 +43,9 @@ struct vec2f
     }
 };
 
-
 void IsoToWorld(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldToIso(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
-void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int *x, int *y);
+void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int* x, int* y);
 
 float linear_interpolate(float v0, float v1, float t);
 

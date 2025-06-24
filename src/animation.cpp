@@ -1,5 +1,5 @@
-#include <SDL2/SDL.h>
 #include "animation.hpp"
+#include <SDL2/SDL.h>
 
 void AnimationSprite::start()
 {
@@ -23,7 +23,7 @@ SpriteID AnimationSprite::tick()
             timer.forwardBy(remaining);
         }
     }
-    
+
     float step = 1.0f / frameCount;
 
     if (reverse)
@@ -40,11 +40,11 @@ bool AnimationSprite::isDone() const
 {
     if (loop)
         return false;
-    
+
     float elapsed = timer.elapsed();
     float perc = elapsed / duration;
     if (perc > 1.0f)
         return true;
-    
+
     return false;
 }

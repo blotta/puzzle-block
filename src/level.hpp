@@ -1,15 +1,14 @@
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 
-#include <array>
-#include <vector>
-#include <span>
 #include <SDL2/SDL.h>
+#include <array>
+#include <span>
+#include <vector>
 
+#include "data.hpp"
 #include "game.hpp"
 #include "util.hpp"
-#include "data.hpp"
-
 
 class Game;
 struct LevelData;
@@ -33,16 +32,16 @@ struct Level
 
     void clear();
     void set(int x, int y, CellType value);
-    void load(const LevelData &ld);
+    void load(const LevelData& ld);
     void toLevelData(LevelData* ld);
     vec2 getStartPos();
-    bool isValidPos(const vec2 &pos) const;
+    bool isValidPos(const vec2& pos) const;
     bool isValid();
-    bool hasFloorAt(const vec2 &pos) const;
-    bool hasSwitchAt(const vec2 &pos, LevelSwitch** sw);
-    bool checkAndTriggerSwitches(const vec2 &pos1, const vec2 &pos2);
-    void toggleThinFloor(const vec2 &pos);
-    CellType cellAt(const vec2 &pos);
+    bool hasFloorAt(const vec2& pos) const;
+    bool hasSwitchAt(const vec2& pos, LevelSwitch** sw);
+    bool checkAndTriggerSwitches(const vec2& pos1, const vec2& pos2);
+    void toggleThinFloor(const vec2& pos);
+    CellType cellAt(const vec2& pos);
     void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);

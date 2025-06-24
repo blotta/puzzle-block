@@ -1,7 +1,6 @@
 #include "block.hpp"
 #include "animation.hpp"
 
-
 static float animDuration = 0.2f;
 
 SpriteID idle_up_frames[1] = {SPR_BLOCK_UP};
@@ -76,7 +75,7 @@ AnimationSprite anim_wide_up = {
     .loop = false,
 };
 
-std::pair<vec2, vec2> Block::GetBlockPositionsForState(const vec2 &pos, BlockState state)
+std::pair<vec2, vec2> Block::GetBlockPositionsForState(const vec2& pos, BlockState state)
 {
     if (state == BlockState::LONG)
     {
@@ -86,10 +85,10 @@ std::pair<vec2, vec2> Block::GetBlockPositionsForState(const vec2 &pos, BlockSta
     if (state == BlockState::WIDE)
         return std::pair<vec2, vec2>(vec2(pos.x, pos.y), vec2(pos.x + 1, pos.y));
 
-    return std::pair<vec2,vec2>(vec2(pos.x, pos.y), vec2(pos.x, pos.y));
+    return std::pair<vec2, vec2>(vec2(pos.x, pos.y), vec2(pos.x, pos.y));
 }
 
-void Block::init(const vec2 &pos, BlockState state)
+void Block::init(const vec2& pos, BlockState state)
 {
     x = pos.x;
     y = pos.y;
@@ -107,7 +106,7 @@ void Block::init(const vec2 &pos, BlockState state)
     moveIntent.transition = BlockTransition::IDLE;
 }
 
-bool Block::move(const vec2 &dir, const Level &level, bool collide)
+bool Block::move(const vec2& dir, const Level& level, bool collide)
 {
     if (currTransition != BlockTransition::IDLE)
     {
@@ -130,7 +129,7 @@ bool Block::move(const vec2 &dir, const Level &level, bool collide)
                 animation = &anim_idle_long;
             else if (state == BlockState::WIDE)
                 animation = &anim_idle_wide;
-            
+
             animation->start();
             return true;
         }
@@ -154,70 +153,69 @@ bool Block::move(const vec2 &dir, const Level &level, bool collide)
         }
     }
 
-
     if (moveIntent.moved)
     {
         switch (moveIntent.transition)
         {
-            case BlockTransition::UP_LONG_FORWARD:
-                animation = &anim_up_long;
-                animation->reverse = false;
-                break;
-            case BlockTransition::LONG_UP_BACKWARD:
-                animation = &anim_up_long;
-                animation->reverse = true;
-                y = moveIntent.newPos.y;
-                break;
-            case BlockTransition::UP_LONG_BACKWARD:
-                animation = &anim_long_up;
-                animation->reverse = true;
-                break;
-            case BlockTransition::LONG_UP_FORWARD:
-                animation = &anim_long_up;
-                animation->reverse = false;
-                y = moveIntent.newPos.y;
-                break;
+        case BlockTransition::UP_LONG_FORWARD:
+            animation = &anim_up_long;
+            animation->reverse = false;
+            break;
+        case BlockTransition::LONG_UP_BACKWARD:
+            animation = &anim_up_long;
+            animation->reverse = true;
+            y = moveIntent.newPos.y;
+            break;
+        case BlockTransition::UP_LONG_BACKWARD:
+            animation = &anim_long_up;
+            animation->reverse = true;
+            break;
+        case BlockTransition::LONG_UP_FORWARD:
+            animation = &anim_long_up;
+            animation->reverse = false;
+            y = moveIntent.newPos.y;
+            break;
 
-            case BlockTransition::UP_WIDE_RIGHT:
-                animation = &anim_up_wide;
-                animation->reverse = false;
-                break;
-            case BlockTransition::WIDE_UP_LEFT:
-                animation = &anim_up_wide;
-                animation->reverse = true;
-                x = moveIntent.newPos.x;
-                break;
-            case BlockTransition::UP_WIDE_LEFT:
-                animation = &anim_wide_up;
-                animation->reverse = true;
-                break;
-            case BlockTransition::WIDE_UP_RIGHT:
-                animation = &anim_wide_up;
-                animation->reverse = false;
-                x = moveIntent.newPos.x;
-                break;
+        case BlockTransition::UP_WIDE_RIGHT:
+            animation = &anim_up_wide;
+            animation->reverse = false;
+            break;
+        case BlockTransition::WIDE_UP_LEFT:
+            animation = &anim_up_wide;
+            animation->reverse = true;
+            x = moveIntent.newPos.x;
+            break;
+        case BlockTransition::UP_WIDE_LEFT:
+            animation = &anim_wide_up;
+            animation->reverse = true;
+            break;
+        case BlockTransition::WIDE_UP_RIGHT:
+            animation = &anim_wide_up;
+            animation->reverse = false;
+            x = moveIntent.newPos.x;
+            break;
 
-            case BlockTransition::LONG_LONG_RIGHT:
-                animation = &anim_long_long;
-                animation->reverse = false;
-                break;
-            case BlockTransition::LONG_LONG_LEFT:
-                animation = &anim_long_long;
-                animation->reverse = true;
-                x = moveIntent.newPos.x;
-                break;
+        case BlockTransition::LONG_LONG_RIGHT:
+            animation = &anim_long_long;
+            animation->reverse = false;
+            break;
+        case BlockTransition::LONG_LONG_LEFT:
+            animation = &anim_long_long;
+            animation->reverse = true;
+            x = moveIntent.newPos.x;
+            break;
 
-            case BlockTransition::WIDE_WIDE_FORWARD:
-                animation = &anim_wide_wide;
-                animation->reverse = false;
-                break;
-            case BlockTransition::WIDE_WIDE_BACKWARD:
-                animation = &anim_wide_wide;
-                animation->reverse = true;
-                y = moveIntent.newPos.y;
-                break;
-            default:
-                break;
+        case BlockTransition::WIDE_WIDE_FORWARD:
+            animation = &anim_wide_wide;
+            animation->reverse = false;
+            break;
+        case BlockTransition::WIDE_WIDE_BACKWARD:
+            animation = &anim_wide_wide;
+            animation->reverse = true;
+            y = moveIntent.newPos.y;
+            break;
+        default:
+            break;
         }
         currTransition = moveIntent.transition;
         animation->start();
@@ -225,7 +223,6 @@ bool Block::move(const vec2 &dir, const Level &level, bool collide)
 
     return false;
 }
-
 
 void Block::updateMovementIntent(const vec2& dir)
 {
@@ -298,7 +295,62 @@ void Block::draw(int offsetX, int offsetY, int cellSize)
     SpriteID sprId = animation->tick();
 
     int sx, sy;
-    IsoToWorld(x, y, cellSize, cellSize/2, &sx, &sy);
+    IsoToWorld(x, y, cellSize, cellSize / 2, &sx, &sy);
 
     Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
+}
+
+void BlockSim::move(const vec2& dir)
+{
+    if (dir.x == 0 && dir.y == 0)
+        return;
+
+    switch (state)
+    {
+    case BlockState::UP:
+        if (dir.x != 0)
+        {
+            x += (dir.x > 0) ? 1 : -2;
+            state = BlockState::WIDE;
+        }
+        else
+        {
+            y += (dir.y > 0) ? 1 : -2;
+            state = BlockState::LONG;
+        }
+        break;
+
+    case BlockState::WIDE:
+        if (dir.x != 0)
+        {
+            x += (dir.x > 0) ? 2 : -1;
+            state = BlockState::UP;
+        }
+        else
+        {
+            y += dir.y;
+        }
+        break;
+
+    case BlockState::LONG:
+        if (dir.y != 0)
+        {
+            y += (dir.y > 0) ? 2 : -1;
+            state = BlockState::UP;
+        }
+        else
+        {
+            x += dir.x;
+        }
+        break;
+    }
+}
+
+std::pair<vec2, vec2> BlockSim::getPositions()
+{
+    if (state == BlockState::LONG)
+        return {{x, y}, {x, y + 1}};
+    if (state == BlockState::WIDE)
+        return {{x, y}, {x + 1, y}};
+    return {{x, y}, {x, y}};
 }

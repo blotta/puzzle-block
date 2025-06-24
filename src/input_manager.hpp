@@ -12,7 +12,7 @@ struct MouseState
 
 class Input
 {
-public:
+  public:
     Input(const Input&) = delete;
 
     static void Update(float dt);
@@ -24,7 +24,8 @@ public:
     static bool MouseJustPressed(uint8_t btn);
     static bool MouseJustReleased(uint8_t btn);
     static void MousePosition(int* x, int* y);
-private:
+
+  private:
     Input();
     static Input& get();
 

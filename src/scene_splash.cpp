@@ -1,5 +1,5 @@
-#include "game.hpp"
 #include "scene_splash.hpp"
+#include "game.hpp"
 #include "input_manager.hpp"
 
 void SplashScene::init()
@@ -32,26 +32,26 @@ void SplashScene::update(float dt)
 
         switch (mIteration)
         {
-            case 1:
-                mText.setText("B");
-                break;
-            case 2:
-                mText.setText("BL");
-                break;
-            case 3:
-                mText.setText("BLT");
-                break;
-            case 4:
-                mText.setText("BLT GAMES");
-                break;
-            default:
-                Game::LoadScene(Scenes::ISOLEVEL);
-                break;
+        case 1:
+            mText.setText("B");
+            break;
+        case 2:
+            mText.setText("BL");
+            break;
+        case 3:
+            mText.setText("BLT");
+            break;
+        case 4:
+            mText.setText("BLT GAMES");
+            break;
+        default:
+            Game::LoadScene(Scenes::ISOLEVEL);
+            break;
         }
     }
 }
 
 void SplashScene::draw()
 {
-    mText.draw(Game::ScreenWidth()/2, Game::ScreenHeight()/2);
+    mText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
 }

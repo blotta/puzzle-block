@@ -3,11 +3,11 @@
 
 #include <SDL2/SDL.h>
 
-#include <utility>
-#include "game.hpp"
-#include "util.hpp"
-#include "level.hpp"
 #include "animation.hpp"
+#include "game.hpp"
+#include "level.hpp"
+#include "util.hpp"
+#include <utility>
 
 enum BlockState
 {
@@ -45,9 +45,9 @@ struct Block
 {
     int x;
     int y;
-    BlockState state = BlockState::UP; 
+    BlockState state = BlockState::UP;
 
-    BlockTransition currTransition = BlockTransition::IDLE; 
+    BlockTransition currTransition = BlockTransition::IDLE;
     AnimationSprite* animation;
     BlockMovement moveIntent;
 
@@ -61,5 +61,14 @@ struct Block
     void draw(int levelX, int levelY, int cellSize);
 };
 
+struct BlockSim
+{
+    int x;
+    int y;
+    BlockState state = BlockState::UP;
+
+    void move(const vec2& dir);
+    std::pair<vec2, vec2> getPositions();
+};
 
 #endif
