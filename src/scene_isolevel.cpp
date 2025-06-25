@@ -9,6 +9,7 @@ void IsoLevelScene::init()
     this->reset();
 
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
+    Game::SetFontSize(32);
 }
 
 void IsoLevelScene::dispose()
@@ -19,11 +20,11 @@ void IsoLevelScene::dispose()
 void IsoLevelScene::reset()
 {
     auto lvl = Game::GetOrCreateState("curr_level", "0");
-    Log::info("Loading level %s\n", lvl.c_str());
     int lvlIdx = std::stoi(lvl);
+    Log::info("Loading level %d\n", lvlIdx + 1);
     level.load(Game::GetLevelData(lvlIdx));
 
-    mTitleText = std::format("Level {}", lvl);
+    mTitleText = std::format("Level {}", lvlIdx + 1);
 
     // block setup
     auto startPos = level.getStartPos();

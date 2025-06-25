@@ -24,8 +24,8 @@ void LevelEditScene::dispose()
 void LevelEditScene::reset()
 {
     auto lvl = Game::GetOrCreateState("curr_level", "0");
-    Log::info("Loading level %s\n", lvl.c_str());
     lvlIdx = std::stoi(lvl);
+    Log::info("Loading level %d\n", lvlIdx + 1);
     if (lvlIdx >= Game::GetLevelsSize())
         lvlIdx = 0;
     level.load(Game::GetLevelData(lvlIdx));
@@ -62,8 +62,13 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
     // save current
     LevelData ld = {};
     level.toLevelData(&ld);
+    trimLevel(ld);
+
     if (newLevel)
+    {
         lvlIdx = Game::AddLevelData(ld);
+        Game::SetState("curr_level", std::to_string(lvlIdx));
+    }
     else
         Game::SaveLevelData(ld, lvlIdx);
 
@@ -72,11 +77,13 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
     if (saveToFile)
     {
         char fileName[50] = {};
-        sprintf(fileName, "assets/levels/%d.txt", lvlIdx);
+        sprintf(fileName, "assets/levels/%d.txt", lvlIdx + 1);
         FILE* f = fopen(fileName, "w");
         ld.print(f);
         fclose(f);
     }
+
+    reset();
 }
 
 void LevelEditScene::levelChanged()
@@ -201,7 +208,6 @@ void LevelEditScene::update(float dt)
         // save new
         levelChanged();
         save(true, true);
-        Game::SetState("curr_level", std::to_string(lvlIdx + 1));
     }
 
     if (Input::JustPressed(SDL_SCANCODE_F4))
