@@ -5,7 +5,6 @@
 #include "camera.hpp"
 #include "level.hpp"
 #include "scene.hpp"
-#include "text.hpp"
 
 class IsoLevelScene : public Scene
 {

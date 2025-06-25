@@ -1,34 +1,45 @@
-#include "text.hpp"
+#include "font.hpp"
 #include "asset_manager.hpp"
 #include "game.hpp"
 
-FontAtlas::FontAtlas(SDL_Renderer* renderer, const std::string& fontPath, int fontSize)
-    : fontPath(fontPath), fontSize(fontSize), renderer(renderer), font(nullptr), atlas(nullptr)
+Font::Font(SDL_Renderer* renderer, const std::string& fontPath, int fontSize)
+    : fontPath(fontPath), fontSize(fontSize), pRenderer(renderer), mFont(nullptr), mAtlas(nullptr)
 {
-    font = TTF_OpenFont(fontPath.c_str(), fontSize);
-    if (!font)
+    mFont = TTF_OpenFont(fontPath.c_str(), fontSize);
+    if (!mFont)
         return;
 
     generateAtlas();
 }
 
-FontAtlas::~FontAtlas()
+Font::Font(Font&& other) noexcept
+    : fontPath(std::move(other.fontPath)), fontSize(other.fontSize), pRenderer(other.pRenderer), mFont(other.mFont),
+      mAtlas(other.mAtlas), mCharData(std::move(other.mCharData))
 {
-    if (atlas)
-        SDL_DestroyTexture(atlas);
-    if (font)
-        TTF_CloseFont(font);
+
+    other.pRenderer = nullptr;
+    other.mFont = nullptr;
+    other.mAtlas = nullptr;
+    SDL_Log("Moving font\n");
 }
 
-void FontAtlas::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align)
+Font::~Font()
 {
-    if (!atlas)
+    if (mAtlas)
+        SDL_DestroyTexture(mAtlas);
+    if (mFont)
+        TTF_CloseFont(mFont);
+}
+
+void Font::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align) const
+{
+    if (!mAtlas)
         return;
 
     int totalWidth = 0;
     for (char c : text)
     {
-        totalWidth += charData[c].advance;
+        totalWidth += mCharData.at(c).advance;
     }
 
     int drawX = x;
@@ -39,17 +50,17 @@ void FontAtlas::drawText(int x, int y, const std::string& text, SDL_Color color,
 
     for (char c : text)
     {
-        const Glyph& g = charData[c];
+        const Glyph& g = mCharData.at(c);
         SDL_Rect src = g.src;
         SDL_Rect dst = {drawX + g.offsetX, y + g.offsetY, src.w, src.h};
-        SDL_SetTextureColorMod(atlas, color.r, color.g, color.b);
-        SDL_SetTextureAlphaMod(atlas, color.a);
-        SDL_RenderCopy(renderer, atlas, &src, &dst);
+        SDL_SetTextureColorMod(mAtlas, color.r, color.g, color.b);
+        SDL_SetTextureAlphaMod(mAtlas, color.a);
+        SDL_RenderCopy(pRenderer, mAtlas, &src, &dst);
         drawX += g.advance;
     }
 }
 
-void FontAtlas::generateAtlas()
+void Font::generateAtlas()
 {
     const std::string chars =
         " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -61,7 +72,7 @@ void FontAtlas::generateAtlas()
     std::vector<SDL_Surface*> glyphSurfaces;
     for (char c : chars)
     {
-        SDL_Surface* surf = TTF_RenderGlyph_Blended(font, c, white);
+        SDL_Surface* surf = TTF_RenderGlyph_Blended(mFont, c, white);
         if (!surf)
             continue;
         glyphSurfaces.push_back(surf);
@@ -81,16 +92,16 @@ void FontAtlas::generateAtlas()
         SDL_BlitSurface(surf, nullptr, atlasSurface, &dst);
 
         int minx, maxx, miny, maxy, advance;
-        TTF_GlyphMetrics32(font, c, &minx, &maxx, &miny, &maxy, &advance);
+        TTF_GlyphMetrics32(mFont, c, &minx, &maxx, &miny, &maxy, &advance);
 
-        this->charData[c] = {.src = dst, .advance = advance, .offsetX = minx, .offsetY = 0};
+        this->mCharData[c] = {.src = dst, .advance = advance, .offsetX = minx, .offsetY = 0};
 
         xOffset += surf->w + spacing;
         SDL_FreeSurface(surf);
     }
 
-    atlas = SDL_CreateTextureFromSurface(renderer, atlasSurface);
+    mAtlas = SDL_CreateTextureFromSurface(pRenderer, atlasSurface);
     SDL_FreeSurface(atlasSurface);
 
-    SDL_Log("FontAtlas texture generated for %s:%d\n", fontPath.c_str(), fontSize);
+    SDL_Log("Font texture generated for %s:%d\n", fontPath.c_str(), fontSize);
 }

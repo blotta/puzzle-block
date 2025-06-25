@@ -11,7 +11,7 @@
 
 #include "asset_manager.hpp"
 #include "scene.hpp"
-#include "text.hpp"
+#include "font.hpp"
 #include "timer.hpp"
 
 class Game
@@ -76,7 +76,7 @@ class Game
     bool mRunning = false;
 
     const Texture* pActiveTexture;
-    FontAtlas* mActiveFont;
+    const Font* mActiveFont;
 
     Scenes mNextScene = Scenes::BOOT;
     std::shared_ptr<Scene> mCurrentScene;

@@ -2,7 +2,6 @@
 #define SCENE_SPLASH_HPP
 
 #include "scene.hpp"
-#include "text.hpp"
 #include "timer.hpp"
 
 class SplashScene : public Scene

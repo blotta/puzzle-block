@@ -190,13 +190,13 @@ void Game::PlayMusic(const std::string& path)
 void Game::SetFont(const std::string& path, int ptsize)
 {
     auto& g = Game::get();
-    g.mActiveFont = Asset::GetFontAtlas(path, ptsize);
+    g.mActiveFont = Asset::GetFont(path, ptsize);
 }
 
 void Game::SetFontSize(int ptsize)
 {
     auto& g = Game::get();
-    g.mActiveFont = Asset::GetFontAtlas(g.mActiveFont->fontPath, ptsize);
+    g.mActiveFont = Asset::GetFont(g.mActiveFont->fontPath, ptsize);
 }
 
 void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align)
@@ -274,8 +274,8 @@ void Game::tick()
 
 void Game::loadAssets()
 {
-    Asset::LoadFontAtlas("assets/fonts/Cabin-Regular.ttf", 16);
-    Asset::LoadFontAtlas("assets/fonts/Cabin-Regular.ttf", 20);
+    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 16);
+    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 20);
     Game::SetFont("assets/fonts/Cabin-Regular.ttf", 32);
 
     // preload spritesheet

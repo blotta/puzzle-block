@@ -4,7 +4,6 @@
 #include "block.hpp"
 #include "level.hpp"
 #include "scene.hpp"
-#include "text.hpp"
 
 class LevelEditScene : public Scene
 {

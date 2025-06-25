@@ -11,21 +11,9 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "data.hpp"
-#include "text.hpp"
+#include "font.hpp"
+#include "texture.hpp"
 
-class Texture
-{
-  public:
-    Texture(SDL_Renderer* rend, const std::string& path);
-    Texture(const Texture& other) = delete; // disallows copying
-    // Texture& operator=(const Texture& other) = delete;
-    Texture(Texture&& other) noexcept; // move constructor
-    ~Texture();
-    SDL_Texture* get() const;
-
-  private:
-    SDL_Texture* mTexture = NULL;
-};
 
 class Asset
 {
@@ -42,8 +30,8 @@ class Asset
     static Mix_Music* GetMusic(const std::string& path);
     static void LoadMusic(const std::string& path);
 
-    static FontAtlas* GetFontAtlas(const std::string& path, int ptsize);
-    static void LoadFontAtlas(const std::string& path, int ptsize);
+    static const Font* GetFont(const std::string& path, int ptsize);
+    static void LoadFont(const std::string& path, int ptsize);
 
     static void UnloadAssets();
 
@@ -55,7 +43,7 @@ class Asset
     std::unordered_map<std::string, Texture> mTextures;
     std::unordered_map<std::string, Mix_Chunk*> mSounds;
     std::unordered_map<std::string, Mix_Music*> mMusics;
-    std::unordered_map<std::string, FontAtlas*> mFontAtlases;
+    std::unordered_map<std::string, Font> mFonts;
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include "asset_manager.hpp"
-#include "text.hpp"
 #include <SDL2/SDL_image.h>
 #include <format>
 
@@ -23,6 +22,7 @@ void Asset::UnloadAssets()
 {
     auto& mgr = Asset::get();
     mgr.mTextures.clear();
+    mgr.mFonts.clear();
 
     for (const auto& [path, sfx] : mgr.mSounds)
     {
@@ -34,11 +34,15 @@ void Asset::UnloadAssets()
         Mix_FreeMusic(sfx);
     }
 
-    for (const auto& [path, fa] : mgr.mFontAtlases)
-    {
-        delete fa;
-    }
+    // for (const auto& [path, fa] : mgr.mFonts)
+    // {
+    //     delete fa;
+    // }
 }
+
+/////////////
+// Texture //
+/////////////
 
 const Texture* Asset::GetTexture(const std::string& path)
 {
@@ -56,6 +60,10 @@ void Asset::LoadTexture(const std::string& path)
     Texture t(mgr.pRenderer, path);
     mgr.mTextures.emplace(path, std::move(t));
 }
+
+///////////////////
+// SOUND & MUSIC //
+///////////////////
 
 Mix_Chunk* Asset::GetSound(const std::string& path)
 {
@@ -91,72 +99,27 @@ void Asset::LoadMusic(const std::string& path)
     mgr.mMusics.emplace(path, sfx);
 }
 
-/////////////
-// Texture //
-/////////////
+//////////
+// FONT //
+//////////
 
-Texture::Texture(SDL_Renderer* rend, const std::string& path)
+const Font* Asset::GetFont(const std::string& path, int ptsize)
 {
-    SDL_Log("Creating texture %s\n", path.c_str());
-    mTexture = IMG_LoadTexture(rend, path.c_str());
-    if (!mTexture)
-    {
-        SDL_Log("Couldn't load texture from file %s: %s\n", path.c_str(), SDL_GetError());
-    }
-    int w, h;
-    int status = SDL_QueryTexture(mTexture, NULL, NULL, &w, &h);
-    SDL_Log("status %d\n", status);
-}
-
-Texture::Texture(Texture&& other) noexcept
-{
-    SDL_Log("Moving texture\n");
-    mTexture = other.mTexture;
-
-    other.mTexture = nullptr;
-}
-
-Texture::~Texture()
-{
-    SDL_Log("Deleting texture\n");
-    if (mTexture != nullptr)
-    {
-        SDL_Log("Destroying SDL texture\n");
-        int status = SDL_QueryTexture(mTexture, NULL, NULL, NULL, NULL);
-        if (status < 0)
-        {
-            SDL_Log("SDL_QueryTexture failed with status %d: %s\n", status, SDL_GetError());
-        }
-
-        SDL_DestroyTexture(mTexture);
-        mTexture = nullptr;
-    }
-}
-
-SDL_Texture* Texture::get() const
-{
-    return mTexture;
-}
-
-////////////////
-// FONT ATLAS //
-////////////////
-void Asset::LoadFontAtlas(const std::string& path, int ptsize)
-{
-    auto& mgr = Asset::get();
-    auto fontAtlas = new FontAtlas(mgr.pRenderer, path, ptsize);
-    std::string key = std::format("{}:{}", path,ptsize);
-    mgr.mFontAtlases.emplace(key, fontAtlas);
-}
-
-FontAtlas* Asset::GetFontAtlas(const std::string& path, int ptsize)
-{
-    std::string key = std::format("{}:{}", path,ptsize);
+    std::string key = std::format("{}:{}", path, ptsize);
 
     auto& mgr = Asset::get();
-    auto it = mgr.mFontAtlases.find(key);
-    if (it == mgr.mFontAtlases.end())
-        LoadFontAtlas(path, ptsize);
+    auto it = mgr.mFonts.find(key);
+    if (it == mgr.mFonts.end())
+        LoadFont(path, ptsize);
 
-    return mgr.mFontAtlases.at(key);
+    return &mgr.mFonts.at(key);
+}
+
+void Asset::LoadFont(const std::string& path, int ptsize)
+{
+    std::string key = std::format("{}:{}", path, ptsize);
+
+    auto& mgr = Asset::get();
+    Font font(mgr.pRenderer, path, ptsize);
+    mgr.mFonts.emplace(key, std::move(font));
 }
