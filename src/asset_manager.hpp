@@ -32,12 +32,9 @@ class Asset
   public:
     Asset(const Asset&) = delete;
     static void SetRenderer(SDL_Renderer* renderer);
+
     static const Texture* GetTexture(const std::string& path);
     static void LoadTexture(const std::string& path);
-
-    static void LoadFont(const std::string& path, int ptsize);
-    static TTF_Font* GetFont();
-    static int GetFontPointSize();
 
     static Mix_Chunk* GetSound(const std::string& path);
     static void LoadSound(const std::string& path);
@@ -45,8 +42,8 @@ class Asset
     static Mix_Music* GetMusic(const std::string& path);
     static void LoadMusic(const std::string& path);
 
-    static void LoadFontAtlas(const std::string& path, int ptsize);
     static FontAtlas* GetFontAtlas(const std::string& path, int ptsize);
+    static void LoadFontAtlas(const std::string& path, int ptsize);
 
     static void UnloadAssets();
 
@@ -56,11 +53,9 @@ class Asset
 
     SDL_Renderer* pRenderer = nullptr;
     std::unordered_map<std::string, Texture> mTextures;
-    TTF_Font* mFont = nullptr;
     std::unordered_map<std::string, Mix_Chunk*> mSounds;
     std::unordered_map<std::string, Mix_Music*> mMusics;
     std::unordered_map<std::string, FontAtlas*> mFontAtlases;
-    int mFontPointSize = 32;
 };
 
 #endif

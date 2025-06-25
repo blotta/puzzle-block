@@ -84,8 +84,6 @@ Game::~Game()
     // unload scene
     loadScene(Scenes::NONE);
 
-    this->mDynText.Destroy();
-
     // make sure to deinit assets before deiniting systems
     Asset::UnloadAssets();
 
@@ -176,12 +174,6 @@ void Game::DrawSprite(int x, int y, SpriteID sprId)
     SDL_RenderCopy(g.mRenderer, g.pActiveTexture->get(), &src, &dest);
 }
 
-void Game::DrawText(int x, int y, const std::string& txt)
-{
-    auto& g = Game::get();
-    g.mDynText.Draw(x, y, txt);
-}
-
 void Game::PlaySound(const std::string& path)
 {
     auto sound = Asset::GetSound(path);
@@ -198,19 +190,19 @@ void Game::PlayMusic(const std::string& path)
 void Game::SetFont(const std::string& path, int ptsize)
 {
     auto& g = Game::get();
-    g.mFontAtlas = Asset::GetFontAtlas(path, ptsize);
+    g.mActiveFont = Asset::GetFontAtlas(path, ptsize);
 }
 
 void Game::SetFontSize(int ptsize)
 {
     auto& g = Game::get();
-    g.mFontAtlas = Asset::GetFontAtlas(g.mFontAtlas->fontPath, ptsize);
+    g.mActiveFont = Asset::GetFontAtlas(g.mActiveFont->fontPath, ptsize);
 }
 
 void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align)
 {
     auto& g = Game::get();
-    g.mFontAtlas->drawText(x, y, text, color, align);
+    g.mActiveFont->drawText(x, y, text, color, align);
 }
 
 void Game::Run()
@@ -282,20 +274,17 @@ void Game::tick()
 
 void Game::loadAssets()
 {
-    Asset::LoadFont("assets/fonts/Cabin-Regular.ttf", 32);
+    Asset::LoadFontAtlas("assets/fonts/Cabin-Regular.ttf", 16);
     Asset::LoadFontAtlas("assets/fonts/Cabin-Regular.ttf", 20);
     Game::SetFont("assets/fonts/Cabin-Regular.ttf", 32);
 
     // preload spritesheet
     pActiveTexture = Asset::GetTexture("assets/images/spritesheet.png");
 
-    mDynText.Init();
-
     Asset::LoadSound("assets/sfx/block_move.ogg");
     Asset::LoadSound("assets/sfx/switch.ogg");
     Asset::LoadSound("assets/sfx/arrive.ogg");
     Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
-
 
     loadLevels();
 }

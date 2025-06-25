@@ -1,5 +1,6 @@
 #include "scene_isolevel.hpp"
 #include "input_manager.hpp"
+#include <format>
 
 void IsoLevelScene::init()
 {
@@ -21,7 +22,7 @@ void IsoLevelScene::reset()
     int lvlIdx = std::stoi(lvl);
     level.load(Game::GetLevelData(lvlIdx));
 
-    mTitleText.setText("Level " + lvl);
+    mTitleText = std::format("Level {}", lvl);
 
     // block setup
     auto startPos = level.getStartPos();
@@ -33,8 +34,6 @@ void IsoLevelScene::reset()
     camera.target.x = tx;
     camera.target.y = ty;
 
-    mLevelClearedText.setText("LEVEL CLEARED!");
-    mLevelClearedText.hAlign = 1;
     mLevelClearedTimer.setDuration(3);
 }
 
@@ -119,15 +118,13 @@ void IsoLevelScene::update(float dt)
 
 void IsoLevelScene::draw()
 {
-    // level.draw(offsetX, offsetY, cellSize);
-    // block.draw(offsetX, offsetY, cellSize);
     level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
     block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
 
-    mTitleText.draw(10, 10);
+    Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {255, 255, 255, 255}, TextAlign::CENTER);
 
     if (mLevelCleared)
-        mLevelClearedText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4);
+        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!", {200, 255, 200, 255}, TextAlign::CENTER);
 
     // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
     // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());

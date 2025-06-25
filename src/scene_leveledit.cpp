@@ -36,9 +36,7 @@ void LevelEditScene::reset()
     block.init(startPos, BlockState::UP);
 
     saved = true;
-    mEditInstruction.setPointSize(16);
-    mEditInstruction.setText(NORMAL_MODE_INSTRUCTIONS);
-    mLevelText.setText(std::format("Level {} {}x{}", lvlIdx + 1, level.cols, level.rows));
+    Game::SetFontSize(16);
 
     resize();
 }
@@ -86,8 +84,6 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
 void LevelEditScene::levelChanged()
 {
     saved = false;
-    mLevelText.setText(
-        std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
 }
 
 void LevelEditScene::update(float dt)
@@ -101,7 +97,6 @@ void LevelEditScene::update(float dt)
         if (Input::JustPressed(SDL_SCANCODE_S))
         {
             switchEditing = false;
-            mEditInstruction.setText(NORMAL_MODE_INSTRUCTIONS);
         }
 
         tmpSwitch.floorX = mouseIsoPos.x;
@@ -165,7 +160,6 @@ void LevelEditScene::update(float dt)
                 else
                 {
                     switchEditing = true;
-                    mEditInstruction.setText(SWITCH_MODE_INSTRUCTIONS);
                     tmpSwitch.x = mouseIsoPos.x;
                     tmpSwitch.y = mouseIsoPos.y;
                 }
@@ -309,11 +303,12 @@ void LevelEditScene::draw()
     }
 
     // Mode
-    mEditInstruction.draw(10, 10);
+    if (switchEditing)
+        Game::Text(10, 10, SWITCH_MODE_INSTRUCTIONS);
+    else
+        Game::Text(10, 10, NORMAL_MODE_INSTRUCTIONS);
 
     // Level Info
-    mLevelText.draw(10, Game::ScreenHeight() - 35);
-
-    Game::SetFontSize(12);
-    Game::Text(10, Game::ScreenHeight() / 2, "heeey");
+    Game::Text(10, Game::ScreenHeight() - 35,
+               std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
 }

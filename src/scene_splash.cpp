@@ -5,10 +5,11 @@
 void SplashScene::init()
 {
     SDL_Log("Loading splash scene\n");
-    mText.clearText();
-    mText.hAlign = 1; // center
+    
     mTimer.setDuration(0);
     mTimer.reset();
+
+    Game::SetFontSize(32);
 }
 
 void SplashScene::dispose()
@@ -33,16 +34,16 @@ void SplashScene::update(float dt)
         switch (mIteration)
         {
         case 1:
-            mText.setText("B");
+            mText = "B";
             break;
         case 2:
-            mText.setText("BL");
+            mText = "BL";
             break;
         case 3:
-            mText.setText("BLT");
+            mText = "BLT";
             break;
         case 4:
-            mText.setText("BLT GAMES");
+            mText = "BLT GAMES";
             break;
         default:
             Game::LoadScene(Scenes::ISOLEVEL);
@@ -53,5 +54,5 @@ void SplashScene::update(float dt)
 
 void SplashScene::draw()
 {
-    mText.draw(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
+    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, mText, {255, 255, 255, 255}, TextAlign::CENTER);
 }

@@ -14,7 +14,7 @@ class SplashScene : public Scene
     void dispose() override;
 
   private:
-    StaticText mText;
+    std::string mText;
     Timer mTimer;
     int mIteration = 0;
 };

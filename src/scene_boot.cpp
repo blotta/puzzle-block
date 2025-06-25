@@ -41,6 +41,8 @@ void BootScene::init()
     spr = Game::GetSprite(SPR_BLOCK_UP);
 
     anim_up_long.start();
+
+    Game::SetFontSize(20);
 }
 
 void BootScene::dispose()
@@ -75,13 +77,13 @@ void debug_input_test_draw()
 {
     char buf[50] = {};
     sprintf(buf, "space key: %d", spaceKey);
-    Game::DrawText(20, 20, buf);
+    Game::Text(20, 20, buf);
 }
 
 // Dynamic Text
 void debug_dynamic_text_draw()
 {
-    Game::DrawText(
+    Game::Text(
         30, 10,
         "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~");
 }
@@ -122,11 +124,11 @@ void debug_sprite_positioning_draw()
 {
     char buf[50] = {};
     sprintf(buf, "start: %d %d", startX, startY);
-    Game::DrawText(10, 10, buf);
+    Game::Text(10, 10, buf);
     sprintf(buf, "origin: %d %d", spr.originX, spr.originY);
-    Game::DrawText(10, 10 + 35 * 1, buf);
+    Game::Text(10, 10 + 35 * 1, buf);
     sprintf(buf, "spritesheet: %d %d", spr.tx / 128, (spr.ty - 64) / 128);
-    Game::DrawText(10, 10 + 35 * 2, buf);
+    Game::Text(10, 10 + 35 * 2, buf);
 
     for (int y = -2; y < 3; y++)
     {
@@ -210,7 +212,7 @@ void BootScene::update(float dt)
 void BootScene::draw()
 {
     if (!debugModeActive && !timer.isDone())
-        Game::DrawText(10, 10, "d: debug mode");
+        Game::Text(10, 10, "d: debug mode");
 
     if (debugModeActive)
     {

@@ -30,8 +30,6 @@ class LevelEditScene : public Scene
     vec2 mousePos;
     vec2 mouseIsoPos;
     bool saved = true;
-    StaticText mEditInstruction;
-    StaticText mLevelText;
     bool switchEditing = false;
     LevelSwitch tmpSwitch = {};
 };

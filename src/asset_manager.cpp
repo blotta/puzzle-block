@@ -24,9 +24,6 @@ void Asset::UnloadAssets()
     auto& mgr = Asset::get();
     mgr.mTextures.clear();
 
-    if (mgr.mFont)
-        TTF_CloseFont(mgr.mFont);
-
     for (const auto& [path, sfx] : mgr.mSounds)
     {
         Mix_FreeChunk(sfx);
@@ -92,27 +89,6 @@ void Asset::LoadMusic(const std::string& path)
     auto& mgr = Asset::get();
     auto sfx = Mix_LoadMUS(path.c_str());
     mgr.mMusics.emplace(path, sfx);
-}
-
-void Asset::LoadFont(const std::string& path, int ptsize)
-{
-    auto& mgr = Asset::get();
-    mgr.mFont = TTF_OpenFont(path.c_str(), ptsize);
-    if (!mgr.mFont)
-    {
-        SDL_Log("Failed to load font: %s\n", TTF_GetError());
-    }
-    mgr.mFontPointSize = ptsize;
-}
-
-TTF_Font* Asset::GetFont()
-{
-    return Asset::get().mFont;
-}
-
-int Asset::GetFontPointSize()
-{
-    return Asset::get().mFontPointSize;
 }
 
 /////////////

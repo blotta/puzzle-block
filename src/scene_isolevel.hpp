@@ -23,9 +23,8 @@ class IsoLevelScene : public Scene
     vec2 moveDir;
     vec2 mousePos;
     void reset();
-    StaticText mTitleText;
+    std::string mTitleText;
     bool mLevelCleared = false;
-    StaticText mLevelClearedText;
     Timer mLevelClearedTimer;
 };
 
