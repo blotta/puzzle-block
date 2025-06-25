@@ -9,17 +9,17 @@
 #include "animation.hpp"
 #include <format>
 
-enum class BootDebugType
-{
-    DEBUG_TYPE_INPUT_TEST,
-    DEBUG_TYPE_DYNAMIC_TEXT_DRAW,
-    DEBUG_TYPE_SPRITE_POSITIONING_UPDATE,
-    DEBUG_TYPE_ANIMATION,
-
-    DEBUG_TYPE_COUNT
-};
-
 static BootDebugType bootDebugType = BootDebugType::DEBUG_TYPE_INPUT_TEST;
+
+void debug_input_test_update(float dt);
+void debug_input_test_draw();
+
+void debug_dynamic_text_draw();
+
+void debug_sprite_positioning_update(float dt);
+void debug_sprite_positioning_draw();
+
+void debug_animation_draw();
 
 inline const char* toString(BootDebugType state)
 {
@@ -38,16 +38,38 @@ inline const char* toString(BootDebugType state)
     }
 }
 
-static int startX, startY = 0;
-static Sprite spr = {};
+void noop_update(float dt)
+{
+}
+void noop_draw()
+{
+}
 
-static SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
-static AnimationSprite anim_up_long = {
-    .duration = 2.0f,
-    .frameCount = 3,
-    .frames = up_long_frames,
-    .loop = true,
-};
+void BootScene::setDebugType(BootDebugType type)
+{
+    this->debug_update_func = noop_update;
+    this->debug_draw_func = noop_draw;
+
+    switch (type)
+    {
+    case BootDebugType::DEBUG_TYPE_INPUT_TEST:
+        this->debug_update_func = debug_input_test_update;
+        this->debug_draw_func = debug_input_test_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW:
+        this->debug_draw_func = debug_dynamic_text_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE:
+        this->debug_update_func = debug_sprite_positioning_update;
+        this->debug_draw_func = debug_sprite_positioning_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_ANIMATION:
+        this->debug_draw_func = debug_animation_draw;
+        break;
+    default:
+        break;
+    }
+}
 
 void BootScene::init()
 {
@@ -55,19 +77,83 @@ void BootScene::init()
     timer.setDuration(3);
     timer.reset();
 
-    startX = Game::ScreenWidth() / 2;
-    startY = Game::ScreenHeight() / 2;
-    spr = Game::GetSprite(SPR_BLOCK_UP);
-
-    anim_up_long.start();
-
     Game::SetFontSize(20);
+
+    setDebugType(bootDebugType);
 }
 
 void BootScene::dispose()
 {
     Log::info("Unloading boot scene\n");
 }
+
+void BootScene::update(float dt)
+{
+    if (Input::JustPressed(SDL_SCANCODE_D))
+    {
+        // debug enter
+        debugModeActive = true;
+    }
+
+    if (!debugModeActive && timer.isDone())
+        loadFirstScene = true;
+
+    if (Input::JustPressed(SDL_SCANCODE_RETURN))
+        loadFirstScene = true;
+
+    if (loadFirstScene)
+        Game::LoadScene(Scenes::SPLASH);
+
+    if (debugModeActive)
+    {
+        if (Input::JustPressed(SDL_SCANCODE_F9))
+        {
+            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, -1);
+            setDebugType(bootDebugType);
+        }
+        if (Input::JustPressed(SDL_SCANCODE_F10))
+        {
+            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, 1);
+            setDebugType(bootDebugType);
+        }
+
+        this->debug_update_func(dt);
+
+        // if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
+        //     debug_input_test_update(dt);
+        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
+        //     debug_sprite_positioning_update(dt);
+    }
+}
+
+void BootScene::draw()
+{
+    if (!debugModeActive && !timer.isDone())
+        Game::Text(10, 10, "d: debug mode");
+
+    if (debugModeActive)
+    {
+        this->debug_draw_func();
+        // if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
+        //     debug_input_test_draw();
+        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW)
+        //     debug_dynamic_text_draw();
+        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
+        //     debug_sprite_positioning_draw();
+        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_ANIMATION)
+        //     debug_animation_draw();
+
+        Game::Text(Game::ScreenWidth() - 10, 10,
+                   std::format("[{}]\n"
+                               "Cycle: F9-F10",
+                               toString(bootDebugType)),
+                   {255, 255, 255, 255}, TextAlign::RIGHT);
+    }
+}
+
+////////////////
+// Input Test //
+////////////////
 
 // 0 not pressed
 // 1 pressed
@@ -94,10 +180,12 @@ void debug_input_test_update(float dt)
 
 void debug_input_test_draw()
 {
-    Game::Text(20, 20, std::format("space key: {}", spaceKey));
+    Game::Text(10, 10, std::format("space key: {}", spaceKey));
 }
 
-// Dynamic Text
+//////////////////
+// Dynamic Text //
+//////////////////
 void debug_dynamic_text_draw()
 {
     static const char* text =
@@ -110,9 +198,23 @@ void debug_dynamic_text_draw()
                VerticalAlign::BOTTOM);
 }
 
-// Sprite positioning
+////////////////////////
+// Sprite positioning //
+////////////////////////
+static bool debug_sprite_positioning_initted = false;
+static int startX, startY = 0;
+static Sprite spr = {};
+
 void debug_sprite_positioning_update(float dt)
 {
+    if (!debug_sprite_positioning_initted)
+    {
+        debug_sprite_positioning_initted = true;
+        startX = Game::ScreenWidth() / 2;
+        startY = Game::ScreenHeight() / 2;
+        spr = Game::GetSprite(SPR_BLOCK_UP);
+    }
+
     int dir = 0;
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         dir = 1;
@@ -144,13 +246,17 @@ void debug_sprite_positioning_update(float dt)
 
 void debug_sprite_positioning_draw()
 {
-    char buf[50] = {};
-    sprintf(buf, "start: %d %d", startX, startY);
-    Game::Text(10, 10, buf);
-    sprintf(buf, "origin: %d %d", spr.originX, spr.originY);
-    Game::Text(10, 10 + 35 * 1, buf);
-    sprintf(buf, "spritesheet: %d %d", spr.tx / 128, (spr.ty - 64) / 128);
-    Game::Text(10, 10 + 35 * 2, buf);
+    Game::Text(10, 10,
+               std::format("start: {} {}\n"
+                           "origin: {} {}\n"
+                           "spritesheet: {} {}",
+                           startX, startY, spr.originX, spr.originY, spr.tx / 128, (spr.ty - 64) / 128));
+
+    Game::Text(10, Game::ScreenHeight() - 10,
+               "change sprite: LEFT/RIGHT\n"
+               "move origin: HJKL\n"
+               "reset: R",
+               {255, 255, 255, 255}, TextAlign::LEFT, VerticalAlign::BOTTOM);
 
     for (int y = -2; y < 3; y++)
     {
@@ -175,9 +281,26 @@ void debug_sprite_positioning_draw()
     SDL_RenderDrawPoint(Game::GetRenderer(), startX - spr.originX, startY - spr.originY);
 }
 
-// Animation test
+////////////////////
+// Animation test //
+////////////////////
+static bool debug_animation_initted = false;
+static SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
+static AnimationSprite anim_up_long = {
+    .duration = 2.0f,
+    .frameCount = 3,
+    .frames = up_long_frames,
+    .loop = true,
+};
+
 void debug_animation_draw()
 {
+    if (!debug_animation_initted)
+    {
+        debug_animation_initted = true;
+        anim_up_long.start();
+    }
+
     // draw floors
     for (int y = -2; y < 3; y++)
     {
@@ -192,63 +315,4 @@ void debug_animation_draw()
 
     // draw animation
     Game::DrawSprite(startX, startY, anim_up_long.tick());
-}
-
-void BootScene::update(float dt)
-{
-    if (Input::JustPressed(SDL_SCANCODE_D))
-    {
-        // debug enter
-        debugModeActive = true;
-
-        anim_up_long.start();
-    }
-
-    if (!debugModeActive && timer.isDone())
-        loadFirstScene = true;
-
-    if (Input::JustPressed(SDL_SCANCODE_RETURN))
-        loadFirstScene = true;
-
-    if (loadFirstScene)
-        Game::LoadScene(Scenes::SPLASH);
-
-    if (debugModeActive)
-    {
-        if (Input::JustPressed(SDL_SCANCODE_F9))
-        {
-            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, -1);
-        }
-        if (Input::JustPressed(SDL_SCANCODE_F10))
-        {
-            bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, 1);
-        }
-
-        if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
-            debug_input_test_update(dt);
-        else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
-            debug_sprite_positioning_update(dt);
-    }
-}
-
-void BootScene::draw()
-{
-    if (!debugModeActive && !timer.isDone())
-        Game::Text(10, 10, "d: debug mode");
-
-    if (debugModeActive)
-    {
-        if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
-            debug_input_test_draw();
-        else if (bootDebugType == BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW)
-            debug_dynamic_text_draw();
-        else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
-            debug_sprite_positioning_draw();
-        else if (bootDebugType == BootDebugType::DEBUG_TYPE_ANIMATION)
-            debug_animation_draw();
-
-        Game::Text(Game::ScreenWidth() - 10, 10, std::format("Mode: {}", toString(bootDebugType)), {255, 255, 255, 255},
-                   TextAlign::RIGHT);
-        Game::Text(Game::ScreenWidth() - 10, 30, "Cycle: F9-F10", {255, 255, 255, 255}, TextAlign::RIGHT);
-    }
 }
