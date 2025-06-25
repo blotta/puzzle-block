@@ -176,7 +176,7 @@ void Game::DrawSprite(int x, int y, SpriteID sprId)
     SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
     SDL_Rect dest = {x - spr->originX, y - spr->originY, spr->tw, spr->th};
 
-    SDL_RenderCopy(g.mRenderer, g.pActiveTexture->get(), &src, &dest);
+    g.pActiveTexture->drawTile(&src, &dest);
 }
 
 void Game::PlaySound(const std::string& path)

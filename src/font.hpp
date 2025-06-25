@@ -35,9 +35,9 @@ class Font
         int offsetX, offsetY;
     };
 
-    SDL_Renderer* pRenderer;
-    TTF_Font* mFont;
-    SDL_Texture* mAtlas;
+    SDL_Renderer* pRenderer = nullptr;
+    TTF_Font* mFont = nullptr;
+    SDL_Texture* mAtlas = nullptr;
     std::unordered_map<char, Glyph> mCharData;
 
     void generateAtlas();

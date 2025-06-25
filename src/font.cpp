@@ -21,15 +21,21 @@ Font::Font(Font&& other) noexcept
     other.pRenderer = nullptr;
     other.mFont = nullptr;
     other.mAtlas = nullptr;
-    Log::debug("Moving font\n");
+    Log::debug("Moving font %s:%d\n", fontPath.c_str(), fontSize);
 }
 
 Font::~Font()
 {
-    if (mAtlas)
+    if (mAtlas != nullptr)
+    {
+        Log::debug("Destroying font atlas %s:%d\n", fontPath.c_str(), fontSize);
         SDL_DestroyTexture(mAtlas);
-    if (mFont)
+    }
+    if (mFont != nullptr)
+    {
+        Log::debug("Destroying font %s:%d\n", fontPath.c_str(), fontSize);
         TTF_CloseFont(mFont);
+    }
 }
 
 void Font::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align) const

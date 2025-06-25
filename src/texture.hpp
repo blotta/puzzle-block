@@ -13,9 +13,12 @@ class Texture
     Texture(Texture&& other) noexcept; // move constructor
     ~Texture();
     SDL_Texture* get() const;
+    void drawTile(const SDL_Rect* src, const SDL_Rect* dest) const;
 
+    std::string path;
   private:
-    SDL_Texture* mTexture = NULL;
+    SDL_Renderer* pRenderer = nullptr;
+    SDL_Texture* mTexture = nullptr;
 };
 
 #endif
