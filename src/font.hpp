@@ -21,6 +21,14 @@ enum class VerticalAlign
     BOTTOM
 };
 
+struct FontDrawOptions
+{
+    SDL_Color color = {255, 255, 255, 255};
+    TextAlign align = TextAlign::LEFT;
+    VerticalAlign valign = VerticalAlign::TOP;
+    int lineHeight = 0;
+};
+
 class Font
 {
   public:
@@ -28,11 +36,8 @@ class Font
     Font(const Font& other) = delete; // disallows copying
     Font(Font&& other) noexcept;      // move constructor
     ~Font();
-    void drawText(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255},
-                  TextAlign align = TextAlign::LEFT, VerticalAlign valign = VerticalAlign::TOP,
-                  int lineHeight = 0) const;
-    void drawTextLine(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255},
-                      TextAlign align = TextAlign::LEFT) const;
+    void drawText(int x, int y, const std::string& text, const FontDrawOptions& options = {}) const;
+    void drawTextLine(int x, int y, const std::string& text, const FontDrawOptions& options = {}) const;
 
     std::string fontPath;
     int fontSize;

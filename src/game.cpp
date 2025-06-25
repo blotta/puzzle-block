@@ -204,10 +204,10 @@ void Game::SetFontSize(int ptsize)
     g.mActiveFont = Asset::GetFont(g.mActiveFont->fontPath, ptsize);
 }
 
-void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align, VerticalAlign valign, int lineHeight)
+void Game::Text(int x, int y, const std::string& text, const FontDrawOptions& options)
 {
     auto& g = Game::get();
-    g.mActiveFont->drawText(x, y, text, color, align, valign, lineHeight);
+    g.mActiveFont->drawText(x, y, text, options);
 }
 
 void Game::Run()

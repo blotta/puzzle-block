@@ -118,11 +118,6 @@ void BootScene::update(float dt)
         }
 
         this->debug_update_func(dt);
-
-        // if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
-        //     debug_input_test_update(dt);
-        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
-        //     debug_sprite_positioning_update(dt);
     }
 }
 
@@ -134,20 +129,12 @@ void BootScene::draw()
     if (debugModeActive)
     {
         this->debug_draw_func();
-        // if (bootDebugType == BootDebugType::DEBUG_TYPE_INPUT_TEST)
-        //     debug_input_test_draw();
-        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW)
-        //     debug_dynamic_text_draw();
-        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE)
-        //     debug_sprite_positioning_draw();
-        // else if (bootDebugType == BootDebugType::DEBUG_TYPE_ANIMATION)
-        //     debug_animation_draw();
 
         Game::Text(Game::ScreenWidth() - 10, 10,
                    std::format("[{}]\n"
                                "Cycle: F9-F10",
                                toString(bootDebugType)),
-                   {255, 255, 255, 255}, TextAlign::RIGHT);
+                   {.align = TextAlign::RIGHT});
     }
 }
 
@@ -192,10 +179,10 @@ void debug_dynamic_text_draw()
         "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~";
 
     Game::Text(10, 10, text);
-    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, text, {255, 255, 255, 255}, TextAlign::CENTER,
-               VerticalAlign::MIDDLE);
-    Game::Text(Game::ScreenWidth() - 10, Game::ScreenHeight() - 10, text, {255, 255, 255, 255}, TextAlign::RIGHT,
-               VerticalAlign::BOTTOM);
+    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, text,
+               {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
+    Game::Text(Game::ScreenWidth() - 10, Game::ScreenHeight() - 10, text,
+               {.align = TextAlign::RIGHT, .valign = VerticalAlign::BOTTOM});
 }
 
 ////////////////////////
@@ -256,7 +243,7 @@ void debug_sprite_positioning_draw()
                "change sprite: LEFT/RIGHT\n"
                "move origin: HJKL\n"
                "reset: R",
-               {255, 255, 255, 255}, TextAlign::LEFT, VerticalAlign::BOTTOM);
+               {.align = TextAlign::LEFT, .valign = VerticalAlign::BOTTOM});
 
     for (int y = -2; y < 3; y++)
     {

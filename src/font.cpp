@@ -52,10 +52,9 @@ int countLines(std::string_view text)
     return count;
 }
 
-void Font::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align, VerticalAlign valign,
-                    int lineHeight) const
+void Font::drawText(int x, int y, const std::string& text, const FontDrawOptions& options) const
 {
-
+    int lineHeight = options.lineHeight;
     if (lineHeight == 0)
     {
         lineHeight = fontSize;
@@ -66,7 +65,7 @@ void Font::drawText(int x, int y, const std::string& text, SDL_Color color, Text
     int totalHeight = lineCount * lineHeight;
     int cursorY = y;
 
-    switch (valign)
+    switch (options.valign)
     {
     case VerticalAlign::TOP:
         break;
@@ -82,12 +81,12 @@ void Font::drawText(int x, int y, const std::string& text, SDL_Color color, Text
     std::string line;
     while (std::getline(ss, line))
     {
-        drawTextLine(x, cursorY, line, color, align);
+        drawTextLine(x, cursorY, line, options);
         cursorY += lineHeight;
     }
 }
 
-void Font::drawTextLine(int x, int y, const std::string& text, SDL_Color color, TextAlign align) const
+void Font::drawTextLine(int x, int y, const std::string& text, const FontDrawOptions& options) const
 {
     if (!mAtlas)
         return;
@@ -101,9 +100,9 @@ void Font::drawTextLine(int x, int y, const std::string& text, SDL_Color color, 
     }
 
     int drawX = x;
-    if (align == TextAlign::CENTER)
+    if (options.align == TextAlign::CENTER)
         drawX -= totalWidth / 2;
-    else if (align == TextAlign::RIGHT)
+    else if (options.align == TextAlign::RIGHT)
         drawX -= totalWidth;
 
     for (char c : text)
@@ -113,8 +112,8 @@ void Font::drawTextLine(int x, int y, const std::string& text, SDL_Color color, 
         const Glyph& g = mCharData.at(c);
         SDL_Rect src = g.src;
         SDL_Rect dst = {drawX + g.offsetX, y + g.offsetY, src.w, src.h};
-        SDL_SetTextureColorMod(mAtlas, color.r, color.g, color.b);
-        SDL_SetTextureAlphaMod(mAtlas, color.a);
+        SDL_SetTextureColorMod(mAtlas, options.color.r, options.color.g, options.color.b);
+        SDL_SetTextureAlphaMod(mAtlas, options.color.a);
         SDL_RenderCopy(pRenderer, mAtlas, &src, &dst);
         drawX += g.advance;
     }

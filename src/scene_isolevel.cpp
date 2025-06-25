@@ -123,11 +123,11 @@ void IsoLevelScene::draw()
     level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
     block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
 
-    Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {255, 255, 255, 255}, TextAlign::CENTER);
+    Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {.align = TextAlign::CENTER});
 
     if (mLevelCleared)
-        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!", {200, 255, 200, 255},
-                   TextAlign::CENTER);
+        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!",
+                   {.color = {200, 255, 200, 255}, .align = TextAlign::CENTER});
 
     // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
     // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());

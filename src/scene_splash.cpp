@@ -6,7 +6,7 @@
 void SplashScene::init()
 {
     Log::info("Loading splash scene\n");
-    
+
     mTimer.setDuration(0);
     mTimer.reset();
 
@@ -55,5 +55,5 @@ void SplashScene::update(float dt)
 
 void SplashScene::draw()
 {
-    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, mText, {255, 255, 255, 255}, TextAlign::CENTER);
+    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, mText, {.align = TextAlign::CENTER});
 }
