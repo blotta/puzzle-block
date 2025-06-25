@@ -204,10 +204,10 @@ void Game::SetFontSize(int ptsize)
     g.mActiveFont = Asset::GetFont(g.mActiveFont->fontPath, ptsize);
 }
 
-void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align)
+void Game::Text(int x, int y, const std::string& text, SDL_Color color, TextAlign align, VerticalAlign valign, int lineHeight)
 {
     auto& g = Game::get();
-    g.mActiveFont->drawText(x, y, text, color, align);
+    g.mActiveFont->drawText(x, y, text, color, align, valign, lineHeight);
 }
 
 void Game::Run()
@@ -256,7 +256,7 @@ void Game::tick()
         return;
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_F11))
+    if (Input::JustPressed(SDL_SCANCODE_F12))
     {
         LoadScene(Scenes::BOOT);
     }

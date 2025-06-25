@@ -2,11 +2,12 @@
 
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 #include "scene_boot.hpp"
 #include "util.hpp"
-#include "log.hpp"
 
 #include "animation.hpp"
+#include <format>
 
 enum class BootDebugType
 {
@@ -19,6 +20,23 @@ enum class BootDebugType
 };
 
 static BootDebugType bootDebugType = BootDebugType::DEBUG_TYPE_INPUT_TEST;
+
+inline const char* toString(BootDebugType state)
+{
+    switch (state)
+    {
+    case BootDebugType::DEBUG_TYPE_INPUT_TEST:
+        return "Input Test";
+    case BootDebugType::DEBUG_TYPE_DYNAMIC_TEXT_DRAW:
+        return "Dynamic Text Draw";
+    case BootDebugType::DEBUG_TYPE_SPRITE_POSITIONING_UPDATE:
+        return "Sprite Positioning Update";
+    case BootDebugType::DEBUG_TYPE_ANIMATION:
+        return "Animation";
+    default:
+        return "UNKNOWN";
+    }
+}
 
 static int startX, startY = 0;
 static Sprite spr = {};
@@ -76,17 +94,20 @@ void debug_input_test_update(float dt)
 
 void debug_input_test_draw()
 {
-    char buf[50] = {};
-    sprintf(buf, "space key: %d", spaceKey);
-    Game::Text(20, 20, buf);
+    Game::Text(20, 20, std::format("space key: {}", spaceKey));
 }
 
 // Dynamic Text
 void debug_dynamic_text_draw()
 {
-    Game::Text(
-        30, 10,
-        "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~");
+    static const char* text =
+        "!\"#$%&'()*+,-./\n0123456789\n:;<=>?@\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n[\\]^_`\nabcdefghijklmnopqrstuvwxyz\n{|}~";
+
+    Game::Text(10, 10, text);
+    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, text, {255, 255, 255, 255}, TextAlign::CENTER,
+               VerticalAlign::MIDDLE);
+    Game::Text(Game::ScreenWidth() - 10, Game::ScreenHeight() - 10, text, {255, 255, 255, 255}, TextAlign::RIGHT,
+               VerticalAlign::BOTTOM);
 }
 
 // Sprite positioning
@@ -194,11 +215,11 @@ void BootScene::update(float dt)
 
     if (debugModeActive)
     {
-        if (Input::JustPressed(SDL_SCANCODE_F10))
+        if (Input::JustPressed(SDL_SCANCODE_F9))
         {
             bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, -1);
         }
-        if (Input::JustPressed(SDL_SCANCODE_F11))
+        if (Input::JustPressed(SDL_SCANCODE_F10))
         {
             bootDebugType = (BootDebugType)cycleIndex((int)bootDebugType, (int)BootDebugType::DEBUG_TYPE_COUNT, 1);
         }
@@ -225,5 +246,9 @@ void BootScene::draw()
             debug_sprite_positioning_draw();
         else if (bootDebugType == BootDebugType::DEBUG_TYPE_ANIMATION)
             debug_animation_draw();
+
+        Game::Text(Game::ScreenWidth() - 10, 10, std::format("Mode: {}", toString(bootDebugType)), {255, 255, 255, 255},
+                   TextAlign::RIGHT);
+        Game::Text(Game::ScreenWidth() - 10, 30, "Cycle: F9-F10", {255, 255, 255, 255}, TextAlign::RIGHT);
     }
 }

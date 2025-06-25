@@ -2,6 +2,7 @@
 #include "asset_manager.hpp"
 #include "game.hpp"
 #include "log.hpp"
+#include <sstream>
 
 Font::Font(SDL_Renderer* renderer, const std::string& fontPath, int fontSize)
     : fontPath(fontPath), fontSize(fontSize), pRenderer(renderer), mFont(nullptr), mAtlas(nullptr)
@@ -38,7 +39,55 @@ Font::~Font()
     }
 }
 
-void Font::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align) const
+int countLines(std::string_view text)
+{
+    if (text.empty())
+        return 1;
+    int count = 1;
+    for (char c : text)
+    {
+        if (c == '\n')
+            ++count;
+    }
+    return count;
+}
+
+void Font::drawText(int x, int y, const std::string& text, SDL_Color color, TextAlign align, VerticalAlign valign,
+                    int lineHeight) const
+{
+
+    if (lineHeight == 0)
+    {
+        lineHeight = fontSize;
+    }
+
+    int lineCount = countLines(text);
+
+    int totalHeight = lineCount * lineHeight;
+    int cursorY = y;
+
+    switch (valign)
+    {
+    case VerticalAlign::TOP:
+        break;
+    case VerticalAlign::MIDDLE:
+        cursorY -= totalHeight / 2;
+        break;
+    case VerticalAlign::BOTTOM:
+        cursorY -= totalHeight;
+        break;
+    }
+
+    std::stringstream ss(text);
+    std::string line;
+    while (std::getline(ss, line))
+    {
+        drawTextLine(x, cursorY, line, color, align);
+        cursorY += lineHeight;
+    }
+}
+
+void Font::drawTextLine(int x, int y, const std::string& text, SDL_Color color, TextAlign align) const
 {
     if (!mAtlas)
         return;
@@ -46,6 +95,8 @@ void Font::drawText(int x, int y, const std::string& text, SDL_Color color, Text
     int totalWidth = 0;
     for (char c : text)
     {
+        if (c < 32 || c > 126)
+            continue;
         totalWidth += mCharData.at(c).advance;
     }
 
@@ -57,6 +108,8 @@ void Font::drawText(int x, int y, const std::string& text, SDL_Color color, Text
 
     for (char c : text)
     {
+        if (c < 32 || c > 126)
+            continue;
         const Glyph& g = mCharData.at(c);
         SDL_Rect src = g.src;
         SDL_Rect dst = {drawX + g.offsetX, y + g.offsetY, src.w, src.h};

@@ -46,7 +46,7 @@ class Game
     static void SetFont(const std::string& path, int ptsize);
     static void SetFontSize(int ptsize);
     static void Text(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255},
-                     TextAlign align = TextAlign::LEFT);
+                     TextAlign align = TextAlign::LEFT, VerticalAlign valign = VerticalAlign::TOP, int lineHeight = 0);
 
   private:
     Game();

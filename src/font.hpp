@@ -14,15 +14,25 @@ enum class TextAlign
     RIGHT
 };
 
+enum class VerticalAlign
+{
+    TOP,
+    MIDDLE,
+    BOTTOM
+};
+
 class Font
 {
   public:
     Font(SDL_Renderer* renderer, const std::string& fontPath, int fontSize);
     Font(const Font& other) = delete; // disallows copying
-    Font(Font&& other) noexcept; // move constructor
+    Font(Font&& other) noexcept;      // move constructor
     ~Font();
     void drawText(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255},
-                  TextAlign align = TextAlign::LEFT) const;
+                  TextAlign align = TextAlign::LEFT, VerticalAlign valign = VerticalAlign::TOP,
+                  int lineHeight = 0) const;
+    void drawTextLine(int x, int y, const std::string& text, SDL_Color color = {255, 255, 255, 255},
+                      TextAlign align = TextAlign::LEFT) const;
 
     std::string fontPath;
     int fontSize;
