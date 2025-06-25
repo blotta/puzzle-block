@@ -1,10 +1,11 @@
 #include "scene_splash.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 
 void SplashScene::init()
 {
-    SDL_Log("Loading splash scene\n");
+    Log::info("Loading splash scene\n");
     
     mTimer.setDuration(0);
     mTimer.reset();
@@ -14,7 +15,7 @@ void SplashScene::init()
 
 void SplashScene::dispose()
 {
-    SDL_Log("Unloading splash scene\n");
+    Log::info("Unloading splash scene\n");
 }
 
 void SplashScene::update(float dt)

@@ -1,6 +1,7 @@
 #include "asset_manager.hpp"
 #include <SDL2/SDL_image.h>
 #include <format>
+#include "log.hpp"
 
 Asset& Asset::get()
 {
@@ -10,7 +11,7 @@ Asset& Asset::get()
 
 Asset::Asset()
 {
-    SDL_Log("Asset initialized\n");
+    Log::debug("Asset initialized\n");
 }
 
 void Asset::SetRenderer(SDL_Renderer* renderer)

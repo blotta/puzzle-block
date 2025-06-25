@@ -3,6 +3,7 @@
 
 #include "scene.hpp"
 #include "timer.hpp"
+#include <string>
 
 class SplashScene : public Scene
 {

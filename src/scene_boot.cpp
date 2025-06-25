@@ -4,6 +4,7 @@
 #include "input_manager.hpp"
 #include "scene_boot.hpp"
 #include "util.hpp"
+#include "log.hpp"
 
 #include "animation.hpp"
 
@@ -32,7 +33,7 @@ static AnimationSprite anim_up_long = {
 
 void BootScene::init()
 {
-    SDL_Log("Loading boot scene\n");
+    Log::info("Loading boot scene\n");
     timer.setDuration(3);
     timer.reset();
 
@@ -47,7 +48,7 @@ void BootScene::init()
 
 void BootScene::dispose()
 {
-    SDL_Log("Unloading boot scene\n");
+    Log::info("Unloading boot scene\n");
 }
 
 // 0 not pressed
@@ -64,12 +65,12 @@ void debug_input_test_update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_SPACE))
     {
         spaceKey = 2;
-        SDL_Log("Just Pressed\n");
+        Log::debug("Just Pressed\n");
     }
     if (Input::JustReleased(SDL_SCANCODE_SPACE))
     {
         spaceKey = 3;
-        SDL_Log("Just Released\n");
+        Log::debug("Just Released\n");
     }
 }
 

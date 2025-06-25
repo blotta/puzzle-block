@@ -1,15 +1,15 @@
-#include <SDL2/SDL.h>
-
 #include "scene.hpp"
+#include "log.hpp"
+#include <SDL2/SDL.h>
 
 Scene::~Scene()
 {
 }
 void Scene::init()
 {
-    SDL_Log("Loading scene\n");
+    Log::info("Loading scene\n");
 }
 void Scene::dispose()
 {
-    SDL_Log("unloading scene\n");
+    Log::info("unloading scene\n");
 };

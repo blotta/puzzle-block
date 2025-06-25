@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 #include "scene_boot.hpp"
 #include "scene_isolevel.hpp"
 #include "scene_leveledit.hpp"
@@ -24,15 +25,19 @@ Game::Game()
     mRunning = true;
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        SDL_Log("Failed to initialize SDL\n");
+        Log::error("Failed to initialize SDL\n");
         success = false;
     }
+
+    // #ifdef DEBUG
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
+    // #endif
 
     mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth,
                                this->mScreenHeight, SDL_WINDOW_SHOWN);
     if (!mWindow)
     {
-        SDL_Log("Failed to initialize SDL Window\n");
+        Log::error("Failed to initialize SDL Window\n");
         success = false;
     }
 
@@ -41,7 +46,7 @@ Game::Game()
     mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
     if (!mRenderer)
     {
-        SDL_Log("Failed to initialize SDL Renderer\n");
+        Log::error("Failed to initialize SDL Renderer\n");
         success = false;
     }
     Asset::SetRenderer(mRenderer);
@@ -49,19 +54,19 @@ Game::Game()
     int imgFlags = IMG_INIT_PNG;
     if (!(IMG_Init(imgFlags) & imgFlags))
     {
-        SDL_Log("Failed to initialize SDL_image: %s\n", IMG_GetError());
+        Log::error("Failed to initialize SDL_image: %s\n", IMG_GetError());
         success = false;
     }
 
     if (-1 == TTF_Init())
     {
-        SDL_Log("Failed to initialize SDL_ttf: %s\n", TTF_GetError());
+        Log::error("Failed to initialize SDL_ttf: %s\n", TTF_GetError());
         success = false;
     }
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
-        SDL_Log("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
+        Log::error("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
         success = false;
     }
 
@@ -74,12 +79,12 @@ Game::Game()
     load_game_data(&mData);
 
     if (!success)
-        SDL_Log("Failed to initialize\n");
+        Log::error("Failed to initialize\n");
 }
 
 Game::~Game()
 {
-    SDL_Log("Deinitializing game\n");
+    Log::info("Deinitializing game\n");
 
     // unload scene
     loadScene(Scenes::NONE);
@@ -216,7 +221,7 @@ void Game::Run()
 
 void Game::run()
 {
-    SDL_Log("Starting program\n");
+    Log::info("Starting program\n");
     mRunning = true;
 
     loadAssets();
@@ -266,7 +271,7 @@ void Game::tick()
     if (mFPSTimer.isDone())
     {
         mFPSTimer.reset();
-        // SDL_Log("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
+        // Log::info("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
         mFpsCounter = 0;
     }
     mFpsCounter += 1;

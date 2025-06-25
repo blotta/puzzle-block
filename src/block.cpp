@@ -1,5 +1,6 @@
 #include "block.hpp"
 #include "animation.hpp"
+#include "log.hpp"
 
 static float animDuration = 0.2f;
 
@@ -112,7 +113,7 @@ bool Block::move(const vec2& dir, const Level& level, bool collide)
     {
         if (animation->isDone())
         {
-            SDL_Log("animation done\n");
+            Log::debug("animation done\n");
             x = moveIntent.newPos.x;
             y = moveIntent.newPos.y;
             state = moveIntent.newState;

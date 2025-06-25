@@ -1,10 +1,11 @@
 #include "scene_isolevel.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 #include <format>
 
 void IsoLevelScene::init()
 {
-    SDL_Log("Loading IsoLevel scene\n");
+    Log::info("Loading IsoLevel scene\n");
     this->reset();
 
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
@@ -12,13 +13,13 @@ void IsoLevelScene::init()
 
 void IsoLevelScene::dispose()
 {
-    SDL_Log("Unloading IsoLevel scene\n");
+    Log::info("Unloading IsoLevel scene\n");
 }
 
 void IsoLevelScene::reset()
 {
     auto lvl = Game::GetOrCreateState("curr_level", "0");
-    SDL_Log("Loading level %s\n", lvl.c_str());
+    Log::info("Loading level %s\n", lvl.c_str());
     int lvlIdx = std::stoi(lvl);
     level.load(Game::GetLevelData(lvlIdx));
 
@@ -124,7 +125,8 @@ void IsoLevelScene::draw()
     Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {255, 255, 255, 255}, TextAlign::CENTER);
 
     if (mLevelCleared)
-        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!", {200, 255, 200, 255}, TextAlign::CENTER);
+        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!", {200, 255, 200, 255},
+                   TextAlign::CENTER);
 
     // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
     // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());

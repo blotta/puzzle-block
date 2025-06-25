@@ -1,6 +1,7 @@
 #include "font.hpp"
 #include "asset_manager.hpp"
 #include "game.hpp"
+#include "log.hpp"
 
 Font::Font(SDL_Renderer* renderer, const std::string& fontPath, int fontSize)
     : fontPath(fontPath), fontSize(fontSize), pRenderer(renderer), mFont(nullptr), mAtlas(nullptr)
@@ -20,7 +21,7 @@ Font::Font(Font&& other) noexcept
     other.pRenderer = nullptr;
     other.mFont = nullptr;
     other.mAtlas = nullptr;
-    SDL_Log("Moving font\n");
+    Log::debug("Moving font\n");
 }
 
 Font::~Font()
@@ -103,5 +104,5 @@ void Font::generateAtlas()
     mAtlas = SDL_CreateTextureFromSurface(pRenderer, atlasSurface);
     SDL_FreeSurface(atlasSurface);
 
-    SDL_Log("Font texture generated for %s:%d\n", fontPath.c_str(), fontSize);
+    Log::info("Font texture generated for %s:%d\n", fontPath.c_str(), fontSize);
 }

@@ -1,8 +1,9 @@
 #include "input_manager.hpp"
+#include "log.hpp"
 
 Input::Input()
 {
-    SDL_Log("Input initialized\n");
+    Log::info("Input initialized\n");
 }
 
 Input& Input::get()

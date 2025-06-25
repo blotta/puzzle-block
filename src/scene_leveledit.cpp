@@ -1,11 +1,9 @@
 #include "scene_leveledit.hpp"
-
-#include <math.h>
-
-#include <format>
-#include <string>
-
 #include "input_manager.hpp"
+#include "log.hpp"
+#include <format>
+#include <math.h>
+#include <string>
 
 const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file   "
                                        " F3: save new file    F4: random    F5: reset level    NUMPAD Arrows: "
@@ -14,19 +12,19 @@ const char* SWITCH_MODE_INSTRUCTIONS = "[SWITCH] LMB: set switch destination    
 
 void LevelEditScene::init()
 {
-    SDL_Log("Loading Editor scene\n");
+    Log::info("Loading Editor scene\n");
     this->reset();
 }
 
 void LevelEditScene::dispose()
 {
-    SDL_Log("Unloading Editor scene\n");
+    Log::info("Unloading Editor scene\n");
 }
 
 void LevelEditScene::reset()
 {
     auto lvl = Game::GetOrCreateState("curr_level", "0");
-    SDL_Log("Loading level %s\n", lvl.c_str());
+    Log::info("Loading level %s\n", lvl.c_str());
     lvlIdx = std::stoi(lvl);
     if (lvlIdx >= Game::GetLevelsSize())
         lvlIdx = 0;
@@ -90,7 +88,7 @@ void LevelEditScene::update(float dt)
 {
     Input::MousePosition(&mousePos.x, &mousePos.y);
     WorldToIso(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
-    // SDL_Log("mouseIso : %d %d\n", mouseIsoPos.x, mouseIsoPos.y);
+    // Log::debug("mouseIso : %d %d\n", mouseIsoPos.x, mouseIsoPos.y);
 
     if (switchEditing)
     {
