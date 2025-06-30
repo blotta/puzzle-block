@@ -13,7 +13,7 @@ OBJS := $(SRCS:src/%.cpp=obj/%.o)
 all: debug
 
 .PHONY: debug
-debug: CFLAGS += -g
+debug: CFLAGS += -g -DDEBUG
 debug: $(EXE)
 
 .PHONY: release
