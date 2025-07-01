@@ -283,7 +283,7 @@ void debug_sprite_positioning_draw()
 static bool debug_animation_initted = false;
 static SpriteID up_long_frames[3] = {SPR_BLOCK_UP, SPR_BLOCK_UP_LONG_30, SPR_BLOCK_UP_LONG_60};
 static AnimationSprite anim_up_long = {
-    .duration = 2.0f,
+    .duration = 3.0f,
     .frameCount = 3,
     .frames = up_long_frames,
     .loop = true,
@@ -315,43 +315,56 @@ void debug_animation_draw()
 
 bool debug_animation2_initted = false;
 Animation anim;
-int startAnimX = 150;
 AnimationProperty<float> animLinear;
 AnimationProperty<float> animEaseIn;
 AnimationProperty<float> animEaseOut;
-AnimationProperty<float> animX;
+AnimationProperty<vec2> animG;
 AnimationProperty<vec2> animV;
 AnimationProperty<SpriteID> animSprite;
 
 void debug_animation2_init()
 {
+    startX = Game::ScreenWidth() / 2;
+    startY = Game::ScreenHeight() / 2;
+
     debug_animation2_initted = true;
     anim.duration = 3.0f;
-    anim.mode = AnimationPlayMode::PINGPONG;
+    anim.mode = AnimationPlayMode::LOOP;
     anim.start();
 
-    animLinear.addKeyframe(0.0f, startAnimX);
-    animLinear.addKeyframe(1.0f, Game::ScreenWidth() - 10.0f);
+    animLinear.addKeyframe(0.0f, 0.0f);
+    animLinear.addKeyframe(1.0f, 1.0f);
     animLinear.interpolationType = InterpolationType::LINEAR;
 
-    animEaseIn.addKeyframe(0.0f, startAnimX);
-    animEaseIn.addKeyframe(1.0f, Game::ScreenWidth() - 10.0f);
+    animEaseIn.addKeyframe(0.0f, 0.0f);
+    animEaseIn.addKeyframe(1.0f, 1.0f);
     animEaseIn.interpolationType = InterpolationType::EASE_IN;
 
-    animEaseOut.addKeyframe(0.0f, startAnimX);
-    animEaseOut.addKeyframe(1.0f, Game::ScreenWidth() - 10.0f);
+    animEaseOut.addKeyframe(0.0f, 0.0f);
+    animEaseOut.addKeyframe(1.0f, 1.0f);
     animEaseOut.interpolationType = InterpolationType::EASE_OUT;
 
-    animX.addKeyframesEvenly({10.0f, Game::ScreenWidth() - 10.0f, (Game::ScreenWidth() / 2) - 10.0f});
-    animX.interpolationType = InterpolationType::EASE_OUT;
+    vec2 gridPoints[] = {vec2{-2, -2}, vec2{2, -2}, vec2{2, 2}, vec2{-2, 2}, vec2{-2, -2}};
+    int gridPointsCount = sizeof(gridPoints) / sizeof(gridPoints[0]);
+    for (int i = 0; i < gridPointsCount; i++)
+    {
+        int sx, sy;
+        IsoToWorld(gridPoints[i].x, gridPoints[i].y, 64, 32, &sx, &sy);
+        gridPoints[i].x = startX + sx;
+        gridPoints[i].y = startY + sy;
+    }
+    animG.addKeyframesEvenly(gridPoints, true);
+    animG.interpolationType = InterpolationType::EASE_OUT;
 
-    animV.addKeyframesEvenly({
-        {10, 10},
-        {Game::ScreenWidth() - 10, 10},
-        {Game::ScreenWidth() - 10, Game::ScreenHeight() - 10},
-        {10, Game::ScreenHeight() - 10},
-    });
-    animV.addKeyframe(1.0f, {10, 10});
+    animV.addKeyframesEvenly(
+        {
+            {10, 10},
+            {Game::ScreenWidth() - 10, 10},
+            {Game::ScreenWidth() - 10, Game::ScreenHeight() - 10},
+            {10, Game::ScreenHeight() - 10},
+            {10, 10},
+        },
+        true);
     animV.interpolationType = InterpolationType::EASE_IN;
 
     animSprite.addKeyframesEvenly({
@@ -359,9 +372,6 @@ void debug_animation2_init()
         SpriteID::SPR_BLOCK_UP_LONG_30,
         SpriteID::SPR_BLOCK_UP_LONG_60,
     });
-
-    startX = Game::ScreenWidth() / 2;
-    startY = Game::ScreenHeight() / 2;
 }
 
 void debug_animation2_update(float dt)
@@ -377,26 +387,43 @@ void debug_animation2_update(float dt)
         return;
     }
 
+    if (Input::JustPressed(SDL_SCANCODE_1))
+    {
+        anim.mode = AnimationPlayMode::ONCE;
+        anim.start();
+    }
+    if (Input::JustPressed(SDL_SCANCODE_2))
+    {
+        anim.mode = AnimationPlayMode::LOOP;
+        anim.start();
+    }
+    if (Input::JustPressed(SDL_SCANCODE_3))
+    {
+        anim.mode = AnimationPlayMode::PINGPONG;
+        anim.start();
+    }
+
     anim.update(dt);
 }
 
 void debug_animation2_draw()
 {
+    // easings comparison
+    int startAnimX = 150;
+    int endAnimX = Game::ScreenWidth() - 10;
+    int length = endAnimX - startAnimX;
     SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
     SDL_RenderDrawLine(Game::GetRenderer(), startAnimX, 590, startAnimX, 650);
-    SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth() - 10, 590, Game::ScreenWidth() - 10, 650);
-    Game::Text(10, 600, "LINEAR", {.align = TextAlign::LEFT, .valign = VerticalAlign::MIDDLE});
-    Game::Text(animLinear.evaluate(anim.getProgress()), 600, "O",
-               {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 620, "EASE IN", {.align = TextAlign::LEFT, .valign = VerticalAlign::MIDDLE});
-    Game::Text(animEaseIn.evaluate(anim.getProgress()), 620, "O",
-               {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 640, "EASE OUT", {.align = TextAlign::LEFT, .valign = VerticalAlign::MIDDLE});
-    Game::Text(animEaseOut.evaluate(anim.getProgress()), 640, "O",
-               {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-
-    float x = animX.evaluate(anim.getProgress());
-    Game::DrawSprite(x, 300, SpriteID::SPR_BLOCK_UP);
+    SDL_RenderDrawLine(Game::GetRenderer(), endAnimX, 590, endAnimX, 650);
+    Game::Text(10, 600, "LINEAR", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, 620, "EASE IN", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, 640, "EASE OUT", {.valign = VerticalAlign::MIDDLE});
+    SDL_FRect rects[3] = {
+        {startAnimX + (length - 10.f) * animLinear.evaluate(anim.getProgress()), 600.f, 10.f, 10.f},
+        {startAnimX + (length - 10.f) * animEaseIn.evaluate(anim.getProgress()), 620.f, 10.f, 10.f},
+        {startAnimX + (length - 10.f) * animEaseOut.evaluate(anim.getProgress()), 640.f, 10.f, 10.f},
+    };
+    SDL_RenderFillRectsF(Game::GetRenderer(), rects, 3);
 
     // draw floors
     for (int y = -2; y < 3; y++)
@@ -410,12 +437,43 @@ void debug_animation2_draw()
         }
     }
 
+    // sprite animation
     SpriteID spr = animSprite.evaluate(anim.getProgress());
+
+    // grid animation
+    auto gridWorldPos = animG.evaluate(anim.getProgress());
+
+    // draw ordering
+    if (gridWorldPos.y < startY)
+        Game::DrawSprite(gridWorldPos.x, gridWorldPos.y, SpriteID::SPR_BLOCK_UP);
+
     Game::DrawSprite(startX, startY, spr);
 
-    auto pos = animV.evaluate(anim.getProgress());
-    Game::Text(pos.x, pos.y, "O", {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
+    if (gridWorldPos.y >= startY)
+        Game::DrawSprite(gridWorldPos.x, gridWorldPos.y, SpriteID::SPR_BLOCK_UP);
 
-    Game::Text(Game::ScreenWidth() / 2 - 100, 200, std::format("Animation progress: {:.2f}", anim.getProgress()),
-               {.align = TextAlign::LEFT, .valign = VerticalAlign::BOTTOM});
+    // border square animation
+    auto pos = animV.evaluate(anim.getProgress());
+    SDL_Rect rect = {pos.x - 10, pos.y - 10, 20, 20};
+    SDL_RenderFillRect(Game::GetRenderer(), &rect);
+
+    // border
+    SDL_Rect progressBorderRect = {.x = Game::ScreenWidth() / 2 - 100, .y = 200, .w = 200, .h = 20};
+
+    // progress
+    SDL_Rect progressFillRect = {.x = progressBorderRect.x,
+                                 .y = progressBorderRect.y,
+                                 .w = (int)(progressBorderRect.w * anim.getProgress()),
+                                 .h = progressBorderRect.h};
+
+    SDL_RenderDrawRect(Game::GetRenderer(), &progressBorderRect);
+    SDL_RenderFillRect(Game::GetRenderer(), &progressFillRect);
+    Game::Text(Game::ScreenWidth() / 2 - 100, 200 - 20, std::format("Animation progress: {:.2f}", anim.getProgress()),
+               {.valign = VerticalAlign::BOTTOM});
+
+    // yellow if selected
+    Game::Text(10, 10, "1: ONCE", {.color = anim.mode == AnimationPlayMode::ONCE ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    Game::Text(10, 30, "2: LOOP", {.color = anim.mode == AnimationPlayMode::LOOP ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    Game::Text(10, 50, "3: PINGPONG", {.color = anim.mode == AnimationPlayMode::PINGPONG ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    Game::Text(10, 70, "Press F5 to reset");
 }

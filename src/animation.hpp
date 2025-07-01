@@ -6,10 +6,10 @@
 #include "timer.hpp"
 #include "util.hpp"
 #include <algorithm>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
-#include <functional>
 
 struct AnimationSprite
 {
@@ -32,8 +32,6 @@ template <typename T> struct AnimationKeyframe
     T value;
 };
 
-template <typename T> using InterpolationFunction = std::function<T(const T&, const T&, float)>;
-
 enum class InterpolationType
 {
     LINEAR,
@@ -44,12 +42,33 @@ enum class InterpolationType
 template <typename T> struct AnimationProperty
 {
     void addKeyframe(float time, const T& value);
-    template <size_t N> void addKeyframesEvenly(const T (&values)[N]);
+
+    template <size_t N> void addKeyframesEvenly(const T (&values)[N], bool lastAtEnd = false)
+    {
+        keyframes.clear();
+
+        if (N == 0)
+            return;
+
+        if (N == 1)
+        {
+            addKeyframe(0.0f, values[0]);
+            return;
+        }
+
+        size_t denom = lastAtEnd ? N - 1 : N;
+        for (size_t i = 0; i < N; ++i)
+        {
+            float t = static_cast<float>(i) / static_cast<float>(denom);
+            if (t > 1.0f) t = 1.0f;
+            Log::debug("Adding keyframe %d at time: %f", i, t);
+            addKeyframe(t, values[i]);
+        }
+    }
 
     T evaluate(float t) const;
 
     std::vector<AnimationKeyframe<T>> keyframes;
-    // InterpolationFunction<T> interpolationFunction = nullptr;
     InterpolationType interpolationType = InterpolationType::LINEAR;
 };
 
@@ -57,22 +76,6 @@ template <typename T> void AnimationProperty<T>::addKeyframe(float time, const T
 {
     keyframes.push_back({time, value});
     std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.time < b.time; });
-}
-
-template <typename T> template <size_t N> void AnimationProperty<T>::addKeyframesEvenly(const T (&values)[N])
-{
-    if (N == 0)
-        return;
-
-    float step = 1.0f / N;
-
-    keyframes.clear();
-    for (size_t i = 0; i < N; ++i)
-    {
-        float time = step * i;
-        Log::debug("Adding keyframe %d at time: %f", i, time);
-        keyframes.push_back({time, values[i]});
-    }
 }
 
 template <typename T> T AnimationProperty<T>::evaluate(float t) const
