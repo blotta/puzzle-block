@@ -349,6 +349,9 @@ void debug_animation2_init()
     anim.duration = 3.0f;
     anim.mode = AnimationPlayMode::LOOP;
     anim.start();
+    anim.onComplete = []() {
+        Log::debug("Animation completed\n");
+    };
 
     animLinear.addKeyframe(0.0f, 0.0f);
     animLinear.addKeyframe(1.0f, 1.0f);

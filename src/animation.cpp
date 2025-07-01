@@ -80,6 +80,8 @@ void Animation::update(float dt)
         {
             time = duration;
             playing = false;
+            if (onComplete)
+                onComplete();
         }
         else if (time < 0.0f)
         {
@@ -89,10 +91,25 @@ void Animation::update(float dt)
     }
     else if (mode == AnimationPlayMode::LOOP)
     {
+        bool onCompleteCalled = false;
         while (time > duration)
+        {
             time -= duration;
+            if (!reverse && onComplete && !onCompleteCalled)
+            {
+                onComplete();
+                onCompleteCalled = true;
+            }
+        }
         while (time < 0.0f)
+        {
             time += duration;
+            if (reverse && onComplete && !onCompleteCalled)
+            {
+                onComplete();
+                onCompleteCalled = true;
+            }
+        }
     }
     else if (mode == AnimationPlayMode::PINGPONG)
     {
@@ -105,6 +122,10 @@ void Animation::update(float dt)
         {
             time = 0.0f;
             reverse = false;
+            if (onComplete)
+            {
+                onComplete();
+            }
         }
     }
 }

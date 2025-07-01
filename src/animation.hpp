@@ -127,6 +127,8 @@ class Animation
     AnimationPlayMode mode = AnimationPlayMode::ONCE;
     bool reverse = false;
 
+    std::function<void()> onComplete = nullptr;
+
     void start();
 
     void stop();
