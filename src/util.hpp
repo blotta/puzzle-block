@@ -82,6 +82,13 @@ int easeOut(int a, int b, float t);
 vec2f easeOut(const vec2f& a, const vec2f& b,  float t);
 vec2 easeOut(const vec2& a, const vec2& b, float t);
 SpriteID easeOut(const SpriteID& a, const SpriteID& b, float t);
+
+// ease out bounce
+float easeOutBounce(float a, float b, float t);
+int easeOutBounce(int a, int b, float t);
+vec2f easeOutBounce(const vec2f& a, const vec2f& b, float t);
+vec2 easeOutBounce(const vec2& a, const vec2& b, float t);
+SpriteID easeOutBounce(const SpriteID& a, const SpriteID& b, float t);
 } // namespace easings
 
 void IsoToWorld(int x, int y, int tile_width, int tile_height, int* sx, int* sy);

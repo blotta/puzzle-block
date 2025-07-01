@@ -77,7 +77,53 @@ SpriteID easeOut(const SpriteID& a, const SpriteID& b, float t)
     return a;
 }
 
+// easeOutBounce functions
+float easeOutBounce(float a, float b, float t)
+{
+    if (t < 1.0f / 2.75f)
+    {
+        return lerp(a, b, 7.5625f * t * t);
+    }
+    else if (t < 2.0f / 2.75f)
+    {
+        t -= 1.5f / 2.75f;
+        return lerp(a, b, 7.5625f * t * t + 0.75f);
+    }
+    else if (t < 2.5f / 2.75f)
+    {
+        t -= 2.25f / 2.75f;
+        return lerp(a, b, 7.5625f * t * t + 0.9375f);
+    }
+    else
+    {
+        t -= 2.625f / 2.75f;
+        return lerp(a, b, 7.5625f * t * t + 0.984375f);
+    }
+}
+
+int easeOutBounce(int a, int b, float t)
+{
+    return static_cast<int>(easeOutBounce(static_cast<float>(a), static_cast<float>(b), t));
+}
+
+vec2f easeOutBounce(const vec2f& a, const vec2f& b, float t)
+{
+    return vec2f(easeOutBounce(a.x, b.x, t), easeOutBounce(a.y, b.y, t));
+}
+
+vec2 easeOutBounce(const vec2& a, const vec2& b, float t)
+{
+    return vec2(static_cast<int>(easeOutBounce(static_cast<float>(a.x), static_cast<float>(b.x), t)),
+                static_cast<int>(easeOutBounce(static_cast<float>(a.y), static_cast<float>(b.y), t)));
+}
+
+SpriteID easeOutBounce(const SpriteID& a, const SpriteID& b, float t)
+{
+    return a;
+}
+
 } // namespace easings
+
 void IsoToWorld(int isoX, int isoY, int tile_width, int tile_height, int* worldX, int* worldY)
 {
     *worldX = ((isoX * tile_width / 2) - (isoY * tile_width / 2));

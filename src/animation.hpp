@@ -36,7 +36,8 @@ enum class InterpolationType
 {
     LINEAR,
     EASE_IN,
-    EASE_OUT
+    EASE_OUT,
+    EASE_OUT_BOUNCE
 };
 
 template <typename T> struct AnimationProperty
@@ -100,6 +101,8 @@ template <typename T> T AnimationProperty<T>::evaluate(float t) const
                 return easings::easeIn(k0.value, k1.value, localT);
             else if (interpolationType == InterpolationType::EASE_OUT)
                 return easings::easeOut(k0.value, k1.value, localT);
+            else if (interpolationType == InterpolationType::EASE_OUT_BOUNCE)
+                return easings::easeOutBounce(k0.value, k1.value, localT);
             else
                 return T{};
         }

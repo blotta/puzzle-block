@@ -318,6 +318,7 @@ Animation anim;
 AnimationProperty<float> animLinear;
 AnimationProperty<float> animEaseIn;
 AnimationProperty<float> animEaseOut;
+AnimationProperty<float> animEaseOutBounce;
 AnimationProperty<vec2> animG;
 AnimationProperty<vec2> animV;
 AnimationProperty<SpriteID> animSprite;
@@ -343,6 +344,10 @@ void debug_animation2_init()
     animEaseOut.addKeyframe(0.0f, 0.0f);
     animEaseOut.addKeyframe(1.0f, 1.0f);
     animEaseOut.interpolationType = InterpolationType::EASE_OUT;
+
+    animEaseOutBounce.addKeyframe(0.0f, 0.0f);
+    animEaseOutBounce.addKeyframe(1.0f, 1.0f);
+    animEaseOutBounce.interpolationType = InterpolationType::EASE_OUT_BOUNCE;
 
     vec2 gridPoints[] = {vec2{-2, -2}, vec2{2, -2}, vec2{2, 2}, vec2{-2, 2}, vec2{-2, -2}};
     int gridPointsCount = sizeof(gridPoints) / sizeof(gridPoints[0]);
@@ -409,21 +414,28 @@ void debug_animation2_update(float dt)
 void debug_animation2_draw()
 {
     // easings comparison
-    int startAnimX = 150;
+    int startAnimX = 200;
+    int startAnimY = 600;
     int endAnimX = Game::ScreenWidth() - 10;
     int length = endAnimX - startAnimX;
     SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
-    SDL_RenderDrawLine(Game::GetRenderer(), startAnimX, 590, startAnimX, 650);
-    SDL_RenderDrawLine(Game::GetRenderer(), endAnimX, 590, endAnimX, 650);
     Game::Text(10, 600, "LINEAR", {.valign = VerticalAlign::MIDDLE});
     Game::Text(10, 620, "EASE IN", {.valign = VerticalAlign::MIDDLE});
     Game::Text(10, 640, "EASE OUT", {.valign = VerticalAlign::MIDDLE});
-    SDL_FRect rects[3] = {
-        {startAnimX + (length - 10.f) * animLinear.evaluate(anim.getProgress()), 600.f, 10.f, 10.f},
-        {startAnimX + (length - 10.f) * animEaseIn.evaluate(anim.getProgress()), 620.f, 10.f, 10.f},
-        {startAnimX + (length - 10.f) * animEaseOut.evaluate(anim.getProgress()), 640.f, 10.f, 10.f},
+    Game::Text(10, 660, "EASE OUT BOUNCE", {.valign = VerticalAlign::MIDDLE});
+    SDL_FRect rects[] = {
+        {startAnimX + (length - 10.f) * animLinear.evaluate(anim.getProgress()), startAnimY + 20 * 0.f, 10.f, 10.f},
+        {startAnimX + (length - 10.f) * animEaseIn.evaluate(anim.getProgress()), startAnimY + 20 * 1.f, 10.f, 10.f},
+        {startAnimX + (length - 10.f) * animEaseOut.evaluate(anim.getProgress()), startAnimY + 20 * 2.f, 10.f, 10.f},
+        {startAnimX + (length - 10.f) * animEaseOutBounce.evaluate(anim.getProgress()), startAnimY + 20 * 3.f, 10.f,
+         10.f},
     };
-    SDL_RenderFillRectsF(Game::GetRenderer(), rects, 3);
+    int lengthRects = sizeof(rects) / sizeof(rects[0]);
+    SDL_RenderFillRectsF(Game::GetRenderer(), rects, lengthRects);
+
+    SDL_RenderDrawLine(Game::GetRenderer(), startAnimX, startAnimY - 10, startAnimX,
+                       startAnimY + lengthRects * 20 + 10);
+    SDL_RenderDrawLine(Game::GetRenderer(), endAnimX, startAnimY - 10, endAnimX, startAnimY + lengthRects * 20 + 10);
 
     // draw floors
     for (int y = -2; y < 3; y++)
@@ -449,6 +461,12 @@ void debug_animation2_draw()
 
     Game::DrawSprite(startX, startY, spr);
 
+    int bounceX, bounceY;
+    IsoToWorld(-1, 1, 64, 32, &bounceX, &bounceY);
+    float bounceProg = 1 - animEaseOutBounce.evaluate(anim.getProgress());
+    float bounceHeight = 500 * bounceProg;
+    Game::DrawSprite(startX + bounceX, startY + bounceY - bounceHeight, SpriteID::SPR_BLOCK_UP);
+
     if (gridWorldPos.y >= startY)
         Game::DrawSprite(gridWorldPos.x, gridWorldPos.y, SpriteID::SPR_BLOCK_UP);
 
@@ -457,10 +475,8 @@ void debug_animation2_draw()
     SDL_Rect rect = {pos.x - 10, pos.y - 10, 20, 20};
     SDL_RenderFillRect(Game::GetRenderer(), &rect);
 
-    // border
-    SDL_Rect progressBorderRect = {.x = Game::ScreenWidth() / 2 - 100, .y = 200, .w = 200, .h = 20};
-
-    // progress
+    // progress bar
+    SDL_Rect progressBorderRect = {.x = Game::ScreenWidth() / 2 - 100, .y = 150, .w = 200, .h = 20};
     SDL_Rect progressFillRect = {.x = progressBorderRect.x,
                                  .y = progressBorderRect.y,
                                  .w = (int)(progressBorderRect.w * anim.getProgress()),
@@ -468,12 +484,18 @@ void debug_animation2_draw()
 
     SDL_RenderDrawRect(Game::GetRenderer(), &progressBorderRect);
     SDL_RenderFillRect(Game::GetRenderer(), &progressFillRect);
-    Game::Text(Game::ScreenWidth() / 2 - 100, 200 - 20, std::format("Animation progress: {:.2f}", anim.getProgress()),
+    Game::Text(progressBorderRect.x, progressBorderRect.y - 20, std::format("Animation progress: {:.2f}", anim.getProgress()),
                {.valign = VerticalAlign::BOTTOM});
 
-    // yellow if selected
-    Game::Text(10, 10, "1: ONCE", {.color = anim.mode == AnimationPlayMode::ONCE ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
-    Game::Text(10, 30, "2: LOOP", {.color = anim.mode == AnimationPlayMode::LOOP ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
-    Game::Text(10, 50, "3: PINGPONG", {.color = anim.mode == AnimationPlayMode::PINGPONG ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    // top left controls. yellow if selected
+    Game::Text(
+        10, 10, "1: ONCE",
+        {.color = anim.mode == AnimationPlayMode::ONCE ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    Game::Text(
+        10, 30, "2: LOOP",
+        {.color = anim.mode == AnimationPlayMode::LOOP ? SDL_Color{255, 255, 0, 255} : SDL_Color{255, 255, 255, 255}});
+    Game::Text(10, 50, "3: PINGPONG",
+               {.color = anim.mode == AnimationPlayMode::PINGPONG ? SDL_Color{255, 255, 0, 255}
+                                                                  : SDL_Color{255, 255, 255, 255}});
     Game::Text(10, 70, "Press F5 to reset");
 }
