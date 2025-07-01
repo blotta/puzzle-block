@@ -21,84 +21,11 @@ Game& Game::get()
 
 Game::Game()
 {
-    bool success = true;
-    mRunning = true;
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        Log::error("Failed to initialize SDL\n");
-        success = false;
-    }
 
-    // #ifdef DEBUG
-    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
-    // #endif
-
-    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth,
-                               this->mScreenHeight, SDL_WINDOW_SHOWN);
-    if (!mWindow)
-    {
-        Log::error("Failed to initialize SDL Window\n");
-        success = false;
-    }
-
-    SDL_SetWindowTitle(mWindow, "Game");
-
-    mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
-    if (!mRenderer)
-    {
-        Log::error("Failed to initialize SDL Renderer\n");
-        success = false;
-    }
-    Asset::SetRenderer(mRenderer);
-
-    int imgFlags = IMG_INIT_PNG;
-    if (!(IMG_Init(imgFlags) & imgFlags))
-    {
-        Log::error("Failed to initialize SDL_image: %s\n", IMG_GetError());
-        success = false;
-    }
-
-    if (-1 == TTF_Init())
-    {
-        Log::error("Failed to initialize SDL_ttf: %s\n", TTF_GetError());
-        success = false;
-    }
-
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-    {
-        Log::error("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
-        success = false;
-    }
-
-    mUpdateTimer.setDuration(1.0 / mTargetFPS);
-    mUpdateTimer.reset();
-
-    mFPSTimer.setDuration(1.0);
-    mFPSTimer.reset();
-
-    load_game_data(&mData);
-
-    if (!success)
-        Log::error("Failed to initialize\n");
 }
 
 Game::~Game()
 {
-    Log::info("Deinitializing game\n");
-
-    // unload scene
-    loadScene(Scenes::NONE);
-
-    // make sure to deinit assets before deiniting systems
-    Asset::UnloadAssets();
-
-    Mix_CloseAudio();
-    Mix_Quit();
-    TTF_Quit();
-    IMG_Quit();
-    SDL_DestroyRenderer(mRenderer);
-    SDL_DestroyWindow(mWindow);
-    SDL_Quit();
 }
 
 int Game::ScreenWidth()
@@ -118,7 +45,8 @@ int Game::TargetFPS()
 
 void Game::LoadScene(Scenes sceneName)
 {
-    Game::get().mNextScene = sceneName;
+    auto& g = Game::get();
+    g.mSceneManager.requestSwitch(sceneName);
 }
 
 SDL_Renderer* Game::GetRenderer()
@@ -219,12 +147,96 @@ void Game::Run()
 // Instance Methods //
 //////////////////////
 
+void Game::init()
+{
+    bool success = true;
+    mRunning = true;
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        Log::error("Failed to initialize SDL\n");
+        success = false;
+    }
+
+    // #ifdef DEBUG
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
+    // #endif
+
+    mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth,
+                               this->mScreenHeight, SDL_WINDOW_SHOWN);
+    if (!mWindow)
+    {
+        Log::error("Failed to initialize SDL Window\n");
+        success = false;
+    }
+
+    SDL_SetWindowTitle(mWindow, "Game");
+
+    mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+    if (!mRenderer)
+    {
+        Log::error("Failed to initialize SDL Renderer\n");
+        success = false;
+    }
+    Asset::SetRenderer(mRenderer);
+
+    int imgFlags = IMG_INIT_PNG;
+    if (!(IMG_Init(imgFlags) & imgFlags))
+    {
+        Log::error("Failed to initialize SDL_image: %s\n", IMG_GetError());
+        success = false;
+    }
+
+    if (-1 == TTF_Init())
+    {
+        Log::error("Failed to initialize SDL_ttf: %s\n", TTF_GetError());
+        success = false;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        Log::error("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
+        success = false;
+    }
+
+    mUpdateTimer.setDuration(1.0 / mTargetFPS);
+    mUpdateTimer.reset();
+
+    mFPSTimer.setDuration(1.0);
+    mFPSTimer.reset();
+
+    loadAssets();
+
+    mSceneManager.init(mStartScene);
+
+    if (!success)
+        Log::error("Failed to initialize\n");
+}
+
+void Game::dispose()
+{
+    Log::info("Deinitializing game\n");
+
+    // unload scene
+    mSceneManager.dispose();
+
+    // make sure to deinit assets before deiniting systems
+    Asset::UnloadAssets();
+
+    Mix_CloseAudio();
+    Mix_Quit();
+    TTF_Quit();
+    IMG_Quit();
+    SDL_DestroyRenderer(mRenderer);
+    SDL_DestroyWindow(mWindow);
+    SDL_Quit();
+}
+
 void Game::run()
 {
     Log::info("Starting program\n");
     mRunning = true;
 
-    loadAssets();
+    init();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop([]() { Game::get().tick(); }, 0, 1);
@@ -235,11 +247,7 @@ void Game::run()
     }
 #endif
 
-    // TODO: move this somewhere else
-    if (mCurrentScene != nullptr)
-    {
-        mCurrentScene->dispose();
-    }
+    dispose();
 }
 
 void Game::tick()
@@ -258,15 +266,17 @@ void Game::tick()
 
     if (Input::JustPressed(SDL_SCANCODE_F12))
     {
-        LoadScene(Scenes::BOOT);
+        mSceneManager.requestSwitch(mStartScene);
     }
 
-    // check scene changed
-    if (mNextScene != Scenes::NONE)
-        loadScene(mNextScene);
+    // update
+    mSceneManager.update(dt);
 
-    update(dt);
-    draw();
+    // draw
+    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(mRenderer);
+    mSceneManager.draw();
+    SDL_RenderPresent(mRenderer);
 
     if (mFPSTimer.isDone())
     {
@@ -296,55 +306,9 @@ void Game::loadAssets()
 
 void Game::loadLevels()
 {
+    load_game_data(&mData);
     for (auto& lvl : mData.DefaultLevels)
     {
         mLevels.emplace_back(lvl);
     }
-}
-
-void Game::loadScene(Scenes scene)
-{
-    if (scene == Scenes::NONE)
-        return;
-
-    if (mCurrentScene != nullptr)
-        mCurrentScene->dispose();
-
-    switch (scene)
-    {
-    case Scenes::SPLASH:
-        mCurrentScene = std::make_shared<SplashScene>();
-        break;
-    case Scenes::LEVEL_EDIT:
-        mCurrentScene = std::make_shared<LevelEditScene>();
-        break;
-    case Scenes::ISOLEVEL:
-        mCurrentScene = std::make_shared<IsoLevelScene>();
-        break;
-    case Scenes::BOOT:
-        mCurrentScene = std::make_shared<BootScene>();
-        break;
-    default:
-        mCurrentScene = nullptr;
-        break;
-    }
-
-    mCurrentScene->init();
-
-    mNextScene = Scenes::NONE;
-}
-
-void Game::update(float dt)
-{
-    mCurrentScene->update(dt);
-}
-
-void Game::draw()
-{
-    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
-    SDL_RenderClear(mRenderer);
-
-    mCurrentScene->draw();
-
-    SDL_RenderPresent(mRenderer);
 }

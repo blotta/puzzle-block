@@ -10,6 +10,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "asset_manager.hpp"
+#include "scene_manager.hpp"
 #include "scene.hpp"
 #include "font.hpp"
 #include "timer.hpp"
@@ -54,12 +55,12 @@ class Game
 
     void loadAssets();
     void loadLevels();
-    void loadScene(Scenes sceneName);
+    void init();
     void run();
+    void dispose();
+
     // Runs update() and draw()
     void tick();
-    void update(float dt);
-    void draw();
 
     const int mScreenWidth = 1280;
     const int mScreenHeight = 720;
@@ -77,8 +78,9 @@ class Game
     const Texture* pActiveTexture;
     const Font* mActiveFont;
 
-    Scenes mNextScene = Scenes::BOOT;
-    std::shared_ptr<Scene> mCurrentScene;
+    Scenes mStartScene = Scenes::BOOT;
+    SceneManager mSceneManager;
+
     std::map<std::string, std::string> mState;
 
     std::vector<LevelData> mLevels;

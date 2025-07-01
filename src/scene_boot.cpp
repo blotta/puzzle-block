@@ -80,20 +80,37 @@ void BootScene::setDebugType(BootDebugType type)
     }
 }
 
+BootScene::BootScene()
+{
+}
+
+BootScene::~BootScene()
+{
+}
+
+BootScene::BootScene(BootScene&& other) noexcept
+    : Scene(std::move(other)), timer(other.timer), loadFirstScene(other.loadFirstScene),
+      debugModeActive(other.debugModeActive), debug_update_func(std::move(other.debug_update_func)),
+      debug_draw_func(std::move(other.debug_draw_func))
+{
+    other.debug_draw_func = nullptr;
+    other.debug_update_func = nullptr;
+}
+
 void BootScene::init()
 {
-    Log::info("Loading boot scene\n");
     timer.setDuration(3);
     timer.reset();
 
     Game::SetFontSize(20);
 
     setDebugType(bootDebugType);
+    Log::debug("Loading boot scene\n");
 }
 
 void BootScene::dispose()
 {
-    Log::info("Unloading boot scene\n");
+    Log::debug("Unloading boot scene\n");
 }
 
 void BootScene::update(float dt)

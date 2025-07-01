@@ -34,11 +34,6 @@ void Asset::UnloadAssets()
     {
         Mix_FreeMusic(sfx);
     }
-
-    // for (const auto& [path, fa] : mgr.mFonts)
-    // {
-    //     delete fa;
-    // }
 }
 
 /////////////

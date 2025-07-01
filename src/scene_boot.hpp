@@ -19,6 +19,9 @@ enum class BootDebugType
 class BootScene : public Scene
 {
   public:
+    BootScene();
+    ~BootScene();
+    BootScene(BootScene&& other) noexcept;
     void init() override;
     void update(float dt) override;
     void draw() override;
@@ -28,8 +31,8 @@ class BootScene : public Scene
 
   private:
     Timer timer;
-    bool loadFirstScene;
-    bool debugModeActive;
+    bool loadFirstScene = false;
+    bool debugModeActive = false;
     std::function<void(float)> debug_update_func;
     std::function<void(void)> debug_draw_func;
 };
