@@ -1,6 +1,83 @@
 #include "util.hpp"
+#include "data.hpp"
 #include <math.h>
 
+namespace easings
+{
+
+float lerp(float a, float b, float t)
+{
+    return a + (b - a) * t;
+}
+
+int lerp(int a, int b, float t)
+{
+    return static_cast<int>(a + (b - a) * t);
+}
+
+vec2f lerp(const vec2f& a, const vec2f& b, float t)
+{
+    return a + (b - a) * t;
+}
+
+vec2 lerp(const vec2& a, const vec2& b, float t)
+{
+    return vec2(static_cast<int>(a.x + (b.x - a.x) * t), static_cast<int>(a.y + (b.y - a.y) * t));
+}
+
+SpriteID lerp(const SpriteID& a, const SpriteID& b, float t)
+{
+    return a;
+}
+
+// easeIn functions
+float easeIn(float a, float b, float t)
+{
+    return a + (b - a) * (t * t);
+}
+int easeIn(int a, int b, float t)
+{
+    return a + (b - a) * (t * t);
+}
+vec2f easeIn(const vec2f& a, const vec2f& b, float t)
+{
+    return a + (b - a) * (t * t);
+}
+vec2 easeIn(const vec2& a, const vec2& b, float t)
+{
+    return vec2(static_cast<int>(a.x + (b.x - a.x) * (t * t)), static_cast<int>(a.y + (b.y - a.y) * (t * t)));
+}
+SpriteID easeIn(const SpriteID& a, const SpriteID& b, float t)
+{
+    return a;
+}
+
+// easeOut functions
+float easeOut(float a, float b, float t)
+{
+    return a + (b - a) * (1 - (1 - t) * (1 - t));
+}
+
+int easeOut(int a, int b, float t)
+{
+    return a + (b - a) * (1 - (1 - t) * (1 - t));
+}
+
+vec2f easeOut(const vec2f& a, const vec2f& b, float t)
+{
+    return a + (b - a) * (1 - (1 - t) * (1 - t));
+}
+vec2 easeOut(const vec2& a, const vec2& b, float t)
+{
+    return vec2(static_cast<int>(a.x + (b.x - a.x) * (1 - (1 - t) * (1 - t))),
+                static_cast<int>(a.y + (b.y - a.y) * (1 - (1 - t) * (1 - t))));
+}
+SpriteID easeOut(const SpriteID& a, const SpriteID& b, float t)
+{
+    return a;
+}
+
+} // namespace easings
 void IsoToWorld(int isoX, int isoY, int tile_width, int tile_height, int* worldX, int* worldY)
 {
     *worldX = ((isoX * tile_width / 2) - (isoY * tile_width / 2));
