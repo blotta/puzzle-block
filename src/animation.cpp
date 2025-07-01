@@ -1,5 +1,6 @@
 #include "animation.hpp"
 #include <SDL2/SDL.h>
+#include <algorithm>
 
 void AnimationSprite::start()
 {
@@ -47,4 +48,68 @@ bool AnimationSprite::isDone() const
         return true;
 
     return false;
+}
+
+///////////////
+// ANIMATION //
+///////////////
+
+void Animation::start()
+{
+    time = 0.0f;
+    playing = true;
+    reverse = false;
+}
+
+void Animation::stop()
+{
+    playing = false;
+}
+
+void Animation::update(float dt)
+{
+    if (!playing)
+        return;
+
+    float delta = reverse ? -dt : dt;
+    time += delta;
+
+    if (mode == AnimationPlayMode::ONCE)
+    {
+        if (time > duration)
+        {
+            time = duration;
+            playing = false;
+        }
+        else if (time < 0.0f)
+        {
+            time = 0.0f;
+            playing = false;
+        }
+    }
+    else if (mode == AnimationPlayMode::LOOP)
+    {
+        while (time > duration)
+            time -= duration;
+        while (time < 0.0f)
+            time += duration;
+    }
+    else if (mode == AnimationPlayMode::PINGPONG)
+    {
+        if (time > duration)
+        {
+            time = duration;
+            reverse = true;
+        }
+        else if (time < 0.0f)
+        {
+            time = 0.0f;
+            reverse = false;
+        }
+    }
+}
+
+float Animation::getProgress() const
+{
+    return std::clamp(time / duration, 0.0f, 1.0f);
 }
