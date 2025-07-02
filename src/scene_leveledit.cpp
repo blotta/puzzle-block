@@ -224,21 +224,10 @@ void LevelEditScene::update(float dt)
         return;
     }
 
-    // normal op
-    moveDir = vec2(0, 0);
-    if (Input::JustPressed(SDL_SCANCODE_UP))
-        moveDir = vec2(0, -1);
-    if (Input::JustPressed(SDL_SCANCODE_DOWN))
-        moveDir = vec2(0, 1);
-    if (Input::JustPressed(SDL_SCANCODE_LEFT))
-        moveDir = vec2(-1, 0);
-    if (Input::JustPressed(SDL_SCANCODE_RIGHT))
-        moveDir = vec2(1, 0);
-
-    bool blockMoved = block.move(moveDir, level, false);
-    if (blockMoved)
+    block.update(dt);
+    if (block.moved)
     {
-        auto positions = block.getPositions();
+        auto positions = block.currSim.getPositions();
         level.checkAndTriggerSwitches(positions.first, positions.second);
     }
 }

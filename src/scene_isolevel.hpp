@@ -16,7 +16,7 @@ class IsoLevelScene : public Scene
 
   private:
     Level level;
-    Block block;
+    BlockVisual block;
     Camera camera;
     int cellSize = 64;
     vec2 moveDir;

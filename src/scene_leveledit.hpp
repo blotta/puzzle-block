@@ -21,7 +21,7 @@ class LevelEditScene : public Scene
 
     Level level;
     int lvlIdx;
-    Block block;
+    BlockVisual block;
     int offsetX = 100;
     int offsetY = 100;
     int cellSize = 64;

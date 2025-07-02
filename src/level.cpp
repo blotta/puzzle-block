@@ -190,6 +190,16 @@ bool Level::checkAndTriggerSwitches(const vec2& pos1, const vec2& pos2)
         else
             this->set(sw->floorX, sw->floorY, CellType::THIN);
         sw->on = !sw->on;
+        Game::PlaySound("assets/sfx/switch.ogg");
+        return true;
+    }
+    return false;
+}
+
+bool Level::isCleared(const vec2& pos1, const vec2& pos2)
+{
+    if (this->cellAt(pos1) == CellType::FINISH && this->cellAt(pos2) == CellType::FINISH)
+    {
         return true;
     }
     return false;

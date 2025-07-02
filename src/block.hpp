@@ -16,9 +16,29 @@ enum BlockState
     LONG
 };
 
-enum class BlockTransition
+struct BlockSim
+{
+    int x;
+    int y;
+    BlockState state = BlockState::UP;
+
+    void move(const vec2& dir);
+    std::pair<vec2, vec2> getPositions();
+
+    static std::pair<vec2, vec2> GetBlockPositionsForState(const vec2& pos, BlockState state);
+};
+
+enum class BlockVisualState
 {
     IDLE,
+    MOVING,
+};
+
+enum class BlockVisualTransition
+{
+    IDLE_UP,
+    IDLE_WIDE,
+    IDLE_LONG,
     UP_LONG_FORWARD,
     UP_LONG_BACKWARD,
     LONG_UP_FORWARD,
@@ -33,42 +53,25 @@ enum class BlockTransition
     WIDE_WIDE_BACKWARD
 };
 
-struct BlockMovement
+struct BlockVisualTransitionData
 {
-    vec2 oldPos, newPos;
-    BlockState oldState, newState;
+    std::array<SpriteID, 2> frames;
+    bool useCurrSim = true;
+};
+
+struct BlockVisual
+{
+    BlockSim currSim, nextSim;
+    BlockVisualState vState = BlockVisualState::IDLE;
+    Animation anim;
+    AnimationProperty<SpriteID> animProp;
+    BlockVisualTransitionData transitionData;
+    Level* level = nullptr;
     bool moved = false;
-    BlockTransition transition;
-};
-
-struct Block
-{
-    int x;
-    int y;
-    BlockState state = BlockState::UP;
-
-    BlockTransition currTransition = BlockTransition::IDLE;
-    AnimationSprite* animation;
-    BlockMovement moveIntent;
-
-    static std::pair<vec2, vec2> GetBlockPositionsForState(const vec2& pos, BlockState state);
-
     void init(const vec2& pos, BlockState state);
-    void updateMovementIntent(const vec2& dir);
-    bool move(const vec2& dir, const Level& level, bool collide);
-    std::pair<vec2, vec2> getPositions();
-
+    void update(float dt);
     void draw(int levelX, int levelY, int cellSize);
-};
-
-struct BlockSim
-{
-    int x;
-    int y;
-    BlockState state = BlockState::UP;
-
-    void move(const vec2& dir);
-    std::pair<vec2, vec2> getPositions();
+    static BlockVisualTransition getTransition(const BlockSim& curr, const BlockSim& next);
 };
 
 #endif

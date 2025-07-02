@@ -7,7 +7,9 @@
 #include "util.hpp"
 
 #include "animation.hpp"
+#include "block.hpp"
 #include <format>
+#include <span>
 
 static BootDebugType bootDebugType = BootDebugType::DEBUG_TYPE_INPUT_TEST;
 
@@ -24,6 +26,9 @@ void debug_animation_draw();
 void debug_animation2_update(float dt);
 void debug_animation2_draw();
 
+void debug_block_update(float dt);
+void debug_block_draw();
+
 inline const char* toString(BootDebugType state)
 {
     switch (state)
@@ -38,6 +43,8 @@ inline const char* toString(BootDebugType state)
         return "Animation";
     case BootDebugType::DEBUG_TYPE_ANIMATION_2:
         return "Animation 2";
+    case BootDebugType::DEBUG_TYPE_BLOCK:
+        return "Block";
     default:
         return "UNKNOWN";
     }
@@ -74,6 +81,10 @@ void BootScene::setDebugType(BootDebugType type)
     case BootDebugType::DEBUG_TYPE_ANIMATION_2:
         this->debug_update_func = debug_animation2_update;
         this->debug_draw_func = debug_animation2_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_BLOCK:
+        this->debug_update_func = debug_block_update;
+        this->debug_draw_func = debug_block_draw;
         break;
     default:
         break;
@@ -349,9 +360,7 @@ void debug_animation2_init()
     anim.duration = 3.0f;
     anim.mode = AnimationPlayMode::LOOP;
     anim.start();
-    anim.onComplete = []() {
-        Log::debug("Animation completed\n");
-    };
+    anim.onComplete = []() { Log::debug("Animation completed\n"); };
 
     animLinear.addKeyframe(0.0f, 0.0f);
     animLinear.addKeyframe(1.0f, 1.0f);
@@ -383,11 +392,11 @@ void debug_animation2_init()
 
     animV.addKeyframesEvenly(
         {
-            {10, 10},
-            {Game::ScreenWidth() - 10, 10},
-            {Game::ScreenWidth() - 10, Game::ScreenHeight() - 10},
-            {10, Game::ScreenHeight() - 10},
-            {10, 10},
+            vec2{10, 10},
+            vec2{Game::ScreenWidth() - 10, 10},
+            vec2{Game::ScreenWidth() - 10, Game::ScreenHeight() - 10},
+            vec2{10, Game::ScreenHeight() - 10},
+            vec2{10, 10},
         },
         true);
     animV.interpolationType = InterpolationType::EASE_IN;
@@ -504,8 +513,8 @@ void debug_animation2_draw()
 
     SDL_RenderDrawRect(Game::GetRenderer(), &progressBorderRect);
     SDL_RenderFillRect(Game::GetRenderer(), &progressFillRect);
-    Game::Text(progressBorderRect.x, progressBorderRect.y - 20, std::format("Animation progress: {:.2f}", anim.getProgress()),
-               {.valign = VerticalAlign::BOTTOM});
+    Game::Text(progressBorderRect.x, progressBorderRect.y - 20,
+               std::format("Animation progress: {:.2f}", anim.getProgress()), {.valign = VerticalAlign::BOTTOM});
 
     // top left controls. yellow if selected
     Game::Text(
@@ -518,4 +527,48 @@ void debug_animation2_draw()
                {.color = anim.mode == AnimationPlayMode::PINGPONG ? SDL_Color{255, 255, 0, 255}
                                                                   : SDL_Color{255, 255, 255, 255}});
     Game::Text(10, 70, "Press F5 to reset");
+}
+
+///////////
+// Block //
+///////////
+
+static bool debug_block_initted = false;
+static BlockVisual blockVisual;
+
+void debug_block_update(float dt)
+{
+    if (!debug_block_initted)
+    {
+        blockVisual.init({0, 0}, BlockState::UP);
+        startX = Game::ScreenWidth() / 2;
+        startY = Game::ScreenHeight() / 2;
+        debug_block_initted = true;
+    }
+
+    if (Input::JustPressed(SDL_SCANCODE_F5))
+    {
+        debug_block_initted = false;
+        return;
+    }
+
+    blockVisual.update(dt);
+}
+
+void debug_block_draw()
+{
+    // draw floors
+    for (int y = -2; y < 3; y++)
+    {
+        for (int x = -2; x < 3; x++)
+        {
+            int sx;
+            int sy;
+            IsoToWorld(x, y, 64, 32, &sx, &sy);
+            Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
+        }
+    }
+
+    // draw block
+    blockVisual.draw(startX, startY, 64);
 }

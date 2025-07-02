@@ -40,6 +40,7 @@ struct Level
     bool hasFloorAt(const vec2& pos) const;
     bool hasSwitchAt(const vec2& pos, LevelSwitch** sw);
     bool checkAndTriggerSwitches(const vec2& pos1, const vec2& pos2);
+    bool isCleared(const vec2& pos1, const vec2& pos2);
     void toggleThinFloor(const vec2& pos);
     CellType cellAt(const vec2& pos);
     void draw(int x, int y, int cellSize);

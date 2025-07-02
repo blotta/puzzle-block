@@ -7,7 +7,9 @@
 #include "util.hpp"
 #include <algorithm>
 #include <functional>
+#include <initializer_list>
 #include <map>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -44,27 +46,37 @@ template <typename T> struct AnimationProperty
 {
     void addKeyframe(float time, const T& value);
 
-    template <size_t N> void addKeyframesEvenly(const T (&values)[N], bool lastAtEnd = false)
+    void addKeyframesEvenly(std::span<const T> values, bool lastAtEnd = false)
     {
         keyframes.clear();
 
-        if (N == 0)
+        size_t count = values.size();
+        if (count == 0)
             return;
 
-        if (N == 1)
+        if (count == 1)
         {
             addKeyframe(0.0f, values[0]);
             return;
         }
 
-        size_t denom = lastAtEnd ? N - 1 : N;
-        for (size_t i = 0; i < N; ++i)
+        size_t denom = lastAtEnd ? count - 1 : count;
+
+        size_t i = 0;
+        for (const auto& value : values)
         {
             float t = static_cast<float>(i) / static_cast<float>(denom);
-            if (t > 1.0f) t = 1.0f;
+            if (t > 1.0f)
+                t = 1.0f;
             Log::debug("Adding keyframe %d at time: %f", i, t);
-            addKeyframe(t, values[i]);
+            addKeyframe(t, value);
+            ++i;
         }
+    }
+
+    void addKeyframesEvenly(std::initializer_list<T> values, bool lastAtEnd = false)
+    {
+        addKeyframesEvenly(std::span<const T>(values.begin(), values.size()), lastAtEnd);
     }
 
     T evaluate(float t) const;

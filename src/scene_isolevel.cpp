@@ -29,10 +29,11 @@ void IsoLevelScene::reset()
     // block setup
     auto startPos = level.getStartPos();
     block.init(startPos, BlockState::UP);
+    block.level = &level;
 
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
-    IsoToWorld(block.x, block.y, cellSize, cellSize / 2, &tx, &ty);
+    IsoToWorld(block.currSim.x, block.currSim.y, cellSize, cellSize / 2, &tx, &ty);
     camera.target.x = tx;
     camera.target.y = ty;
 
@@ -65,34 +66,19 @@ void IsoLevelScene::update(float dt)
 
     Input::MousePosition(&mousePos.x, &mousePos.y);
 
-    moveDir = vec2(0, 0);
-    if (Input::JustPressed(SDL_SCANCODE_UP))
-        moveDir = vec2(0, -1);
-    if (Input::JustPressed(SDL_SCANCODE_DOWN))
-        moveDir = vec2(0, 1);
-    if (Input::JustPressed(SDL_SCANCODE_LEFT))
-        moveDir = vec2(-1, 0);
-    if (Input::JustPressed(SDL_SCANCODE_RIGHT))
-        moveDir = vec2(1, 0);
+    block.update(dt);
 
-    bool blockMoved = block.move(moveDir, level, true);
-
-    if (blockMoved)
+    if (block.moved)
     {
-        auto positions = block.getPositions();
-        if (level.checkAndTriggerSwitches(positions.first, positions.second))
-        {
-            Game::PlaySound("assets/sfx/switch.ogg");
-        }
+        auto positions = block.currSim.getPositions();
+        level.checkAndTriggerSwitches(positions.first, positions.second);
 
-        if (!mLevelCleared && level.cellAt(positions.first) == CellType::FINISH &&
-            level.cellAt(positions.second) == CellType::FINISH)
+        if (!mLevelCleared && level.isCleared(positions.first, positions.second))
         {
             mLevelCleared = true;
             mLevelClearedTimer.reset();
             Game::PlaySound("assets/sfx/arrive.ogg");
         }
-        Game::PlaySound("assets/sfx/block_move.ogg");
     }
 
     if (Input::MousePressed(SDL_BUTTON_LEFT))
@@ -103,7 +89,7 @@ void IsoLevelScene::update(float dt)
     else
     {
         int tx, ty;
-        IsoToWorld(block.moveIntent.newPos.x, block.moveIntent.newPos.y, cellSize, cellSize / 2, &tx, &ty);
+        IsoToWorld(block.nextSim.x, block.nextSim.y, cellSize, cellSize / 2, &tx, &ty);
         camera.target.x = (float)tx;
         camera.target.y = (float)ty;
         camera.target.x += cellSize / 2;
