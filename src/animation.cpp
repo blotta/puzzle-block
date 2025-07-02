@@ -1,6 +1,7 @@
 #include "animation.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>
+#include <algorithm>
 
 void AnimationSprite::start()
 {

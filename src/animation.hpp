@@ -3,6 +3,7 @@
 
 #include "data.hpp"
 #include "log.hpp"
+#include "log.hpp"
 #include "timer.hpp"
 #include "util.hpp"
 #include <algorithm>
