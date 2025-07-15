@@ -1,18 +1,18 @@
 #ifndef ANIMATION_HPP
 #define ANIMATION_HPP
 
-#include "data.hpp"
-#include "log.hpp"
-#include "log.hpp"
-#include "timer.hpp"
-#include "util.hpp"
+#include <span>
+// #include <map>
+// #include <string>
 #include <algorithm>
 #include <functional>
 #include <initializer_list>
-#include <map>
-#include <span>
-#include <string>
 #include <vector>
+
+#include "data.hpp"
+#include "log.hpp"
+#include "timer.hpp"
+#include "util.hpp"
 
 struct AnimationSprite
 {

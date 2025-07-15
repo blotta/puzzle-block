@@ -1,4 +1,3 @@
-
 @echo off
 for /f "delims=" %%i in ('pkg-config --cflags --libs sdl2') do set DEPFLAGS=%%i
 

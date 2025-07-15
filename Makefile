@@ -1,5 +1,5 @@
 CC := g++
-# CC := clang++
+#CC := clang++
 LIBS := sdl2 sdl2_image sdl2_ttf sdl2_mixer
 PKG_CONFIG := pkg-config
 

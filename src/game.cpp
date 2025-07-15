@@ -1,13 +1,10 @@
-#include "game.hpp"
-#include "input_manager.hpp"
-#include "log.hpp"
-#include "scene_boot.hpp"
-#include "scene_isolevel.hpp"
-#include "scene_leveledit.hpp"
-#include "scene_splash.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
+#include "game.hpp"
+#include "input_manager.hpp"
+#include "asset_manager.hpp"
+#include "log.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -21,7 +18,6 @@ Game& Game::get()
 
 Game::Game()
 {
-
 }
 
 Game::~Game()

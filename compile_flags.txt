@@ -1,0 +1,1 @@
+-IC:/dev/installs/w64devkit/include/SDL2

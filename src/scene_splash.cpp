@@ -22,7 +22,7 @@ void SplashScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_RETURN))
     {
-        Game::LoadScene(Scenes::ISOLEVEL);
+        Game::LoadScene(Scenes::MAIN_MENU);
         return;
     }
 

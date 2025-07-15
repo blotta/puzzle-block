@@ -6,6 +6,7 @@ enum class Scenes
     NONE = 0,
     BOOT,
     SPLASH,
+    MAIN_MENU,
     LEVEL_EDIT,
     ISOLEVEL,
 };

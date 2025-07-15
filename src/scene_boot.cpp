@@ -2,6 +2,7 @@
 
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "asset_manager.hpp"
 #include "log.hpp"
 #include "scene_boot.hpp"
 #include "util.hpp"

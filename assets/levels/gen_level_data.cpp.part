@@ -1,5 +1,5 @@
 
-data->DefaultLevels[0] =
+data->DefaultLevels[0] = 
 {
     .cols = 2,
     .rows = 7,
@@ -15,7 +15,7 @@ data->DefaultLevels[0] =
 }
 ;
 
-data->DefaultLevels[1] =
+data->DefaultLevels[1] = 
 {
     .cols = 4,
     .rows = 6,
@@ -30,7 +30,7 @@ data->DefaultLevels[1] =
 }
 ;
 
-data->DefaultLevels[2] =
+data->DefaultLevels[2] = 
 {
     .cols = 4,
     .rows = 5,
@@ -44,7 +44,7 @@ data->DefaultLevels[2] =
 }
 ;
 
-data->DefaultLevels[3] =
+data->DefaultLevels[3] = 
 {
     .cols = 2,
     .rows = 7,
@@ -63,7 +63,7 @@ data->DefaultLevels[3] =
     }
 };
 
-data->DefaultLevels[4] =
+data->DefaultLevels[4] = 
 {
     .cols = 4,
     .rows = 9,
@@ -84,7 +84,7 @@ data->DefaultLevels[4] =
     }
 };
 
-data->DefaultLevels[5] =
+data->DefaultLevels[5] = 
 {
     .cols = 6,
     .rows = 14,
@@ -111,7 +111,7 @@ data->DefaultLevels[5] =
 }
 ;
 
-data->DefaultLevels[6] =
+data->DefaultLevels[6] = 
 {
     .cols = 7,
     .rows = 7,
@@ -127,7 +127,7 @@ data->DefaultLevels[6] =
 }
 ;
 
-data->DefaultLevels[7] =
+data->DefaultLevels[7] = 
 {
     .cols = 6,
     .rows = 13,
@@ -149,7 +149,7 @@ data->DefaultLevels[7] =
 }
 ;
 
-data->DefaultLevels[8] =
+data->DefaultLevels[8] = 
 {
     .cols = 9,
     .rows = 9,

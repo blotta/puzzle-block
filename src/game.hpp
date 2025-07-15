@@ -2,18 +2,18 @@
 #define GAME_HPP
 
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "asset_manager.hpp"
 #include "scene_manager.hpp"
 #include "scene.hpp"
 #include "font.hpp"
 #include "timer.hpp"
+#include "data.hpp"
+#include "texture.hpp"
 
 class Game
 {
