@@ -225,7 +225,7 @@ void load_game_data(GameData* data)
     };
 
 // levels
-#include "./../assets/levels/gen_level_data.cpp.part"
+#include "./../assets-build/levels/gen_level_data.cpp.part"
 #include "block.hpp"
 #include <random>
 }

@@ -81,7 +81,7 @@ struct LevelData
 
 // Game data context
 
-#include "./../assets/levels/gen_level_data.hpp"
+#include "./../assets-build/levels/gen_level_data.hpp"
 
 struct GameData
 {
