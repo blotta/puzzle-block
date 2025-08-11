@@ -1,16 +1,76 @@
 #include "scene_splash.hpp"
+#include "animation.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
 #include "log.hpp"
+
+static Animation splashAnim;
+static AnimationProperty<vec2> animB;
+static AnimationProperty<vec2> animL;
+static AnimationProperty<vec2> animT;
+static AnimationProperty<vec2> animGames;
+static AnimationProperty<float> animShake;
 
 void SplashScene::init()
 {
     Log::info("Loading splash scene\n");
 
-    mTimer.setDuration(0);
-    mTimer.reset();
-
     Game::SetFontSize(32);
+    int textWidth = Game::TextWidth("BLT GAMES");
+    int textStart = Game::ScreenWidth() / 2 - textWidth / 2;
+
+    splashAnim.duration = 3.0f;
+    splashAnim.mode = AnimationPlayMode::ONCE;
+    splashAnim.onComplete = [this]() {
+        this->splashDone = true;
+        this->mTimer.setDuration(1.0f);
+        this->mTimer.reset();
+    };
+    splashAnim.start();
+
+    // B
+    splashAnim.addEvent(0.0f, []() { Game::PlaySound("assets/sfx/swosh-05.ogg"); });
+    animB.interpolationType = InterpolationType::EASE_IN;
+    animB.addKeyframe(0.0f, {-20, Game::ScreenHeight() / 2});
+    animB.addKeyframe(0.1f, {textStart + 40, Game::ScreenHeight() / 2});
+
+    animB.addKeyframe(0.70f, {textStart + 40, Game::ScreenHeight() / 2});
+    animB.addKeyframe(0.72f, {textStart - 25, Game::ScreenHeight() / 2});
+    animB.addKeyframe(0.90f, {textStart, Game::ScreenHeight() / 2});
+
+    // L
+    splashAnim.addEvent(0.1f, []() { Game::PlaySound("assets/sfx/swosh-18.ogg"); });
+    animL.interpolationType = InterpolationType::EASE_IN;
+    animL.addKeyframe(0.1f, {textStart + 20, Game::ScreenHeight() + 20});
+    animL.addKeyframe(0.2f, {textStart + 40, Game::ScreenHeight() / 2});
+
+    animL.addKeyframe(0.70f, {textStart + 40, Game::ScreenHeight() / 2});
+    animL.addKeyframe(0.72f, {textStart + 20 - 20, Game::ScreenHeight() / 2});
+    animL.addKeyframe(0.90f, {textStart + 20, Game::ScreenHeight() / 2});
+
+    // T
+    splashAnim.addEvent(0.2f, []() { Game::PlaySound("assets/sfx/swosh-15.ogg"); });
+    animT.interpolationType = InterpolationType::EASE_IN;
+    animT.addKeyframe(0.2f, {textStart + 40, -20});
+    animT.addKeyframe(0.3f, {textStart + 40, Game::ScreenHeight() / 2});
+
+    animT.addKeyframe(0.70f, {textStart + 40, Game::ScreenHeight() / 2});
+    animT.addKeyframe(0.72f, {textStart + 40 - 15, Game::ScreenHeight() / 2});
+    animT.addKeyframe(0.90f, {textStart + 40, Game::ScreenHeight() / 2});
+
+    // Games
+    splashAnim.addEvent(0.4f, []() { Game::PlaySound("assets/sfx/swosh-37-mod.ogg"); });
+    splashAnim.addEvent(0.71f, []() { Game::PlaySound("assets/sfx/rumble.ogg"); });
+    animGames.interpolationType = InterpolationType::EASE_IN;
+    animGames.addKeyframe(0.5f, {Game::ScreenWidth() + 20, Game::ScreenHeight() / 2});
+    animGames.addKeyframe(0.7f, {textStart + 65, Game::ScreenHeight() / 2});
+
+    // shake
+    animShake.interpolationType = InterpolationType::LINEAR;
+    animShake.addKeyframe(0.7f, 0.f);
+    animShake.addKeyframe(0.71f, 10.f);
+    animShake.addKeyframe(0.8f, 0.f);
+
 }
 
 void SplashScene::dispose()
@@ -26,34 +86,29 @@ void SplashScene::update(float dt)
         return;
     }
 
-    if (mTimer.isDone())
+    if (splashDone && mTimer.isDone())
     {
-        mIteration += 1;
-        mTimer.reset();
-        mTimer.setDuration(1.0);
-
-        switch (mIteration)
-        {
-        case 1:
-            mText = "B";
-            break;
-        case 2:
-            mText = "BL";
-            break;
-        case 3:
-            mText = "BLT";
-            break;
-        case 4:
-            mText = "BLT GAMES";
-            break;
-        default:
-            Game::LoadScene(Scenes::ISOLEVEL);
-            break;
-        }
+        Game::LoadScene(Scenes::MAIN_MENU);
+        return;
     }
+
+    splashAnim.update(dt);
 }
 
 void SplashScene::draw()
 {
-    Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, mText, {.align = TextAlign::CENTER});
+    float camShake = animShake.evaluate(splashAnim.getProgress());
+    vec2 cam{(int)(camShake * randomNeg1to1()), (int)(camShake * randomNeg1to1())};
+
+    vec2 bPos = animB.evaluate(splashAnim.getProgress());
+    Game::Text(bPos.x - cam.x, bPos.y - cam.y, "B", {.valign = VerticalAlign::MIDDLE});
+
+    vec2 lPos = animL.evaluate(splashAnim.getProgress());
+    Game::Text(lPos.x - cam.x, lPos.y - cam.y, "L", {.valign = VerticalAlign::MIDDLE});
+
+    vec2 tPos = animT.evaluate(splashAnim.getProgress());
+    Game::Text(tPos.x - cam.x, tPos.y - cam.y, "T", {.valign = VerticalAlign::MIDDLE});
+
+    vec2 gamesPos = animGames.evaluate(splashAnim.getProgress());
+    Game::Text(gamesPos.x - cam.x, gamesPos.y - cam.y, "GAMES", {.valign = VerticalAlign::MIDDLE});
 }

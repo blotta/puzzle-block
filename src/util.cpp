@@ -1,6 +1,7 @@
 #include "util.hpp"
 #include "data.hpp"
 #include <math.h>
+#include <random>
 
 namespace easings
 {
@@ -173,4 +174,16 @@ int cycleIndex(int currIdx, int length, int amount)
     }
 
     return next;
+}
+
+float random01()
+{
+    static std::mt19937 rng(std::random_device{}()); 
+    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    return dist(rng);
+}
+
+float randomNeg1to1()
+{
+    return random01() * 2.0f - 1.0f;
 }

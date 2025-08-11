@@ -99,4 +99,6 @@ float linear_interpolate(float v0, float v1, float t);
 
 int cycleIndex(int currIdx, int length, int amount);
 
+float random01();
+float randomNeg1to1();
 #endif
