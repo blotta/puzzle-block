@@ -105,6 +105,12 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->anim.duration = 0.15f;
     this->anim.stop();
     this->animProp.addKeyframesEvenly(FRAMES.at(BlockVisualTransition::IDLE_UP).frames);
+
+    this->animFallStart.duration = 0.5f;
+    this->animFallStart.stop();
+    this->animFallStartProp.interpolationType = InterpolationType::EASE_IN;
+    this->animFallStartProp.addKeyframe(0.f, 1.f);
+    this->animFallStartProp.addKeyframe(1.f, 0.0f);
 }
 
 void BlockVisual::update(float dt)
@@ -156,6 +162,15 @@ void BlockVisual::update(float dt)
             moved = true;
         }
     }
+    else if (vState == BlockVisualState::FALLING_LEVEL_START)
+    {
+        this->animFallStart.update(dt);
+        if (this->animFallStart.getProgress() >= 1.0f)
+        {
+            this->animFallStart.stop();
+            this->vState = BlockVisualState::IDLE;
+        }
+    }
 }
 
 void BlockVisual::draw(int levelX, int levelY, int cellSize)
@@ -179,6 +194,25 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         IsoToWorld(sim.x, sim.y, cellSize, cellSize / 2, &sx, &sy);
         Game::DrawSprite(levelX + sx, levelY + sy, sprId);
     }
+    else if (vState == BlockVisualState::FALLING_LEVEL_START)
+    {
+        // draw idle state
+        SpriteID sprId = currSim.state == BlockState::UP     ? SPR_BLOCK_UP
+                         : currSim.state == BlockState::LONG ? SPR_BLOCK_LONG
+                                                             : SPR_BLOCK_WIDE;
+        int sx, sy;
+        IsoToWorld(currSim.x, currSim.y, cellSize, cellSize / 2, &sx, &sy);
+
+        auto heightPerc = animFallStartProp.evaluate(animFallStart.getProgress());
+        float height = (levelY + sy + 200) * heightPerc;
+        Game::DrawSprite(levelX + sx, levelY + sy - height, sprId);
+    }
+}
+
+void BlockVisual::startFall()
+{
+    this->vState = BlockVisualState::FALLING_LEVEL_START;
+    this->animFallStart.start();
 }
 
 BlockVisualTransition BlockVisual::getTransition(const BlockSim& curr, const BlockSim& next)

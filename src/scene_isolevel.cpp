@@ -38,6 +38,8 @@ void IsoLevelScene::reset()
     camera.target.y = ty;
 
     mLevelClearedTimer.setDuration(3);
+
+    block.startFall();
 }
 
 void IsoLevelScene::update(float dt)

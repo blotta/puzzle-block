@@ -32,6 +32,7 @@ enum class BlockVisualState
 {
     IDLE,
     MOVING,
+    FALLING_LEVEL_START,
 };
 
 enum class BlockVisualTransition
@@ -66,11 +67,14 @@ struct BlockVisual
     Animation anim;
     AnimationProperty<SpriteID> animProp;
     BlockVisualTransitionData transitionData;
+    Animation animFallStart;
+    AnimationProperty<float> animFallStartProp;
     Level* level = nullptr;
     bool moved = false;
     void init(const vec2& pos, BlockState state);
     void update(float dt);
     void draw(int levelX, int levelY, int cellSize);
+    void startFall();
     static BlockVisualTransition getTransition(const BlockSim& curr, const BlockSim& next);
 };
 

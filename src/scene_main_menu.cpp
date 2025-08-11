@@ -13,6 +13,8 @@ static LevelData lvl = {.cols = 7,
 void MainMenuScene::init()
 {
     Log::info("Loading Menu scene\n");
+    Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
+
     level.load(lvl);
 
     // block setup
@@ -25,6 +27,8 @@ void MainMenuScene::init()
     IsoToWorld(block.currSim.x, block.currSim.y, cellSize, cellSize / 2, &tx, &ty);
     camera.target.x = tx;
     camera.target.y = ty;
+
+    block.startFall();
 }
 
 void MainMenuScene::dispose()
