@@ -134,6 +134,12 @@ void Game::Text(int x, int y, const std::string& text, const FontDrawOptions& op
     g.mActiveFont->drawText(x, y, text, options);
 }
 
+int Game::TextWidth(const std::string& text, const FontDrawOptions& options)
+{
+    auto& g = Game::get();
+    return g.mActiveFont->measureText(text, options).width;
+}
+
 void Game::Run()
 {
     Game::get().run();
@@ -295,6 +301,12 @@ void Game::loadAssets()
     Asset::LoadSound("assets/sfx/block_move.ogg");
     Asset::LoadSound("assets/sfx/switch.ogg");
     Asset::LoadSound("assets/sfx/arrive.ogg");
+    Asset::LoadSound("assets/sfx/swosh-05.ogg");
+    Asset::LoadSound("assets/sfx/swosh-15.ogg");
+    Asset::LoadSound("assets/sfx/swosh-18.ogg");
+    Asset::LoadSound("assets/sfx/swosh-37-mod.ogg");
+    Asset::LoadSound("assets/sfx/rumble.ogg");
+
     Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
 
     loadLevels();

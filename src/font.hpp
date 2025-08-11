@@ -29,6 +29,12 @@ struct FontDrawOptions
     int lineHeight = 0;
 };
 
+struct TextSize
+{
+    int width;
+    int height;
+};
+
 class Font
 {
   public:
@@ -38,6 +44,8 @@ class Font
     ~Font();
     void drawText(int x, int y, const std::string& text, const FontDrawOptions& options = {}) const;
     void drawTextLine(int x, int y, const std::string& text, const FontDrawOptions& options = {}) const;
+
+    TextSize measureText(const std::string& text, const FontDrawOptions& options = {}) const;
 
     std::string fontPath;
     int fontSize;

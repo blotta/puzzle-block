@@ -8,12 +8,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "scene_manager.hpp"
-#include "scene.hpp"
-#include "font.hpp"
-#include "timer.hpp"
 #include "data.hpp"
+#include "font.hpp"
+#include "scene.hpp"
+#include "scene_manager.hpp"
 #include "texture.hpp"
+#include "timer.hpp"
 
 class Game
 {
@@ -47,6 +47,7 @@ class Game
     static void SetFont(const std::string& path, int ptsize);
     static void SetFontSize(int ptsize);
     static void Text(int x, int y, const std::string& text, const FontDrawOptions& = {});
+    static int TextWidth(const std::string& text, const FontDrawOptions& = {});
 
   private:
     Game();

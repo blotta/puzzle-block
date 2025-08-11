@@ -39,30 +39,11 @@ Font::~Font()
     }
 }
 
-int countLines(std::string_view text)
-{
-    if (text.empty())
-        return 1;
-    int count = 1;
-    for (char c : text)
-    {
-        if (c == '\n')
-            ++count;
-    }
-    return count;
-}
-
 void Font::drawText(int x, int y, const std::string& text, const FontDrawOptions& options) const
 {
-    int lineHeight = options.lineHeight;
-    if (lineHeight == 0)
-    {
-        lineHeight = fontSize;
-    }
+    int lineHeight = (options.lineHeight > 0) ? options.lineHeight : fontSize;
+    TextSize size = measureText(text, options);
 
-    int lineCount = countLines(text);
-
-    int totalHeight = lineCount * lineHeight;
     int cursorY = y;
 
     switch (options.valign)
@@ -70,10 +51,10 @@ void Font::drawText(int x, int y, const std::string& text, const FontDrawOptions
     case VerticalAlign::TOP:
         break;
     case VerticalAlign::MIDDLE:
-        cursorY -= totalHeight / 2;
+        cursorY -= size.height / 2;
         break;
     case VerticalAlign::BOTTOM:
-        cursorY -= totalHeight;
+        cursorY -= size.height;
         break;
     }
 
@@ -117,6 +98,43 @@ void Font::drawTextLine(int x, int y, const std::string& text, const FontDrawOpt
         SDL_RenderCopy(pRenderer, mAtlas, &src, &dst);
         drawX += g.advance;
     }
+}
+
+TextSize Font::measureText(const std::string& text, const FontDrawOptions& options) const
+{
+    if (!mAtlas)
+        return {0, 0};
+
+    int lineHeight = (options.lineHeight > 0) ? options.lineHeight : fontSize;
+
+    int maxWidth = 0;
+    int currentWidth = 0;
+    int lines = 1;
+
+    for (char c : text)
+    {
+        if (c == '\n')
+        {
+            maxWidth = std::max(maxWidth, currentWidth);
+            currentWidth = 0;
+            ++lines;
+            continue;
+        }
+
+        if (c < 32 || c > 126)
+        {
+            continue;
+        }
+
+        auto it = mCharData.find(c);
+        if (it != mCharData.end())
+            currentWidth += it->second.advance;
+    }
+
+    // last line check
+    maxWidth = std::max(maxWidth, currentWidth);
+
+    return {maxWidth, lines * lineHeight};
 }
 
 void Font::generateAtlas()
