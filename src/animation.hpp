@@ -131,6 +131,13 @@ enum class AnimationPlayMode
     PINGPONG
 };
 
+struct AnimationEvent
+{
+    float triggerTime;
+    std::function<void()> action;
+    bool triggered = false;
+};
+
 class Animation
 {
   public:
@@ -141,6 +148,9 @@ class Animation
     bool reverse = false;
 
     std::function<void()> onComplete = nullptr;
+    std::vector<AnimationEvent> events;
+
+    void addEvent(float progress, std::function<void()> action);
 
     void start();
 

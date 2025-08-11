@@ -55,11 +55,17 @@ bool AnimationSprite::isDone() const
 // ANIMATION //
 ///////////////
 
+void Animation::addEvent(float progress, std::function<void()> action)
+{
+    events.push_back({progress, std::move(action), false});
+}
+
 void Animation::start()
 {
     time = 0.0f;
     playing = true;
     reverse = false;
+    for (auto& e : events) e.triggered = false;
 }
 
 void Animation::stop()
@@ -74,6 +80,17 @@ void Animation::update(float dt)
 
     float delta = reverse ? -dt : dt;
     time += delta;
+
+    float progress = getProgress();
+
+    for (auto& e : events)
+    {
+        if (!e.triggered && progress >= e.triggerTime)
+        {
+            if (e.action) e.action();
+            e.triggered = true;
+        }
+    }
 
     if (mode == AnimationPlayMode::ONCE)
     {
