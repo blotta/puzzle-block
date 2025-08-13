@@ -33,6 +33,7 @@ enum class BlockVisualState
     IDLE,
     MOVING,
     FALLING_LEVEL_START,
+    FLYING_LEVEL_END,
 };
 
 enum class BlockVisualTransition
@@ -69,12 +70,16 @@ struct BlockVisual
     BlockVisualTransitionData transitionData;
     Animation animFallStart;
     AnimationProperty<float> animFallStartProp;
+    Animation animFlyEnd;
+    AnimationProperty<float> animFlyEndProp;
     Level* level = nullptr;
     bool moved = false;
     void init(const vec2& pos, BlockState state);
     void update(float dt);
     void draw(int levelX, int levelY, int cellSize);
     void startFall();
+    // void startFly();
+    void startFly(const std::function<void()>& onComplete);
     static BlockVisualTransition getTransition(const BlockSim& curr, const BlockSim& next);
 };
 

@@ -19,12 +19,11 @@ class IsoLevelScene : public Scene
     BlockVisual block;
     Camera camera;
     int cellSize = 64;
-    vec2 moveDir;
-    vec2 mousePos;
     void reset();
     std::string mTitleText;
     bool mLevelCleared = false;
-    Timer mLevelClearedTimer;
+    Animation animLevelCleared;
+    AnimationProperty<float> animLevelClearedProp;
 };
 
 #endif

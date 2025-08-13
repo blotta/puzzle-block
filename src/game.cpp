@@ -306,6 +306,8 @@ void Game::loadAssets()
     Asset::LoadSound("assets/sfx/swosh-18.ogg");
     Asset::LoadSound("assets/sfx/swosh-37-mod.ogg");
     Asset::LoadSound("assets/sfx/rumble.ogg");
+    Asset::LoadSound("assets/sfx/snd_gunshot1.ogg");
+    Asset::LoadSound("assets/sfx/uff.ogg");
 
     Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
 

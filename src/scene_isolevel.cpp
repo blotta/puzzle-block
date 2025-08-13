@@ -10,6 +10,21 @@ void IsoLevelScene::init()
 
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
     Game::SetFontSize(32);
+
+    auto textHalfWidth = Game::TextWidth("LEVEL CLEARED") / 2 + 10;
+    animLevelClearedProp.addKeyframe(0.15f, - textHalfWidth); // Level Cleared text position
+    animLevelClearedProp.addKeyframe(0.20f, Game::ScreenWidth() / 2 - 50);
+    animLevelClearedProp.addKeyframe(0.60f, Game::ScreenWidth() / 2);
+    animLevelClearedProp.addKeyframe(0.65f, Game::ScreenWidth() + textHalfWidth);
+    animLevelCleared.addEvent(0.2f, [](){
+        Game::PlaySound("assets/sfx/arrive.ogg");
+    });
+    animLevelCleared.onComplete = [](){
+        Game::LoadScene(Scenes::ISOLEVEL);
+    };
+    animLevelCleared.duration = 3.f;
+    animLevelClearedProp.interpolationType = InterpolationType::EASE_OUT;
+    animLevelCleared.stop();
 }
 
 void IsoLevelScene::dispose()
@@ -37,13 +52,21 @@ void IsoLevelScene::reset()
     camera.target.x = tx;
     camera.target.y = ty;
 
-    mLevelClearedTimer.setDuration(3);
+    mLevelCleared = false;
 
     block.startFall();
 }
 
 void IsoLevelScene::update(float dt)
 {
+    block.update(dt);
+
+    if (mLevelCleared)
+    {
+        animLevelCleared.update(dt);
+        return;
+    }
+
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // edit this level
@@ -66,20 +89,24 @@ void IsoLevelScene::update(float dt)
         reset();
     }
 
+    vec2 mousePos;
     Input::MousePosition(&mousePos.x, &mousePos.y);
-
-    block.update(dt);
 
     if (block.moved)
     {
         auto positions = block.currSim.getPositions();
         level.checkAndTriggerSwitches(positions.first, positions.second);
 
-        if (!mLevelCleared && level.isCleared(positions.first, positions.second))
+        if (level.isCleared(positions.first, positions.second))
         {
-            mLevelCleared = true;
-            mLevelClearedTimer.reset();
-            Game::PlaySound("assets/sfx/arrive.ogg");
+            this->mLevelCleared = true;
+            int idx = cycleIndex(std::stoi(Game::GetState("curr_level")), Game::GetLevelsSize(), 1);
+            Game::SetState("curr_level", std::to_string(idx));
+            Log::debug("Level cleared!");
+            block.startFly([this]() {
+                this->animLevelCleared.start();
+                Log::debug("starting level cleared animation");
+            });
         }
     }
 
@@ -97,13 +124,6 @@ void IsoLevelScene::update(float dt)
         camera.target.x += cellSize / 2;
     }
     camera.update(dt);
-
-    if (mLevelCleared && mLevelClearedTimer.isDone())
-    {
-        int idx = cycleIndex(std::stoi(Game::GetState("curr_level")), Game::GetLevelsSize(), 1);
-        Game::SetState("curr_level", std::to_string(idx));
-        Game::LoadScene(Scenes::ISOLEVEL);
-    }
 }
 
 void IsoLevelScene::draw()
@@ -113,9 +133,12 @@ void IsoLevelScene::draw()
 
     Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {.align = TextAlign::CENTER});
 
-    if (mLevelCleared)
-        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() / 4, "LEVEL CLEARED!",
+    if (animLevelCleared.playing)
+    {
+        float x = animLevelClearedProp.evaluate(animLevelCleared.getProgress());
+        Game::Text(x, Game::ScreenHeight() / 4, "LEVEL CLEARED",
                    {.color = {200, 255, 200, 255}, .align = TextAlign::CENTER});
+    }
 
     // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
     // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());
