@@ -1,8 +1,6 @@
 #include <span>
 #include <stdlib.h>
 
-#include <SDL2/SDL.h>
-
 #include "level.hpp"
 
 void Level::clear()

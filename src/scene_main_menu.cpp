@@ -53,9 +53,7 @@ void MainMenuScene::update(float dt)
 
         if (sceneChosen != Scenes::NONE)
         {
-            block.startFly(
-            []() { Game::LoadScene(Scenes::ISOLEVEL); }
-            );
+            block.startFly([]() { Game::LoadScene(Scenes::ISOLEVEL); });
             sceneChosen = Scenes::NONE;
         }
     }
@@ -67,4 +65,22 @@ void MainMenuScene::draw()
 {
     level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
     block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
+
+    int txtX, txtY;
+
+    IsoToWorld(3, 0, cellSize, cellSize / 2, &txtX, &txtY);
+    Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x, txtY - cellSize / 2 + camera.offset.y - camera.pos.y,
+               "START");
+
+    IsoToWorld(3, 6, cellSize, cellSize / 2, &txtX, &txtY);
+    Game::Text(txtX - cellSize/2 + camera.offset.x - camera.pos.x, txtY + cellSize / 2 + camera.offset.y - camera.pos.y,
+               "EXIT", {.align = TextAlign::RIGHT});
+
+    IsoToWorld(0, 3, cellSize, cellSize / 2, &txtX, &txtY);
+    Game::Text(txtX - cellSize/2 + camera.offset.x - camera.pos.x, txtY - cellSize / 2 + camera.offset.y - camera.pos.y,
+               "OPTIONS", {.align = TextAlign::RIGHT});
+
+    IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
+    Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x, txtY + cellSize / 2 + camera.offset.y - camera.pos.y,
+               "LEVEL SELECT");
 }
