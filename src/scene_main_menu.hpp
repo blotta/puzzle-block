@@ -16,7 +16,7 @@ class MainMenuScene : public Scene
     void onPopReturn() override;
 
   private:
-    Level level;
+    LevelVisual level;
     BlockVisual block;
     Camera camera;
     int cellSize = 64;

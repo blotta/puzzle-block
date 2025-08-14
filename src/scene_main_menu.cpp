@@ -18,12 +18,12 @@ void MainMenuScene::init()
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
     Game::SetFontSize(20);
 
-    level.load(lvl);
+    level.mModel.load(lvl);
 
     // block setup
-    auto startPos = level.getStartPos();
+    auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
-    block.level = &level;
+    block.level = &level.mModel;
 
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
@@ -43,7 +43,7 @@ void MainMenuScene::dispose()
 
 void MainMenuScene::onPopReturn()
 {
-    auto startPos = level.getStartPos();
+    auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
     block.startFall();
     choseOption = false;

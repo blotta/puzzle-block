@@ -28,9 +28,9 @@ void LevelEditScene::reset()
     Log::info("Loading level %d\n", lvlIdx + 1);
     if (lvlIdx >= Game::GetLevelsSize())
         lvlIdx = 0;
-    level.load(Game::GetLevelData(lvlIdx));
+    level.mModel.load(Game::GetLevelData(lvlIdx));
 
-    auto startPos = level.getStartPos();
+    auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
 
     saved = true;
@@ -44,13 +44,13 @@ void LevelEditScene::resize()
     // view sizes
     cellSize = 64;
     vec2 boundLeft, boundRight;
-    IsoToWorld(0, level.rows - 1, cellSize, cellSize / 2, &boundLeft.x, &boundLeft.y);
-    IsoToWorld(level.cols - 1, 0, cellSize, cellSize / 2, &boundRight.x, &boundRight.y);
+    IsoToWorld(0, level.mModel.rows - 1, cellSize, cellSize / 2, &boundLeft.x, &boundLeft.y);
+    IsoToWorld(level.mModel.cols - 1, 0, cellSize, cellSize / 2, &boundRight.x, &boundRight.y);
     int width = boundRight.x + cellSize / 2 - boundLeft.x;
 
     vec2 boundTop, boundBottom;
     IsoToWorld(0, 0, cellSize, cellSize / 2, &boundTop.x, &boundTop.y);
-    IsoToWorld(level.cols - 1, level.rows - 1, cellSize, cellSize / 2, &boundBottom.x, &boundBottom.y);
+    IsoToWorld(level.mModel.cols - 1, level.mModel.rows - 1, cellSize, cellSize / 2, &boundBottom.x, &boundBottom.y);
     int height = boundBottom.y + cellSize / 2 / 2 - boundTop.y;
 
     offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
@@ -61,7 +61,7 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
 {
     // save current
     LevelData ld = {};
-    level.toLevelData(&ld);
+    level.mModel.toLevelData(&ld);
     trimLevel(ld);
 
     if (newLevel)
@@ -109,15 +109,15 @@ void LevelEditScene::update(float dt)
 
         if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
         {
-            level.toggleFloor(mouseIsoPos);
+            level.mModel.toggleFloor(mouseIsoPos);
             levelChanged();
         }
 
         if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
         {
-            if (level.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::EMPTY)
+            if (level.mModel.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::EMPTY)
             {
-                level.addSwitch(tmpSwitch);
+                level.mModel.addSwitch(tmpSwitch);
                 switchEditing = false;
                 levelChanged();
             }
@@ -129,7 +129,7 @@ void LevelEditScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // exit level edit
-        if (level.isValid())
+        if (level.mModel.isValid())
         {
             save(false, false);
             Game::LoadScene(Scenes::ISOLEVEL);
@@ -137,29 +137,29 @@ void LevelEditScene::update(float dt)
         }
     }
 
-    if (level.isValidPos(mouseIsoPos))
+    if (level.mModel.isValidPos(mouseIsoPos))
     {
         if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
         {
-            level.toggleFloor(mouseIsoPos);
+            level.mModel.toggleFloor(mouseIsoPos);
             levelChanged();
         }
 
         if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
         {
-            level.toggleSpecialFloor(mouseIsoPos);
+            level.mModel.toggleSpecialFloor(mouseIsoPos);
             levelChanged();
         }
 
-        if (level.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::FLOOR)
+        if (level.mModel.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::FLOOR)
         {
             if (Input::JustPressed(SDL_SCANCODE_S))
             {
                 // enter switch edit mode if no switch in gridpos
                 LevelSwitch* sw;
-                if (level.hasSwitchAt(mouseIsoPos, &sw))
+                if (level.mModel.hasSwitchAt(mouseIsoPos, &sw))
                 {
-                    level.removeSwitch(mouseIsoPos);
+                    level.mModel.removeSwitch(mouseIsoPos);
                     levelChanged();
                 }
                 else
@@ -174,36 +174,36 @@ void LevelEditScene::update(float dt)
 
     if (Input::JustPressed(SDL_SCANCODE_KP_6))
     {
-        level.addColumn();
+        level.mModel.addColumn();
         resize();
         levelChanged();
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_8))
     {
-        level.removeRow();
+        level.mModel.removeRow();
         resize();
         levelChanged();
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_4))
     {
-        level.removeColumn();
+        level.mModel.removeColumn();
         resize();
         levelChanged();
     }
     if (Input::JustPressed(SDL_SCANCODE_KP_2))
     {
-        level.addRow();
+        level.mModel.addRow();
         resize();
         levelChanged();
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_F2) && level.isValid())
+    if (Input::JustPressed(SDL_SCANCODE_F2) && level.mModel.isValid())
     {
         // save current
         levelChanged();
         save(false, true);
     }
-    else if (Input::JustPressed(SDL_SCANCODE_F3) && level.isValid())
+    else if (Input::JustPressed(SDL_SCANCODE_F3) && level.mModel.isValid())
     {
         // save new
         levelChanged();
@@ -213,8 +213,8 @@ void LevelEditScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_F4))
     {
         auto randLvl = generateRandomLevel(20);
-        level.load(randLvl);
-        auto startPos = level.getStartPos();
+        level.mModel.load(randLvl);
+        auto startPos = level.mModel.getStartPos();
         block.init(startPos, BlockState::UP);
     }
 
@@ -228,7 +228,7 @@ void LevelEditScene::update(float dt)
     if (block.moved)
     {
         auto positions = block.currSim.getPositions();
-        level.checkAndTriggerSwitches(positions.first, positions.second);
+        level.mModel.checkAndTriggerSwitches(positions.first, positions.second);
     }
 }
 
@@ -240,16 +240,16 @@ void LevelEditScene::draw()
     // outline
     {
         SDL_SetRenderDrawColor(Game::GetRenderer(), 40, 200, 80, 255); // green
-        if (!level.isValid())
+        if (!level.mModel.isValid())
             SDL_SetRenderDrawColor(Game::GetRenderer(), 200, 40, 80, 255); // orange
         else if (!saved)
             SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 20, 255); // yellow
 
         int topX, topY, rightX, rightY, botX, botY, leftX, leftY = 0;
         IsoToWorld(0, 0, cellSize, cellSize / 2, &topX, &topY);
-        IsoToWorld(level.cols, 0, cellSize, cellSize / 2, &rightX, &rightY);
-        IsoToWorld(level.cols, level.rows, cellSize, cellSize / 2, &botX, &botY);
-        IsoToWorld(0, level.rows, cellSize, cellSize / 2, &leftX, &leftY);
+        IsoToWorld(level.mModel.cols, 0, cellSize, cellSize / 2, &rightX, &rightY);
+        IsoToWorld(level.mModel.cols, level.mModel.rows, cellSize, cellSize / 2, &botX, &botY);
+        IsoToWorld(0, level.mModel.rows, cellSize, cellSize / 2, &leftX, &leftY);
         SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
                            offsetX + rightX + cellSize / 2, offsetY + rightY);
         SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
@@ -261,9 +261,9 @@ void LevelEditScene::draw()
     }
 
     // level switches
-    for (int i = 0; i < level.switchCount; i++)
+    for (int i = 0; i < level.mModel.switchCount; i++)
     {
-        LevelSwitch& sw = level.switches[i];
+        LevelSwitch& sw = level.mModel.switches[i];
         SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
         if (sw.on)
             SDL_SetRenderDrawColor(Game::GetRenderer(), 180, 255, 0, 255);
@@ -288,7 +288,7 @@ void LevelEditScene::draw()
     }
 
     // editor
-    if (level.isValidPos(mouseIsoPos))
+    if (level.mModel.isValidPos(mouseIsoPos))
     {
         int mix, miy;
         IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize / 2, &mix, &miy);
@@ -303,5 +303,5 @@ void LevelEditScene::draw()
 
     // Level Info
     Game::Text(10, Game::ScreenHeight() - 35,
-               std::format("Level {} {}x{} {}", lvlIdx + 1, level.cols, level.rows, (level.isValid() ? "OK" : "NOK")));
+               std::format("Level {} {}x{} {}", lvlIdx + 1, level.mModel.cols, level.mModel.rows, (level.mModel.isValid() ? "OK" : "NOK")));
 }

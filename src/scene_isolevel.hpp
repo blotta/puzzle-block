@@ -15,7 +15,7 @@ class IsoLevelScene : public Scene
     void dispose() override;
 
   private:
-    Level level;
+    LevelVisual level;
     BlockVisual block;
     Camera camera;
     int cellSize = 64;

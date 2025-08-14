@@ -37,14 +37,14 @@ void IsoLevelScene::reset()
     auto lvl = Game::GetOrCreateState("curr_level", "0");
     int lvlIdx = std::stoi(lvl);
     Log::info("Loading level %d\n", lvlIdx + 1);
-    level.load(Game::GetLevelData(lvlIdx));
+    level.mModel.load(Game::GetLevelData(lvlIdx));
 
     mTitleText = std::format("Level {}", lvlIdx + 1);
 
     // block setup
-    auto startPos = level.getStartPos();
+    auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
-    block.level = &level;
+    block.level = &level.mModel;
 
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
@@ -95,9 +95,9 @@ void IsoLevelScene::update(float dt)
     if (block.moved)
     {
         auto positions = block.currSim.getPositions();
-        level.checkAndTriggerSwitches(positions.first, positions.second);
+        level.mModel.checkAndTriggerSwitches(positions.first, positions.second);
 
-        if (level.isCleared(positions.first, positions.second))
+        if (level.mModel.isCleared(positions.first, positions.second))
         {
             this->mLevelCleared = true;
             int idx = cycleIndex(std::stoi(Game::GetState("curr_level")), Game::GetLevelsSize(), 1);

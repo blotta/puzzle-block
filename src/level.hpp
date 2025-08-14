@@ -9,6 +9,7 @@
 #include "data.hpp"
 #include "game.hpp"
 #include "util.hpp"
+#include "animation.hpp"
 
 class Game;
 struct LevelData;
@@ -21,6 +22,13 @@ enum class CellType
     FINISH = 3,
     THIN = 4,
 };
+
+enum class LevelState
+{
+    IDLE,
+    RISING
+};
+
 struct Level
 {
     int rows = 6;
@@ -43,7 +51,7 @@ struct Level
     bool isCleared(const vec2& pos1, const vec2& pos2);
     void toggleThinFloor(const vec2& pos);
     CellType cellAt(const vec2& pos);
-    void draw(int x, int y, int cellSize);
+    // void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);
     void toggleSpecialFloor(const vec2& pos);
@@ -53,6 +61,18 @@ struct Level
     void removeColumn();
     void addSwitch(LevelSwitch sw);
     void removeSwitch(const vec2& pos);
+};
+
+struct LevelVisual
+{
+    Level mModel;
+    LevelState mState;
+    Animation animRise;
+    AnimationProperty<float> animRiseHeight;
+    void startRise();
+
+    void update(float dt);
+    void draw(int x, int y, int cellSize);
 };
 
 #endif

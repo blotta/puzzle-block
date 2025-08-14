@@ -19,7 +19,7 @@ class LevelEditScene : public Scene
     void save(bool newLevel, bool saveToFile);
     void levelChanged();
 
-    Level level;
+    LevelVisual level;
     int lvlIdx;
     BlockVisual block;
     int offsetX = 100;

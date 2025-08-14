@@ -222,50 +222,6 @@ CellType Level::cellAt(const vec2& pos)
     return grid[pos.y][pos.x];
 }
 
-void Level::draw(int offsetX, int offsetY, int cellSize)
-{
-    for (int i = 0; i < cols; i++)
-    {
-        for (int j = 0; j < rows; j++)
-        {
-            if (grid[j][i] == CellType::EMPTY)
-                continue;
-
-            int sx;
-            int sy;
-            IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
-
-            SpriteID sprId = SpriteID::SPR_FLOOR;
-
-            switch (grid[j][i])
-            {
-            case CellType::START:
-                sprId = SpriteID::SPR_FLOOR_START;
-                break;
-            case CellType::FINISH:
-                sprId = SpriteID::SPR_FLOOR_FINISH;
-                break;
-            case CellType::THIN:
-                sprId = SpriteID::SPR_FLOOR_THIN;
-                break;
-            default:
-                sprId = SpriteID::SPR_FLOOR;
-                break;
-            }
-
-            Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
-        }
-    }
-
-    for (int sidx = 0; sidx < this->switchCount; sidx++)
-    {
-        auto& sw = this->switches[sidx];
-        int sx;
-        int sy;
-        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(offsetX + sx, offsetY + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
-    }
-}
 
 void Level::toggleFloor(const vec2& pos)
 {
@@ -375,5 +331,68 @@ void Level::removeSwitch(const vec2& pos)
                     grid[j][i] = CellType::EMPTY;
             }
         }
+    }
+}
+
+void LevelVisual::startRise()
+{
+    mState = LevelState::RISING;
+    animRise.start();
+}
+
+void LevelVisual::update(float dt)
+{
+    if (mState == LevelState::IDLE)
+    {
+
+    }
+    else if (mState == LevelState::RISING)
+    {
+
+    }
+}
+
+void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
+{
+    for (int i = 0; i < mModel.cols; i++)
+    {
+        for (int j = 0; j < mModel.rows; j++)
+        {
+            if (mModel.grid[j][i] == CellType::EMPTY)
+                continue;
+
+            int sx;
+            int sy;
+            IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
+
+            SpriteID sprId = SpriteID::SPR_FLOOR;
+
+            switch (mModel.grid[j][i])
+            {
+            case CellType::START:
+                sprId = SpriteID::SPR_FLOOR_START;
+                break;
+            case CellType::FINISH:
+                sprId = SpriteID::SPR_FLOOR_FINISH;
+                break;
+            case CellType::THIN:
+                sprId = SpriteID::SPR_FLOOR_THIN;
+                break;
+            default:
+                sprId = SpriteID::SPR_FLOOR;
+                break;
+            }
+
+            Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
+        }
+    }
+
+    for (int sidx = 0; sidx < this->mModel.switchCount; sidx++)
+    {
+        auto& sw = this->mModel.switches[sidx];
+        int sx;
+        int sy;
+        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
+        Game::DrawSprite(offsetX + sx, offsetY + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
     }
 }
