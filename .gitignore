@@ -5,4 +5,6 @@ obj/
 .cache/
 testscripts/
 
-assets/anim-ref/*.png
+assets-projects/anim-ref/*.png
+
+.cpm/

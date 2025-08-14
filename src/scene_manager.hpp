@@ -1,7 +1,7 @@
 #ifndef SCENE_MANAGER_HPP
 #define SCENE_MANAGER_HPP
 
-#include "Scene.hpp"
+#include "scene.hpp"
 #include <memory>
 #include <vector>
 

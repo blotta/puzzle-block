@@ -94,7 +94,7 @@ void Animation::update(float dt)
 
     if (mode == AnimationPlayMode::ONCE)
     {
-        if (time > duration)
+        if (time >= duration)
         {
             time = duration;
             playing = false;
