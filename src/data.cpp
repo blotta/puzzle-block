@@ -224,6 +224,16 @@ void load_game_data(GameData* data)
         .originY = 90,
     };
 
+    data->Sprites[SpriteID::SPR_TITLE] = {
+        .id = SpriteID::SPR_TITLE,
+        .tx = 0,
+        .ty = 448,
+        .tw = 390,
+        .th = 235,
+        .originX = 0,
+        .originY = 0,
+    };
+
 // levels
 #include "./../assets-build/levels/gen_level_data.cpp.part"
 #include "block.hpp"

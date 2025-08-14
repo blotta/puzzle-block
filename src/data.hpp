@@ -33,6 +33,8 @@ enum SpriteID
     SPR_SWITCH_OFF,
     SPR_SWITCH_ON,
 
+    SPR_TITLE,
+
     SPR_NUM_SPRITES
 };
 

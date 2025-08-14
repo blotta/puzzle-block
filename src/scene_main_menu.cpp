@@ -28,8 +28,8 @@ void MainMenuScene::init()
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
     IsoToWorld(startPos.x, startPos.y, cellSize, cellSize / 2, &tx, &ty);
-    camera.target.x = tx;
-    camera.target.y = ty;
+    camera.target.x = tx + cellSize/2;
+    camera.target.y = ty - 100;
 
     choseOption = false;
 
@@ -108,4 +108,7 @@ void MainMenuScene::draw()
     IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
     Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x, txtY + cellSize / 2 + camera.offset.y - camera.pos.y,
                "LEVEL SELECT");
+
+    Sprite titleSprite = Game::GetSprite(SPR_TITLE);
+    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw/2, 50, SPR_TITLE);
 }
