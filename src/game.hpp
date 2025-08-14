@@ -23,9 +23,12 @@ class Game
     static int ScreenWidth();
     static int ScreenHeight();
     static int TargetFPS();
+    static const GameSettings& Settings();
 
     static void Run();
     static void LoadScene(Scenes sceneName);
+    static void PushScene(Scenes sceneName);
+    static void PopScene();
     static void Exit();
 
     static SDL_Renderer* GetRenderer();
@@ -43,7 +46,9 @@ class Game
     static void DrawSprite(int x, int y, SpriteID sprId);
 
     static void PlaySound(const std::string& path);
+    static void SetSoundVolume(int vol);
     static void PlayMusic(const std::string& path);
+    static void SetMusicVolume(int vol);
 
     static void SetFont(const std::string& path, int ptsize);
     static void SetFontSize(int ptsize);
@@ -89,6 +94,8 @@ class Game
 
     // data
     GameData mData = {};
+
+    GameSettings settings;
 };
 
 #endif

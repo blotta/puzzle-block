@@ -13,18 +13,13 @@ class MainMenuScene : public Scene
     void update(float dt) override;
     void draw() override;
     void dispose() override;
+    void onPopReturn() override;
 
   private:
     Level level;
     BlockVisual block;
     Camera camera;
     int cellSize = 64;
-    // vec2 moveDir;
-    // vec2 mousePos;
-    // void reset();
-    // std::string mTitleText;
-    // bool mLevelCleared = false;
-    // Timer mLevelClearedTimer;
 };
 
 #endif

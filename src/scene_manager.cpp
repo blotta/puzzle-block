@@ -4,6 +4,7 @@
 #include "scene_leveledit.hpp"
 #include "scene_splash.hpp"
 #include "scene_main_menu.hpp"
+#include "scene_options.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -19,6 +20,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<LevelEditScene>();
     case Scenes::ISOLEVEL:
         return std::make_unique<IsoLevelScene>();
+    case Scenes::OPTIONS:
+        return std::make_unique<OptionsScene>();
     default:
         return nullptr;
     }
@@ -92,6 +95,7 @@ void SceneManager::performSceneChange() {
     if (doPop && !sceneStack.empty()) {
         sceneStack.back()->dispose();
         sceneStack.pop_back();
+        sceneStack.back()->onPopReturn();
         doPop = false;
     }
 

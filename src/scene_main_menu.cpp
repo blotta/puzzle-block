@@ -16,6 +16,7 @@ void MainMenuScene::init()
 {
     Log::info("Loading Menu scene\n");
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
+    Game::SetFontSize(20);
 
     level.load(lvl);
 
@@ -26,7 +27,7 @@ void MainMenuScene::init()
 
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
-    IsoToWorld(block.currSim.x, block.currSim.y, cellSize, cellSize / 2, &tx, &ty);
+    IsoToWorld(startPos.x, startPos.y, cellSize, cellSize / 2, &tx, &ty);
     camera.target.x = tx;
     camera.target.y = ty;
 
@@ -40,12 +41,21 @@ void MainMenuScene::dispose()
     Log::info("Unloading Menu scene\n");
 }
 
+void MainMenuScene::onPopReturn()
+{
+    auto startPos = level.getStartPos();
+    block.init(startPos, BlockState::UP);
+    block.startFall();
+    choseOption = false;
+}
+
 void MainMenuScene::update(float dt)
 {
     block.update(dt);
 
     if (!choseOption)
     {
+        // Start
         if (block.currSim.x == 3 && block.currSim.y == 0)
         {
             choseOption = true;
@@ -54,11 +64,21 @@ void MainMenuScene::update(float dt)
             });
         }
 
+        // Exit
         if (block.currSim.x == 3 && block.currSim.y == 6)
         {
             choseOption = true;
             block.startFly([](){
                 Game::Exit();
+            });
+        }
+
+        // Options
+        if (block.currSim.x == 0 && block.currSim.y == 3)
+        {
+            choseOption = true;
+            block.startFly([](){
+                Game::PushScene(Scenes::OPTIONS);
             });
         }
     }

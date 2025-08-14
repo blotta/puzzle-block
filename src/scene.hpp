@@ -9,6 +9,7 @@ enum class Scenes
     MAIN_MENU,
     LEVEL_EDIT,
     ISOLEVEL,
+    OPTIONS,
 };
 
 class Scene
@@ -19,6 +20,7 @@ class Scene
     virtual void update(float dt) = 0;
     virtual void draw() = 0;
     virtual void dispose();
+    virtual void onPopReturn();
 };
 
 #endif

@@ -12,4 +12,5 @@ void Scene::init()
 void Scene::dispose()
 {
     Log::info("unloading scene\n");
-};
+}
+void Scene::onPopReturn() {};

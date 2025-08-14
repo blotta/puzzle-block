@@ -83,6 +83,12 @@ struct LevelData
 
 #include "./../assets-build/levels/gen_level_data.hpp"
 
+struct GameSettings
+{
+    int sfx_vol = 5;
+    int music_vol = 5;
+};
+
 struct GameData
 {
     Sprite Sprites[SpriteID::SPR_NUM_SPRITES];

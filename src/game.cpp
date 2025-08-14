@@ -39,10 +39,27 @@ int Game::TargetFPS()
     return Game::get().mTargetFPS;
 }
 
+const GameSettings& Game::Settings()
+{
+    return Game::get().settings;
+}
+
 void Game::LoadScene(Scenes sceneName)
 {
     auto& g = Game::get();
     g.mSceneManager.requestSwitch(sceneName);
+}
+
+void Game::PushScene(Scenes sceneName)
+{
+    auto& g = Game::get();
+    g.mSceneManager.pushScene(sceneName);
+}
+
+void Game::PopScene()
+{
+    auto& g = Game::get();
+    g.mSceneManager.popScene();
 }
 
 SDL_Renderer* Game::GetRenderer()
@@ -109,11 +126,35 @@ void Game::PlaySound(const std::string& path)
     Mix_PlayChannel(-1, sound, 0);
 }
 
+void Game::SetSoundVolume(int vol)
+{
+    if (vol > 10)
+        vol = 10;
+    if (vol < 0)
+        vol = 0;
+
+    int mixVol = MIX_MAX_VOLUME * (vol/10.f);
+    Mix_Volume(-1, mixVol);
+    Game::get().settings.sfx_vol = vol;
+}
+
 void Game::PlayMusic(const std::string& path)
 {
     auto sound = Asset::GetMusic(path);
     if (0 == Mix_PlayingMusic())
         Mix_PlayMusic(sound, -1);
+}
+
+void Game::SetMusicVolume(int vol)
+{
+    if (vol > 10)
+        vol = 10;
+    if (vol < 0)
+        vol = 0;
+
+    int mixVol = MIX_MAX_VOLUME * (vol/10.f);
+    Mix_VolumeMusic(mixVol);
+    Game::get().settings.music_vol = vol;
 }
 
 void Game::SetFont(const std::string& path, int ptsize)
@@ -205,6 +246,8 @@ void Game::init()
         Log::error("Failed to initialize SDL_mixer: %s\n", Mix_GetError());
         success = false;
     }
+    SetSoundVolume(settings.sfx_vol);
+    SetMusicVolume(settings.music_vol);
 
     mUpdateTimer.setDuration(1.0 / mTargetFPS);
     mUpdateTimer.reset();
