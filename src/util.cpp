@@ -169,6 +169,33 @@ SpriteID easeOutBack(const SpriteID& a, const SpriteID& b, float t)
     return a;
 }
 
+// snap functions
+float snap(float a, float b, float t)
+{
+    return (t >= 1.0f) ? b : a;
+}
+
+int snap(int a, int b, float t)
+{
+    return (t >= 1.0f) ? b : a;
+}
+
+vec2f snap(const vec2f& a, const vec2f& b, float t)
+{
+    return (t >= 1.0f) ? b : a;
+}
+
+vec2 snap(const vec2& a, const vec2& b, float t)
+{
+    return (t >= 1.0f) ? b : a;
+}
+
+SpriteID snap(const SpriteID& a, const SpriteID& b, float t)
+{
+    return (t >= 1.0f) ? b : a;
+}
+
+
 
 } // namespace easings
 

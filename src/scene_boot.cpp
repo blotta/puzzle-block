@@ -349,6 +349,7 @@ AnimationProperty<float> animEaseIn;
 AnimationProperty<float> animEaseOut;
 AnimationProperty<float> animEaseOutBounce;
 AnimationProperty<float> animEaseOutBack;
+AnimationProperty<float> animSnap;
 AnimationProperty<vec2> animG;
 AnimationProperty<vec2> animV;
 AnimationProperty<SpriteID> animSprite;
@@ -383,6 +384,10 @@ void debug_animation2_init()
     animEaseOutBack.addKeyframe(0.0f, 0.0f);
     animEaseOutBack.addKeyframe(1.0f, 1.0f);
     animEaseOutBack.interpolationType = InterpolationType::EASE_OUT_BACK;
+
+    animSnap.addKeyframe(0.0f, 0.0f);
+    animSnap.addKeyframe(1.0f, 1.0f);
+    animSnap.interpolationType = InterpolationType::SNAP;
 
     vec2 gridPoints[] = {vec2{-2, -2}, vec2{2, -2}, vec2{2, 2}, vec2{-2, 2}, vec2{-2, -2}};
     int gridPointsCount = sizeof(gridPoints) / sizeof(gridPoints[0]);
@@ -454,11 +459,12 @@ void debug_animation2_draw()
     int endAnimX = Game::ScreenWidth() - 100;
     int length = endAnimX - startAnimX;
     SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
-    Game::Text(10, 600, "LINEAR", {.valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 620, "EASE IN", {.valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 640, "EASE OUT", {.valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 660, "EASE OUT BOUNCE", {.valign = VerticalAlign::MIDDLE});
-    Game::Text(10, 680, "EASE OUT BACK", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 0.f, "LINEAR", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 1.f, "EASE IN", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 2.f, "EASE OUT", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 3.f, "EASE OUT BOUNCE", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 4.f, "EASE OUT BACK", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, startAnimY + 20 * 5.f, "SNAP", {.valign = VerticalAlign::MIDDLE});
     SDL_FRect rects[] = {
         {startAnimX + (length - 10.f) * animLinear.evaluate(anim.getProgress()), startAnimY + 20 * 0.f, 10.f, 10.f},
         {startAnimX + (length - 10.f) * animEaseIn.evaluate(anim.getProgress()), startAnimY + 20 * 1.f, 10.f, 10.f},
@@ -467,6 +473,7 @@ void debug_animation2_draw()
          10.f},
         {startAnimX + (length - 10.f) * animEaseOutBack.evaluate(anim.getProgress()), startAnimY + 20 * 4.f, 10.f,
          10.f},
+        {startAnimX + (length - 10.f) * animSnap.evaluate(anim.getProgress()), startAnimY + 20 * 5.f, 10.f, 10.f},
     };
     int lengthRects = sizeof(rects) / sizeof(rects[0]);
     SDL_RenderFillRectsF(Game::GetRenderer(), rects, lengthRects);
