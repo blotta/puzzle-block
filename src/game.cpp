@@ -145,6 +145,12 @@ void Game::Run()
     Game::get().run();
 }
 
+void Game::Exit()
+{
+    Game::get().mRunning = false;
+}
+
+
 //////////////////////
 // Instance Methods //
 //////////////////////
@@ -262,7 +268,7 @@ void Game::tick()
 
     if (Input::QuitRequested())
     {
-        mRunning = false;
+        Game::Exit();
         return;
     }
 

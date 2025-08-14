@@ -26,6 +26,7 @@ class Game
 
     static void Run();
     static void LoadScene(Scenes sceneName);
+    static void Exit();
 
     static SDL_Renderer* GetRenderer();
 

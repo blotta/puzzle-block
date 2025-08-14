@@ -11,7 +11,6 @@ static LevelData lvl = {.cols = 7,
                                  "0003000"}};
 
 static bool choseOption = false;
-static Scenes sceneChosen = Scenes::NONE;
 
 void MainMenuScene::init()
 {
@@ -31,6 +30,8 @@ void MainMenuScene::init()
     camera.target.x = tx;
     camera.target.y = ty;
 
+    choseOption = false;
+
     block.startFall();
 }
 
@@ -47,14 +48,18 @@ void MainMenuScene::update(float dt)
     {
         if (block.currSim.x == 3 && block.currSim.y == 0)
         {
-            sceneChosen = Scenes::ISOLEVEL;
             choseOption = true;
+            block.startFly([](){
+                Game::LoadScene(Scenes::ISOLEVEL);
+            });
         }
 
-        if (sceneChosen != Scenes::NONE)
+        if (block.currSim.x == 3 && block.currSim.y == 6)
         {
-            block.startFly([]() { Game::LoadScene(Scenes::ISOLEVEL); });
-            sceneChosen = Scenes::NONE;
+            choseOption = true;
+            block.startFly([](){
+                Game::Exit();
+            });
         }
     }
 
