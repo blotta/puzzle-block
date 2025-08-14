@@ -123,6 +123,53 @@ SpriteID easeOutBounce(const SpriteID& a, const SpriteID& b, float t)
     return a;
 }
 
+// easeOutBack functions
+float easeOutBack(float a, float b, float t)
+{
+    float c1 = 1.70158f;
+    float c3 = c1 + 1.0f;
+    float tt = t - 1.0f;
+    float easedT = 1.0f + c3 * (tt * tt * tt) + c1 * (tt * tt);
+    return a + (b - a) * easedT;
+}
+
+int easeOutBack(int a, int b, float t)
+{
+    float c1 = 1.70158f;
+    float c3 = c1 + 1.0f;
+    float tt = t - 1.0f;
+    float easedT = 1.0f + c3 * (tt * tt * tt) + c1 * (tt * tt);
+    return static_cast<int>(a + (b - a) * easedT);
+}
+
+vec2f easeOutBack(const vec2f& a, const vec2f& b, float t)
+{
+    float c1 = 1.70158f;
+    float c3 = c1 + 1.0f;
+    float tt = t - 1.0f;
+    float easedT = 1.0f + c3 * (tt * tt * tt) + c1 * (tt * tt);
+    return a + (b - a) * easedT;
+}
+
+vec2 easeOutBack(const vec2& a, const vec2& b, float t)
+{
+    float c1 = 1.70158f;
+    float c3 = c1 + 1.0f;
+    float tt = t - 1.0f;
+    float easedT = 1.0f + c3 * (tt * tt * tt) + c1 * (tt * tt);
+    return vec2(
+        static_cast<int>(a.x + (b.x - a.x) * easedT),
+        static_cast<int>(a.y + (b.y - a.y) * easedT)
+    );
+}
+
+SpriteID easeOutBack(const SpriteID& a, const SpriteID& b, float t)
+{
+    // No interpolation logic for SpriteID — same as easeIn
+    return a;
+}
+
+
 } // namespace easings
 
 void IsoToWorld(int isoX, int isoY, int tile_width, int tile_height, int* worldX, int* worldY)
@@ -178,7 +225,7 @@ int cycleIndex(int currIdx, int length, int amount)
 
 float random01()
 {
-    static std::mt19937 rng(std::random_device{}()); 
+    static std::mt19937 rng(std::random_device{}());
     static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(rng);
 }

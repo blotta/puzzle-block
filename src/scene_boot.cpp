@@ -1,8 +1,8 @@
 #include <SDL2/SDL.h>
 
+#include "asset_manager.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
-#include "asset_manager.hpp"
 #include "log.hpp"
 #include "scene_boot.hpp"
 #include "util.hpp"
@@ -348,6 +348,7 @@ AnimationProperty<float> animLinear;
 AnimationProperty<float> animEaseIn;
 AnimationProperty<float> animEaseOut;
 AnimationProperty<float> animEaseOutBounce;
+AnimationProperty<float> animEaseOutBack;
 AnimationProperty<vec2> animG;
 AnimationProperty<vec2> animV;
 AnimationProperty<SpriteID> animSprite;
@@ -378,6 +379,10 @@ void debug_animation2_init()
     animEaseOutBounce.addKeyframe(0.0f, 0.0f);
     animEaseOutBounce.addKeyframe(1.0f, 1.0f);
     animEaseOutBounce.interpolationType = InterpolationType::EASE_OUT_BOUNCE;
+
+    animEaseOutBack.addKeyframe(0.0f, 0.0f);
+    animEaseOutBack.addKeyframe(1.0f, 1.0f);
+    animEaseOutBack.interpolationType = InterpolationType::EASE_OUT_BACK;
 
     vec2 gridPoints[] = {vec2{-2, -2}, vec2{2, -2}, vec2{2, 2}, vec2{-2, 2}, vec2{-2, -2}};
     int gridPointsCount = sizeof(gridPoints) / sizeof(gridPoints[0]);
@@ -444,20 +449,23 @@ void debug_animation2_update(float dt)
 void debug_animation2_draw()
 {
     // easings comparison
-    int startAnimX = 200;
+    int startAnimX = 300;
     int startAnimY = 600;
-    int endAnimX = Game::ScreenWidth() - 10;
+    int endAnimX = Game::ScreenWidth() - 100;
     int length = endAnimX - startAnimX;
     SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
     Game::Text(10, 600, "LINEAR", {.valign = VerticalAlign::MIDDLE});
     Game::Text(10, 620, "EASE IN", {.valign = VerticalAlign::MIDDLE});
     Game::Text(10, 640, "EASE OUT", {.valign = VerticalAlign::MIDDLE});
     Game::Text(10, 660, "EASE OUT BOUNCE", {.valign = VerticalAlign::MIDDLE});
+    Game::Text(10, 680, "EASE OUT BACK", {.valign = VerticalAlign::MIDDLE});
     SDL_FRect rects[] = {
         {startAnimX + (length - 10.f) * animLinear.evaluate(anim.getProgress()), startAnimY + 20 * 0.f, 10.f, 10.f},
         {startAnimX + (length - 10.f) * animEaseIn.evaluate(anim.getProgress()), startAnimY + 20 * 1.f, 10.f, 10.f},
         {startAnimX + (length - 10.f) * animEaseOut.evaluate(anim.getProgress()), startAnimY + 20 * 2.f, 10.f, 10.f},
         {startAnimX + (length - 10.f) * animEaseOutBounce.evaluate(anim.getProgress()), startAnimY + 20 * 3.f, 10.f,
+         10.f},
+        {startAnimX + (length - 10.f) * animEaseOutBack.evaluate(anim.getProgress()), startAnimY + 20 * 4.f, 10.f,
          10.f},
     };
     int lengthRects = sizeof(rects) / sizeof(rects[0]);
