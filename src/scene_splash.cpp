@@ -1,15 +1,7 @@
 #include "scene_splash.hpp"
-#include "animation.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
 #include "log.hpp"
-
-static Animation splashAnim;
-static AnimationProperty<vec2> animB;
-static AnimationProperty<vec2> animL;
-static AnimationProperty<vec2> animT;
-static AnimationProperty<vec2> animGames;
-static AnimationProperty<float> animShake;
 
 void SplashScene::init()
 {
@@ -21,11 +13,7 @@ void SplashScene::init()
 
     splashAnim.duration = 3.0f;
     splashAnim.mode = AnimationPlayMode::ONCE;
-    splashAnim.onComplete = [this]() {
-        this->splashDone = true;
-        this->mTimer.setDuration(1.0f);
-        this->mTimer.reset();
-    };
+    splashAnim.onComplete = [this]() { this->fadeAnim.start(); };
     splashAnim.start();
 
     // B
@@ -65,17 +53,41 @@ void SplashScene::init()
     animGames.addKeyframe(0.5f, {Game::ScreenWidth() + 20, Game::ScreenHeight() / 2});
     animGames.addKeyframe(0.7f, {textStart + 65, Game::ScreenHeight() / 2});
 
+    // square
+    animSquare.interpolationType = InterpolationType::SNAP;
+    animSquare.addKeyframe(0.0f, {0, 0});
+
+    animSquare.addKeyframe(0.10f, {40, 40});
+    animSquare.addKeyframe(0.11f, {30, 30});
+
+    animSquare.addKeyframe(0.20f, {50, 50});
+    animSquare.addKeyframe(0.21f, {40, 40});
+
+    animSquare.addKeyframe(0.30f, {60, 60});
+    animSquare.addKeyframe(0.31f, {50, 50});
+
+    animSquare.addKeyframe(0.7f, {0, 0});
+
     // shake
     animShake.interpolationType = InterpolationType::LINEAR;
     animShake.addKeyframe(0.7f, 0.f);
     animShake.addKeyframe(0.71f, 10.f);
     animShake.addKeyframe(0.8f, 0.f);
 
+    // fade
+    fadeAnim.stop();
+    fadeAnim.duration = 3.0f;
+    fadeAnim.mode = AnimationPlayMode::ONCE;
+    fadeAnim.onComplete = []() { Game::LoadScene(Scenes::MAIN_MENU); };
+    animFade.interpolationType = InterpolationType::LINEAR;
+    animFade.addKeyframe(1.f / 3.f, 0);
+    animFade.addKeyframe(2.f / 3.f, 255);
 }
 
 void SplashScene::dispose()
 {
     Log::info("Unloading splash scene\n");
+    splashAnim.events.clear();
 }
 
 void SplashScene::update(float dt)
@@ -86,13 +98,8 @@ void SplashScene::update(float dt)
         return;
     }
 
-    if (splashDone && mTimer.isDone())
-    {
-        Game::LoadScene(Scenes::MAIN_MENU);
-        return;
-    }
-
     splashAnim.update(dt);
+    fadeAnim.update(dt);
 }
 
 void SplashScene::draw()
@@ -109,6 +116,22 @@ void SplashScene::draw()
     vec2 tPos = animT.evaluate(splashAnim.getProgress());
     Game::Text(tPos.x - cam.x, tPos.y - cam.y, "T", {.valign = VerticalAlign::MIDDLE});
 
+    vec2 squareSize = animSquare.evaluate(splashAnim.getProgress());
+    SDL_Rect r = {bPos.x - cam.x, bPos.y - cam.y - squareSize.y / 2, squareSize.x, squareSize.y};
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
+    SDL_RenderFillRect(Game::GetRenderer(), &r);
+
     vec2 gamesPos = animGames.evaluate(splashAnim.getProgress());
     Game::Text(gamesPos.x - cam.x, gamesPos.y - cam.y, "GAMES", {.valign = VerticalAlign::MIDDLE});
+
+    float fadeOpacity = animFade.evaluate(fadeAnim.getProgress());
+    SDL_Rect overlayRect = {
+        0,
+        0,
+        Game::ScreenWidth(),
+        Game::ScreenHeight(),
+    };
+    SDL_SetRenderDrawBlendMode(Game::GetRenderer(), SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, fadeOpacity);
+    SDL_RenderFillRect(Game::GetRenderer(), &overlayRect);
 }
