@@ -11,6 +11,7 @@ static LevelData lvl = {.cols = 7,
                                  "0003000"}};
 
 static bool choseOption = false;
+static bool showText = false;
 
 void MainMenuScene::init()
 {
@@ -18,7 +19,7 @@ void MainMenuScene::init()
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
     Game::SetFontSize(20);
 
-    level.mModel.load(lvl);
+    level.init(lvl);
 
     // block setup
     auto startPos = level.mModel.getStartPos();
@@ -28,12 +29,18 @@ void MainMenuScene::init()
     camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
     int tx, ty;
     IsoToWorld(startPos.x, startPos.y, cellSize, cellSize / 2, &tx, &ty);
-    camera.target.x = tx + cellSize/2;
+    camera.target.x = tx + cellSize / 2;
     camera.target.y = ty - 100;
 
     choseOption = false;
+    showText = false;
 
-    block.startFall();
+    block.vState = BlockVisualState::INVISIBLE;
+    level.startRise([this]() {
+        this->block.startFall([](){
+            showText = true;
+        });
+    });
 }
 
 void MainMenuScene::dispose()
@@ -51,7 +58,9 @@ void MainMenuScene::onPopReturn()
 
 void MainMenuScene::update(float dt)
 {
+    camera.update(dt);
     block.update(dt);
+    level.update(dt);
 
     if (!choseOption)
     {
@@ -59,31 +68,23 @@ void MainMenuScene::update(float dt)
         if (block.currSim.x == 3 && block.currSim.y == 0)
         {
             choseOption = true;
-            block.startFly([](){
-                Game::LoadScene(Scenes::ISOLEVEL);
-            });
+            block.startFly([]() { Game::LoadScene(Scenes::ISOLEVEL); });
         }
 
         // Exit
         if (block.currSim.x == 3 && block.currSim.y == 6)
         {
             choseOption = true;
-            block.startFly([](){
-                Game::Exit();
-            });
+            block.startFly([]() { Game::Exit(); });
         }
 
         // Options
         if (block.currSim.x == 0 && block.currSim.y == 3)
         {
             choseOption = true;
-            block.startFly([](){
-                Game::PushScene(Scenes::OPTIONS);
-            });
+            block.startFly([]() { Game::PushScene(Scenes::OPTIONS); });
         }
     }
-
-    camera.update(dt);
 }
 
 void MainMenuScene::draw()
@@ -93,22 +94,26 @@ void MainMenuScene::draw()
 
     int txtX, txtY;
 
-    IsoToWorld(3, 0, cellSize, cellSize / 2, &txtX, &txtY);
-    Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x, txtY - cellSize / 2 + camera.offset.y - camera.pos.y,
-               "START");
+    if (showText)
+    {
 
-    IsoToWorld(3, 6, cellSize, cellSize / 2, &txtX, &txtY);
-    Game::Text(txtX - cellSize/2 + camera.offset.x - camera.pos.x, txtY + cellSize / 2 + camera.offset.y - camera.pos.y,
-               "EXIT", {.align = TextAlign::RIGHT});
+        IsoToWorld(3, 0, cellSize, cellSize / 2, &txtX, &txtY);
+        Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
+                   txtY - cellSize / 2 + camera.offset.y - camera.pos.y, "START");
 
-    IsoToWorld(0, 3, cellSize, cellSize / 2, &txtX, &txtY);
-    Game::Text(txtX - cellSize/2 + camera.offset.x - camera.pos.x, txtY - cellSize / 2 + camera.offset.y - camera.pos.y,
-               "OPTIONS", {.align = TextAlign::RIGHT});
+        IsoToWorld(3, 6, cellSize, cellSize / 2, &txtX, &txtY);
+        Game::Text(txtX - cellSize / 2 + camera.offset.x - camera.pos.x,
+                   txtY + cellSize / 2 + camera.offset.y - camera.pos.y, "EXIT", {.align = TextAlign::RIGHT});
 
-    IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
-    Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x, txtY + cellSize / 2 + camera.offset.y - camera.pos.y,
-               "LEVEL SELECT");
+        IsoToWorld(0, 3, cellSize, cellSize / 2, &txtX, &txtY);
+        Game::Text(txtX - cellSize / 2 + camera.offset.x - camera.pos.x,
+                   txtY - cellSize / 2 + camera.offset.y - camera.pos.y, "OPTIONS", {.align = TextAlign::RIGHT});
+
+        IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
+        Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
+                   txtY + cellSize / 2 + camera.offset.y - camera.pos.y, "LEVEL SELECT");
+    }
 
     Sprite titleSprite = Game::GetSprite(SPR_TITLE);
-    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw/2, 50, SPR_TITLE);
+    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
 }

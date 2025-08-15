@@ -247,6 +247,12 @@ void BlockVisual::startFall()
     this->animFallStart.start();
 }
 
+void BlockVisual::startFall(const std::function<void()>& onComplete)
+{
+    this->animFallStart.onComplete = onComplete;
+    startFall();
+}
+
 void BlockVisual::startFly(const std::function<void()>& onComplete)
 {
     this->vState = BlockVisualState::FLYING_LEVEL_END;

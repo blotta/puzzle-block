@@ -23,7 +23,7 @@ enum class CellType
     THIN = 4,
 };
 
-enum class LevelState
+enum class LevelVisualState
 {
     IDLE,
     RISING
@@ -51,7 +51,6 @@ struct Level
     bool isCleared(const vec2& pos1, const vec2& pos2);
     void toggleThinFloor(const vec2& pos);
     CellType cellAt(const vec2& pos);
-    // void draw(int x, int y, int cellSize);
 
     void toggleFloor(const vec2& pos);
     void toggleSpecialFloor(const vec2& pos);
@@ -66,11 +65,13 @@ struct Level
 struct LevelVisual
 {
     Level mModel;
-    LevelState mState;
+    LevelVisualState mVisualState;
     Animation animRise;
-    AnimationProperty<float> animRiseHeight;
-    void startRise();
 
+    AnimationProperty<vec2> tileAnims[MAX_GRID_SIZE][MAX_GRID_SIZE];
+    void startRise(std::function<void()> onComplete);
+
+    void init(const LevelData& ld);
     void update(float dt);
     void draw(int x, int y, int cellSize);
 };

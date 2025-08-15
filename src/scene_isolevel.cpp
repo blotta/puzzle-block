@@ -12,16 +12,12 @@ void IsoLevelScene::init()
     Game::SetFontSize(32);
 
     auto textHalfWidth = Game::TextWidth("LEVEL CLEARED") / 2 + 10;
-    animLevelClearedProp.addKeyframe(0.15f, - textHalfWidth); // Level Cleared text position
+    animLevelClearedProp.addKeyframe(0.15f, -textHalfWidth); // Level Cleared text position
     animLevelClearedProp.addKeyframe(0.20f, Game::ScreenWidth() / 2 - 50);
     animLevelClearedProp.addKeyframe(0.60f, Game::ScreenWidth() / 2);
     animLevelClearedProp.addKeyframe(0.65f, Game::ScreenWidth() + textHalfWidth);
-    animLevelCleared.addEvent(0.2f, [](){
-        Game::PlaySound("assets/sfx/arrive.ogg");
-    });
-    animLevelCleared.onComplete = [](){
-        Game::LoadScene(Scenes::ISOLEVEL);
-    };
+    animLevelCleared.addEvent(0.2f, []() { Game::PlaySound("assets/sfx/arrive.ogg"); });
+    animLevelCleared.onComplete = []() { Game::LoadScene(Scenes::ISOLEVEL); };
     animLevelCleared.duration = 3.f;
     animLevelClearedProp.interpolationType = InterpolationType::EASE_OUT;
     animLevelCleared.stop();
@@ -37,7 +33,7 @@ void IsoLevelScene::reset()
     auto lvl = Game::GetOrCreateState("curr_level", "0");
     int lvlIdx = std::stoi(lvl);
     Log::info("Loading level %d\n", lvlIdx + 1);
-    level.mModel.load(Game::GetLevelData(lvlIdx));
+    level.init(Game::GetLevelData(lvlIdx));
 
     mTitleText = std::format("Level {}", lvlIdx + 1);
 
@@ -54,12 +50,14 @@ void IsoLevelScene::reset()
 
     mLevelCleared = false;
 
-    block.startFall();
+    block.vState = BlockVisualState::INVISIBLE;
+    level.startRise([this]() { block.startFall(); });
 }
 
 void IsoLevelScene::update(float dt)
 {
     block.update(dt);
+    level.update(dt);
 
     if (mLevelCleared)
     {

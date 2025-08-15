@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "level.hpp"
+#include "util.hpp"
 
 void Level::clear()
 {
@@ -222,7 +223,6 @@ CellType Level::cellAt(const vec2& pos)
     return grid[pos.y][pos.x];
 }
 
-
 void Level::toggleFloor(const vec2& pos)
 {
     CellType& cell = grid[pos.y][pos.x];
@@ -334,21 +334,52 @@ void Level::removeSwitch(const vec2& pos)
     }
 }
 
-void LevelVisual::startRise()
+void LevelVisual::startRise(std::function<void()> onComplete)
 {
-    mState = LevelState::RISING;
+    mVisualState = LevelVisualState::RISING;
+    animRise.duration = 2.f;
     animRise.start();
+    animRise.events.clear();
+    animRise.onComplete = onComplete;
+
+    int baseStartHeight = 400;
+
+    for (int i = 0; i < mModel.cols; i++)
+    {
+        for (int j = 0; j < mModel.rows; j++)
+        {
+            int width = randomNeg1to1() * Game::ScreenWidth() / 3;
+            int height = baseStartHeight + randomNeg1to1() * 100;
+            float endTime = 1.0f - (random01() * 0.5f);
+
+            auto& prop = tileAnims[j][i];
+            prop.interpolationType = InterpolationType::EASE_OUT_BACK;
+            prop.addKeyframe(0.f, {width, height});
+            prop.addKeyframe(endTime, {0, 0});
+        }
+    }
+}
+
+void LevelVisual::init(const LevelData& ld)
+{
+    mModel.load(ld);
+    mVisualState = LevelVisualState::IDLE;
+    animRise.stop();
 }
 
 void LevelVisual::update(float dt)
 {
-    if (mState == LevelState::IDLE)
+    if (mVisualState == LevelVisualState::IDLE)
     {
-
     }
-    else if (mState == LevelState::RISING)
+    else if (mVisualState == LevelVisualState::RISING)
     {
-
+        animRise.update(dt);
+        if (animRise.getProgress() == 1.f)
+        {
+            this->animRise.stop();
+            this->mVisualState = LevelVisualState::IDLE;
+        }
     }
 }
 
@@ -358,12 +389,9 @@ void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
     {
         for (int j = 0; j < mModel.rows; j++)
         {
+
             if (mModel.grid[j][i] == CellType::EMPTY)
                 continue;
-
-            int sx;
-            int sy;
-            IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
 
             SpriteID sprId = SpriteID::SPR_FLOOR;
 
@@ -383,16 +411,32 @@ void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
                 break;
             }
 
-            Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
-        }
-    }
+            int sx;
+            int sy;
+            IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
 
-    for (int sidx = 0; sidx < this->mModel.switchCount; sidx++)
-    {
-        auto& sw = this->mModel.switches[sidx];
-        int sx;
-        int sy;
-        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(offsetX + sx, offsetY + sy, sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
+            vec2 posDiff = {0, 0};
+
+            if (mVisualState == LevelVisualState::RISING)
+            {
+                posDiff = tileAnims[j][i].evaluate(animRise.getProgress());
+            }
+
+            Game::DrawSprite(offsetX + sx + posDiff.x, offsetY + sy + posDiff.y, sprId);
+
+            for (int sidx = 0; sidx < this->mModel.switchCount; sidx++)
+            {
+                auto& sw = this->mModel.switches[sidx];
+                if (sw.x != i || sw.y != j)
+                    continue;
+
+                int sx;
+                int sy;
+                IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
+
+                Game::DrawSprite(offsetX + sx + posDiff.x, offsetY + sy + posDiff.y,
+                                 sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
+            }
+        }
     }
 }
