@@ -10,6 +10,7 @@ enum class Scenes
     LEVEL_EDIT,
     ISOLEVEL,
     OPTIONS,
+    LEVEL_SELECT,
 };
 
 class Scene

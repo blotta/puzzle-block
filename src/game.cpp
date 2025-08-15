@@ -89,6 +89,11 @@ const int Game::GetLevelsSize()
     return Game::get().mLevels.size();
 }
 
+const std::vector<LevelData>& Game::GetLevels()
+{
+    return Game::get().mLevels;
+}
+
 const LevelData& Game::GetLevelData(int idx)
 {
     return Game::get().mLevels[idx];
@@ -357,6 +362,7 @@ void Game::loadAssets()
     Asset::LoadSound("assets/sfx/rumble.ogg");
     Asset::LoadSound("assets/sfx/snd_gunshot1.ogg");
     Asset::LoadSound("assets/sfx/uff.ogg");
+    Asset::LoadSound("assets/sfx/ui_move.ogg");
 
     Asset::LoadMusic("assets/sfx/music_ambient_01.ogg");
 

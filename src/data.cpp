@@ -236,8 +236,6 @@ void load_game_data(GameData* data)
 
 // levels
 #include "./../assets-build/levels/gen_level_data.cpp.part"
-#include "block.hpp"
-#include <random>
 }
 
 void LevelData::print(FILE* file) const

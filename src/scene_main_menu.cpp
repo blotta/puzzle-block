@@ -84,11 +84,21 @@ void MainMenuScene::update(float dt)
             choseOption = true;
             block.startFly([]() { Game::PushScene(Scenes::OPTIONS); });
         }
+
+        // Level Select
+        if (block.currSim.x == 6 && block.currSim.y == 3)
+        {
+            choseOption = true;
+            block.startFly([]() { Game::PushScene(Scenes::LEVEL_SELECT); });
+        }
     }
 }
 
 void MainMenuScene::draw()
 {
+    Sprite titleSprite = Game::GetSprite(SPR_TITLE);
+    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
+
     level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
     block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
 
@@ -96,7 +106,6 @@ void MainMenuScene::draw()
 
     if (showText)
     {
-
         IsoToWorld(3, 0, cellSize, cellSize / 2, &txtX, &txtY);
         Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
                    txtY - cellSize / 2 + camera.offset.y - camera.pos.y, "START");
@@ -113,7 +122,4 @@ void MainMenuScene::draw()
         Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
                    txtY + cellSize / 2 + camera.offset.y - camera.pos.y, "LEVEL SELECT");
     }
-
-    Sprite titleSprite = Game::GetSprite(SPR_TITLE);
-    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
 }

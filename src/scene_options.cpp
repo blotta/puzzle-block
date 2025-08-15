@@ -71,7 +71,7 @@ void OptionsScene::draw()
 
     int sec_line = panel.h / (this->mLines + 1);
 
-    // measurements for for 1-10 bar
+    // measurements for 1-10 bar
     int bar_width = (panel.w / 2) * 0.8f;
     int bar_height = 20;
 

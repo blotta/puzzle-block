@@ -38,6 +38,7 @@ class Game
     static void SetState(const std::string& name, const std::string& value);
 
     static const int GetLevelsSize();
+    static const std::vector<LevelData>& GetLevels();
     static const LevelData& GetLevelData(int idx);
     static void SaveLevelData(const LevelData& ld, int idx);
     static int AddLevelData(const LevelData& ld);
