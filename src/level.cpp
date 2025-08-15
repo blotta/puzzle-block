@@ -334,10 +334,20 @@ void Level::removeSwitch(const vec2& pos)
     }
 }
 
-void LevelVisual::startRise()
+void LevelVisual::startRise(std::function<void()> onComplete)
 {
     mState = LevelState::RISING;
     animRise.start();
+    animRise.events.clear();
+    animRise.onComplete = onComplete;
+}
+
+void LevelVisual::init(const LevelData& ld)
+{
+    animRise.stop();
+    animRiseHeight.interpolationType = InterpolationType::EASE_OUT_BACK;
+    animRiseHeight.addKeyframe(0.f, -400);
+    animRiseHeight.addKeyframe(1.f, 0);
 }
 
 void LevelVisual::update(float dt)
@@ -348,16 +358,28 @@ void LevelVisual::update(float dt)
     }
     else if (mState == LevelState::RISING)
     {
-
+        animRise.update(dt);
+        if (animRise.getProgress() == 1.f)
+        {
+            this->animRise.stop();
+            this->mState = LevelState::IDLE;
+        }
     }
 }
 
 void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
 {
+    int height = 0;
+    if (mState == LevelState::RISING)
+    {
+        height = animRiseHeight.evaluate(animRise.getProgress());
+    }
+
     for (int i = 0; i < mModel.cols; i++)
     {
         for (int j = 0; j < mModel.rows; j++)
         {
+
             if (mModel.grid[j][i] == CellType::EMPTY)
                 continue;
 
@@ -383,7 +405,7 @@ void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
                 break;
             }
 
-            Game::DrawSprite(offsetX + sx, offsetY + sy, sprId);
+            Game::DrawSprite(offsetX + sx, offsetY + sy + height, sprId);
         }
     }
 

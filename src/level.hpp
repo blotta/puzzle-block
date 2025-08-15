@@ -68,9 +68,10 @@ struct LevelVisual
     Level mModel;
     LevelState mState;
     Animation animRise;
-    AnimationProperty<float> animRiseHeight;
-    void startRise();
+    AnimationProperty<int> animRiseHeight;
+    void startRise(std::function<void()> onComplete);
 
+    void init(const LevelData& ld);
     void update(float dt);
     void draw(int x, int y, int cellSize);
 };

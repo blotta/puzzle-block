@@ -19,6 +19,7 @@ void MainMenuScene::init()
     Game::SetFontSize(20);
 
     level.mModel.load(lvl);
+    level.init(lvl);
 
     // block setup
     auto startPos = level.mModel.getStartPos();
@@ -33,7 +34,9 @@ void MainMenuScene::init()
 
     choseOption = false;
 
-    block.startFall();
+    level.startRise([this](){
+        this->block.startFall();
+    });
 }
 
 void MainMenuScene::dispose()
@@ -51,7 +54,9 @@ void MainMenuScene::onPopReturn()
 
 void MainMenuScene::update(float dt)
 {
+    camera.update(dt);
     block.update(dt);
+    level.update(dt);
 
     if (!choseOption)
     {
@@ -83,7 +88,6 @@ void MainMenuScene::update(float dt)
         }
     }
 
-    camera.update(dt);
 }
 
 void MainMenuScene::draw()
