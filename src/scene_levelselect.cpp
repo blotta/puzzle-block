@@ -3,13 +3,11 @@
 #include "input_manager.hpp"
 #include <format>
 
-// static SDL_Color DEFAULT = {180, 180, 180, 255};
-// static SDL_Color FOCUSED = {255, 255, 255, 255};
+const int OFFSCREEN_LEVEL_OFFSET = 600;
 
 void LevelSelectScene::init()
 {
     Game::SetFontSize(20);
-    mTitle = std::format("Level {}", mLvlIdx + 1);
     level.init(Game::GetLevelData(mLvlIdx));
 
     mLevelCount = Game::GetLevelsSize();
@@ -24,20 +22,26 @@ void LevelSelectScene::init()
     animPanelDropHeight.addKeyframe(0.f, -(h + Game::ScreenHeight() / 2));
     animPanelDropHeight.addKeyframe(1.f, 0);
     animPanel.start();
+
+    animLevelSlide.duration = .2f;
+    animLevelSlideLeft.interpolationType = InterpolationType::EASE_OUT;
+    animLevelSlideLeft.addKeyframe(0.f, OFFSCREEN_LEVEL_OFFSET);
+    animLevelSlideLeft.addKeyframe(1.f, 0);
 }
 
 void LevelSelectScene::update(float dt)
 {
     animPanel.update(dt);
+    animLevelSlide.update(dt);
 
-    if (exiting)
+    if (mState == LevelSelectState::EXITING)
         return;
 
     if (Input::JustPressed(SDL_SCANCODE_ESCAPE))
     {
         animPanel.start();
         animPanel.onComplete = []() { Game::PopScene(); };
-        exiting = true;
+        mState = LevelSelectState::EXITING;
         return;
     }
 
@@ -48,37 +52,49 @@ void LevelSelectScene::update(float dt)
             Game::PopScene();
             Game::LoadScene(Scenes::ISOLEVEL);
         };
-        exiting = true;
+        mState = LevelSelectState::EXITING;
         animPanel.start();
     }
 
-    int loadLevel = -1;
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
     {
+        Game::PlaySound("assets/sfx/ui_move.ogg");
+
+        int prevLvlIdx = mLvlIdx;
+
         mLvlIdx += 1;
         if (mLvlIdx > mLevelCount - 1)
             mLvlIdx = 0;
+        
+        levelAux.init(Game::GetLevelData(prevLvlIdx));
+        level.init(Game::GetLevelData(mLvlIdx));
+        mState = LevelSelectState::SLIDING_LEVEL_LEFT;
+        animLevelSlide.onComplete = [this](){
+            this->mState = LevelSelectState::IDLE;
+        };
 
-        Game::PlaySound("assets/sfx/ui_move.ogg");
-
-        loadLevel = mLvlIdx;
+        animLevelSlide.start();
     }
     if (Input::JustPressed(SDL_SCANCODE_LEFT))
     {
+        Game::PlaySound("assets/sfx/ui_move.ogg");
+
+        int prevLvlIdx = mLvlIdx;
+
         mLvlIdx -= 1;
         if (mLvlIdx < 0)
             mLvlIdx = mLevelCount - 1;
+        
+        levelAux.init(Game::GetLevelData(prevLvlIdx));
+        level.init(Game::GetLevelData(mLvlIdx));
+        mState = LevelSelectState::SLIDING_LEVEL_RIGHT;
+        animLevelSlide.onComplete = [this](){
+            this->mState = LevelSelectState::IDLE;
+        };
 
-        Game::PlaySound("assets/sfx/ui_move.ogg");
-
-        loadLevel = mLvlIdx;
+        animLevelSlide.start();
     }
 
-    if (loadLevel >= 0)
-    {
-        level.init(Game::GetLevelData(loadLevel));
-        loadLevel = -1;
-    }
 }
 
 void LevelSelectScene::draw()
@@ -92,7 +108,7 @@ void LevelSelectScene::draw()
         w,
         h,
     };
-    if (exiting)
+    if (mState == LevelSelectState::EXITING)
         panel.y += animPanelDropHeight.evaluate(1 - animPanel.getProgress());
     else
         panel.y += animPanelDropHeight.evaluate(animPanel.getProgress());
@@ -117,7 +133,26 @@ void LevelSelectScene::draw()
                        {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
         }
 
-        level.draw(w / 2, h / 2 - 100, 64);
+        if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
+        {
+            int lx = animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
+            Log::debug("prog: %f, lx: %d", animLevelSlide.getProgress(), lx);
+
+            level.draw(w / 2 + lx, h / 2 - 100, 64);
+            levelAux.draw(w / 2 - OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);
+        }
+        else if (mState == LevelSelectState::SLIDING_LEVEL_RIGHT)
+        {
+            int lx = -1 * animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
+            Log::debug("prog: %f, lx: %d", animLevelSlide.getProgress(), lx);
+
+            level.draw(w / 2 + lx, h / 2 - 100, 64);
+            levelAux.draw(w / 2 + OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);
+        }
+        else
+        {
+            level.draw(w / 2, h / 2 - 100, 64);
+        }
 
         SDL_SetRenderTarget(Game::GetRenderer(), nullptr);
     }

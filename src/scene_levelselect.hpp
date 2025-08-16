@@ -5,6 +5,14 @@
 #include "level.hpp"
 #include <string>
 
+enum class LevelSelectState
+{
+  IDLE,
+  EXITING,
+  SLIDING_LEVEL_LEFT,
+  SLIDING_LEVEL_RIGHT,
+};
+
 class LevelSelectScene : public Scene
 {
   public:
@@ -14,16 +22,16 @@ class LevelSelectScene : public Scene
     void dispose() override;
 
   private:
-    int mCursor = 1;
     int mLevelCount = 1;
     int mLvlIdx = 0;
     LevelVisual level;
-    std::string mTitle;
+    LevelVisual levelAux;
     Animation animPanel;
     AnimationProperty<int> animPanelDropHeight;
-    Animation animSlide;
+    Animation animLevelSlide;
+    AnimationProperty<int> animLevelSlideLeft;
     SDL_Texture* mPanelTex;
-    bool exiting = false;
+    LevelSelectState mState = LevelSelectState::IDLE;
 };
 
 #endif
