@@ -1,0 +1,33 @@
+#ifndef SCENE_PAUSE_HPP
+#define SCENE_PAUSE_HPP
+
+#include "scene.hpp"
+#include "level.hpp"
+#include <string>
+
+enum class PauseState
+{
+  IDLE,
+  EXITING
+};
+
+class PauseScene : public Scene
+{
+  public:
+    void init() override;
+    void update(float dt) override;
+    void draw() override;
+    void dispose() override;
+
+  private:
+    int mPanelWidth = 600;
+    int mPanelHeight = 400;
+    int mCursor = 1;
+    int mLines = 4; // resume, options, mainmenu, exit
+    PauseState mState = PauseState::IDLE;
+    Animation animPanel;
+    AnimationProperty<int> animPanelDropHeight;
+    SDL_Texture* mPanelTex;
+};
+
+#endif

@@ -65,6 +65,12 @@ void IsoLevelScene::update(float dt)
         return;
     }
 
+    if (Input::JustPressed(SDL_SCANCODE_ESCAPE))
+    {
+        Game::PushScene(Scenes::PAUSE);
+        return;
+    }
+
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // edit this level

@@ -6,6 +6,7 @@
 #include "scene_main_menu.hpp"
 #include "scene_options.hpp"
 #include "scene_levelselect.hpp"
+#include "scene_pause.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -25,6 +26,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<OptionsScene>();
     case Scenes::LEVEL_SELECT:
         return std::make_unique<LevelSelectScene>();
+    case Scenes::PAUSE:
+        return std::make_unique<PauseScene>();
     default:
         return nullptr;
     }

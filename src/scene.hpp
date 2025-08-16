@@ -11,6 +11,7 @@ enum class Scenes
     ISOLEVEL,
     OPTIONS,
     LEVEL_SELECT,
+    PAUSE,
 };
 
 class Scene
