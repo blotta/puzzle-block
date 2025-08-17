@@ -365,59 +365,5 @@ LevelData generateRandomLevel(int pathLength)
         level.switches[0].floorY = path[3].y;
     }
 
-    trimLevel(level);
-
     return level;
-}
-
-void trimLevel(LevelData& level)
-{
-    int minX = level.cols, maxX = -1;
-    int minY = level.rows, maxY = -1;
-
-    for (int y = 0; y < level.rows; ++y)
-    {
-        for (int x = 0; x < level.cols; ++x)
-        {
-            if (level.data[y * level.cols + x] != '0')
-            {
-                minX = std::min(minX, x);
-                maxX = std::max(maxX, x);
-                minY = std::min(minY, y);
-                maxY = std::max(maxY, y);
-            }
-        }
-    }
-
-    if (minX > maxX || minY > maxY)
-    {
-        level.cols = level.rows = 0;
-        level.data[0] = '\0';
-        return;
-    }
-
-    int newCols = maxX - minX + 1;
-    int newRows = maxY - minY + 1;
-    char newData[MAX_GRID_SIZE * MAX_GRID_SIZE + 1];
-
-    for (int y = 0; y < newRows; ++y)
-    {
-        for (int x = 0; x < newCols; ++x)
-        {
-            newData[y * newCols + x] = level.data[(y + minY) * level.cols + (x + minX)];
-        }
-    }
-
-    newData[newCols * newRows] = '\0';
-    memcpy(level.data, newData, sizeof(newData));
-    level.cols = newCols;
-    level.rows = newRows;
-
-    for (int i = 0; i < level.switchCount; ++i)
-    {
-        level.switches[i].x -= minX;
-        level.switches[i].y -= minY;
-        level.switches[i].floorX -= minX;
-        level.switches[i].floorY -= minY;
-    }
 }

@@ -223,6 +223,46 @@ CellType Level::cellAt(const vec2& pos)
     return grid[pos.y][pos.x];
 }
 
+Rect Level::rect() const
+{
+    int minCol = MAX_GRID_SIZE, maxCol = 0, minRow = MAX_GRID_SIZE, maxRow = 0;
+
+    for (int i = 0; i < cols; i++)
+    {
+        for (int j = 0; j < rows; j++)
+        {
+            CellType cell = grid[j][i];
+
+            if (cell != CellType::EMPTY)
+            {
+                if (i < minCol)
+                    minCol = i;
+                if (i > maxCol)
+                    maxCol = i;
+                if (j < minRow)
+                    minRow = j;
+                if (j > maxRow)
+                    maxRow = j;
+            }
+        }
+    }
+
+    if (minCol > maxCol || minRow > maxRow)
+    {
+        return {0};
+    }
+
+    int width = maxCol - minCol + 1;
+    int height = maxRow - minRow + 1;
+
+    return Rect{
+        minCol,
+        minRow,
+        width,
+        height,
+    };
+}
+
 void Level::toggleFloor(const vec2& pos)
 {
     CellType& cell = grid[pos.y][pos.x];
@@ -332,6 +372,101 @@ void Level::removeSwitch(const vec2& pos)
             }
         }
     }
+}
+
+void Level::trim()
+{
+    auto rect = this->rect();
+
+    if (rect.x > 0 || rect.y > 0)
+    {
+        this->moveCellsBy({-rect.x, -rect.y});
+    }
+
+    this->cols = rect.w;
+    this->rows = rect.h;
+}
+
+void Level::moveCellsBy(const vec2& diff)
+{
+    bool canMakeMove = true;
+
+    auto rect = this->rect();
+
+    int emptyLeft = rect.x;
+    int emptyRight = cols - rect.w - rect.x;
+    int emptyTop = rect.y;
+    int emptyBottom = rows - rect.h - rect.y;
+
+    if (diff.x < 0 && emptyLeft < -diff.x)
+    {
+        Log::error("Cannot move cells by %d to the left", -diff.x);
+        canMakeMove = false;
+    }
+
+    if (diff.x > 0 && emptyRight < diff.x)
+    {
+        Log::error("Cannot move cells by %d to the right", diff.x);
+        canMakeMove = false;
+    }
+
+    if (diff.y < 0 && emptyTop < -diff.y)
+    {
+        Log::error("Cannot move cells by %d to the top", -diff.y);
+        canMakeMove = false;
+    }
+
+    if (diff.y > 0 && emptyBottom < diff.y)
+    {
+        Log::error("Cannot move cells by %d to the bottom", diff.y);
+        canMakeMove = false;
+    }
+
+    if (!canMakeMove)
+        return;
+
+    std::array<std::array<CellType, MAX_GRID_SIZE>, MAX_GRID_SIZE> oldGrid = this->grid;
+
+    for (int i = 0; i < MAX_GRID_SIZE; i++)
+    {
+        for (int j = 0; j < MAX_GRID_SIZE; j++)
+        {
+            int oldI = i - diff.x;
+            int oldJ = j - diff.y;
+            if (i < this->cols && j < this->rows && oldI >= 0 && oldI < MAX_GRID_SIZE && oldJ >= 0 && oldJ < MAX_GRID_SIZE)
+            {
+                this->grid[j][i] = oldGrid[oldJ][oldI];
+            }
+            else
+                this->grid[j][i] = CellType::EMPTY;
+        }
+    }
+
+    for (int i = 0; i < this->switchCount; i++)
+    {
+        auto& sw = this->switches[i];
+        sw.x += diff.x;
+        sw.y += diff.y;
+        sw.floorX += diff.x;
+        sw.floorY += diff.y;
+    }
+}
+
+void Level::centerCells()
+{
+    auto rect = this->rect();
+
+    int emptyLeft = rect.x;
+    int emptyRight = cols - rect.w - rect.x;
+    int emptyTop = rect.y;
+    int emptyBottom = rows - rect.h - rect.y;
+
+    vec2 moveBy;
+
+    int marginX = (int)SDL_floorf((emptyLeft + emptyRight) / 2.f);
+    int marginY = (int)SDL_floorf((emptyTop + emptyBottom) / 2.f);
+
+    this->moveCellsBy({marginX - emptyLeft, marginY - emptyTop});
 }
 
 void LevelVisual::startRise(std::function<void()> onComplete)

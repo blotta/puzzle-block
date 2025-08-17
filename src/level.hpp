@@ -51,6 +51,7 @@ struct Level
     bool isCleared(const vec2& pos1, const vec2& pos2);
     void toggleThinFloor(const vec2& pos);
     CellType cellAt(const vec2& pos);
+    Rect rect() const;
 
     void toggleFloor(const vec2& pos);
     void toggleSpecialFloor(const vec2& pos);
@@ -60,6 +61,9 @@ struct Level
     void removeColumn();
     void addSwitch(LevelSwitch sw);
     void removeSwitch(const vec2& pos);
+    void trim();
+    void moveCellsBy(const vec2& diff);
+    void centerCells();
 };
 
 struct LevelVisual

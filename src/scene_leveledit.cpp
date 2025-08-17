@@ -10,6 +10,8 @@ const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggl
                                        "resize grid";
 const char* SWITCH_MODE_INSTRUCTIONS = "[SWITCH] LMB: set switch destination    RMB: toggle floor ";
 
+Rect levelRect;
+
 void LevelEditScene::init()
 {
     Log::info("Loading Editor scene\n");
@@ -29,6 +31,10 @@ void LevelEditScene::reset()
     if (lvlIdx >= Game::GetLevelsSize())
         lvlIdx = 0;
     level.mModel.load(Game::GetLevelData(lvlIdx));
+    level.mModel.cols = MAX_GRID_SIZE;
+    level.mModel.rows = MAX_GRID_SIZE;
+    level.mModel.centerCells();
+    levelRect = level.mModel.rect();
 
     auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
@@ -60,9 +66,9 @@ void LevelEditScene::resize()
 void LevelEditScene::save(bool newLevel, bool saveToFile)
 {
     // save current
+    level.mModel.trim();
     LevelData ld = {};
     level.mModel.toLevelData(&ld);
-    trimLevel(ld);
 
     if (newLevel)
     {
@@ -78,7 +84,7 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
     {
 #ifndef __EMSCRIPTEN__
         char fileName[50] = {};
-        sprintf(fileName, "assets/levels/%d.txt", lvlIdx + 1);
+        sprintf(fileName, "assets-build/levels/%d.txt", lvlIdx + 1);
         FILE* f = fopen(fileName, "w");
         ld.print(f);
         fclose(f);
@@ -91,6 +97,8 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
 void LevelEditScene::levelChanged()
 {
     saved = false;
+    level.mModel.centerCells();
+    levelRect = level.mModel.rect();
 }
 
 void LevelEditScene::update(float dt)
@@ -174,31 +182,6 @@ void LevelEditScene::update(float dt)
         }
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_KP_6))
-    {
-        level.mModel.addColumn();
-        resize();
-        levelChanged();
-    }
-    if (Input::JustPressed(SDL_SCANCODE_KP_8))
-    {
-        level.mModel.removeRow();
-        resize();
-        levelChanged();
-    }
-    if (Input::JustPressed(SDL_SCANCODE_KP_4))
-    {
-        level.mModel.removeColumn();
-        resize();
-        levelChanged();
-    }
-    if (Input::JustPressed(SDL_SCANCODE_KP_2))
-    {
-        level.mModel.addRow();
-        resize();
-        levelChanged();
-    }
-
     if (Input::JustPressed(SDL_SCANCODE_F2) && level.mModel.isValid())
     {
         // save current
@@ -216,8 +199,12 @@ void LevelEditScene::update(float dt)
     {
         auto randLvl = generateRandomLevel(20);
         level.mModel.load(randLvl);
+        level.mModel.cols = MAX_GRID_SIZE;
+        level.mModel.rows = MAX_GRID_SIZE;
+        level.mModel.centerCells();
         auto startPos = level.mModel.getStartPos();
         block.init(startPos, BlockState::UP);
+        return;
     }
 
     if (Input::JustPressed(SDL_SCANCODE_F5))
@@ -305,5 +292,5 @@ void LevelEditScene::draw()
 
     // Level Info
     Game::Text(10, Game::ScreenHeight() - 35,
-               std::format("Level {} {}x{} {}", lvlIdx + 1, level.mModel.cols, level.mModel.rows, (level.mModel.isValid() ? "OK" : "NOK")));
+               std::format("Level {} {}x{} {}", lvlIdx + 1, levelRect.w, levelRect.h, (level.mModel.isValid() ? "OK" : "NOK")));
 }

@@ -101,6 +101,4 @@ void load_game_data(GameData* d);
 
 LevelData generateRandomLevel(int pathLength);
 
-void trimLevel(LevelData& level);
-
 #endif

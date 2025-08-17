@@ -11,8 +11,6 @@ Texture::Texture(SDL_Renderer* rend, const std::string& path) : path(std::move(p
     {
         Log::error("Couldn't load texture from file %s: %s\n", path.c_str(), SDL_GetError());
     }
-    int w, h;
-    int status = SDL_QueryTexture(mTexture, NULL, NULL, &w, &h);
 }
 
 Texture::Texture(Texture&& other) noexcept
