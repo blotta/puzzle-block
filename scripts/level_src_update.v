@@ -3,7 +3,10 @@ import os
 fn main() {
 	mut levels := []string{}
 
-	for lvl in os.glob('./assets-build/levels/*.txt')! {
+	mut lvl_files := os.glob('./assets-build/levels/*.txt')!
+	lvl_files.sort_with_compare(lvl_file_sort)
+
+	for lvl in lvl_files {
 		println(lvl)
 		levels << os.read_file('./assets-build/levels/${lvl}')!
 	}
@@ -21,4 +24,10 @@ fn main() {
 	os.write_lines('./assets-build/levels/gen_level_data.cpp.part', [content])!
 
 	println('written ${levels.len} levels')
+}
+
+fn lvl_file_sort(a &string, b &string) int {
+	na := os.file_name(a).all_before_last('.').int()
+	nb := os.file_name(b).all_before_last('.').int()
+	return na - nb
 }
