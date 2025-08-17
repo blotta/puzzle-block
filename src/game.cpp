@@ -211,9 +211,9 @@ void Game::init()
         success = false;
     }
 
-    // #ifdef DEBUG
+#ifdef DEBUG
     SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
-    // #endif
+#endif
 
     mWindow = SDL_CreateWindow("Game Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->mScreenWidth,
                                this->mScreenHeight, SDL_WINDOW_SHOWN);

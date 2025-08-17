@@ -15,6 +15,10 @@ void LevelSelectScene::init()
     int w = Game::ScreenWidth() * 0.7;
     int h = Game::ScreenHeight() * 0.7;
     mPanelTex = SDL_CreateTexture(Game::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h);
+    if (mPanelTex == nullptr)
+    {
+        Log::debug("Couldn't create render target texture: %s", SDL_GetError());
+    }
     SDL_SetTextureBlendMode(mPanelTex, SDL_BLENDMODE_BLEND);
 
     animPanel.duration = .5f;
@@ -136,7 +140,6 @@ void LevelSelectScene::draw()
         if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
         {
             int lx = animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-            Log::debug("prog: %f, lx: %d", animLevelSlide.getProgress(), lx);
 
             level.draw(w / 2 + lx, h / 2 - 100, 64);
             levelAux.draw(w / 2 - OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);
@@ -144,7 +147,6 @@ void LevelSelectScene::draw()
         else if (mState == LevelSelectState::SLIDING_LEVEL_RIGHT)
         {
             int lx = -1 * animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-            Log::debug("prog: %f, lx: %d", animLevelSlide.getProgress(), lx);
 
             level.draw(w / 2 + lx, h / 2 - 100, 64);
             levelAux.draw(w / 2 + OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);

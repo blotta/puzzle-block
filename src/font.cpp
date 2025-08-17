@@ -22,7 +22,6 @@ Font::Font(Font&& other) noexcept
     other.pRenderer = nullptr;
     other.mFont = nullptr;
     other.mAtlas = nullptr;
-    Log::debug("Moving font %s:%d\n", fontPath.c_str(), fontSize);
 }
 
 Font::~Font()
@@ -180,5 +179,5 @@ void Font::generateAtlas()
     mAtlas = SDL_CreateTextureFromSurface(pRenderer, atlasSurface);
     SDL_FreeSurface(atlasSurface);
 
-    Log::info("Font texture generated for %s:%d\n", fontPath.c_str(), fontSize);
+    Log::debug("Font texture generated for %s:%d\n", fontPath.c_str(), fontSize);
 }

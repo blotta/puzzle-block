@@ -76,11 +76,13 @@ void LevelEditScene::save(bool newLevel, bool saveToFile)
 
     if (saveToFile)
     {
+#ifndef __EMSCRIPTEN__
         char fileName[50] = {};
         sprintf(fileName, "assets/levels/%d.txt", lvlIdx + 1);
         FILE* f = fopen(fileName, "w");
         ld.print(f);
         fclose(f);
+#endif
     }
 
     reset();

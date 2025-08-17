@@ -86,7 +86,11 @@ class Game
     const Texture* pActiveTexture;
     const Font* mActiveFont;
 
+#if DEBUG
     Scenes mStartScene = Scenes::BOOT;
+#else
+    Scenes mStartScene = Scenes::SPLASH;
+#endif
     SceneManager mSceneManager;
 
     std::map<std::string, std::string> mState;

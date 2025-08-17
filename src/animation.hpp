@@ -71,7 +71,6 @@ template <typename T> struct AnimationProperty
             float t = static_cast<float>(i) / static_cast<float>(denom);
             if (t > 1.0f)
                 t = 1.0f;
-            Log::debug("Adding keyframe %d at time: %f", i, t);
             addKeyframe(t, value);
             ++i;
         }

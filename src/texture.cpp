@@ -13,7 +13,6 @@ Texture::Texture(SDL_Renderer* rend, const std::string& path) : path(std::move(p
     }
     int w, h;
     int status = SDL_QueryTexture(mTexture, NULL, NULL, &w, &h);
-    Log::debug("status %d\n", status);
 }
 
 Texture::Texture(Texture&& other) noexcept
