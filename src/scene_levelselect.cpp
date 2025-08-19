@@ -69,13 +69,11 @@ void LevelSelectScene::update(float dt)
         mLvlIdx += 1;
         if (mLvlIdx > mLevelCount - 1)
             mLvlIdx = 0;
-        
+
         levelAux.init(Game::GetLevelData(prevLvlIdx));
         level.init(Game::GetLevelData(mLvlIdx));
         mState = LevelSelectState::SLIDING_LEVEL_LEFT;
-        animLevelSlide.onComplete = [this](){
-            this->mState = LevelSelectState::IDLE;
-        };
+        animLevelSlide.onComplete = [this]() { this->mState = LevelSelectState::IDLE; };
 
         animLevelSlide.start();
     }
@@ -88,17 +86,14 @@ void LevelSelectScene::update(float dt)
         mLvlIdx -= 1;
         if (mLvlIdx < 0)
             mLvlIdx = mLevelCount - 1;
-        
+
         levelAux.init(Game::GetLevelData(prevLvlIdx));
         level.init(Game::GetLevelData(mLvlIdx));
         mState = LevelSelectState::SLIDING_LEVEL_RIGHT;
-        animLevelSlide.onComplete = [this](){
-            this->mState = LevelSelectState::IDLE;
-        };
+        animLevelSlide.onComplete = [this]() { this->mState = LevelSelectState::IDLE; };
 
         animLevelSlide.start();
     }
-
 }
 
 void LevelSelectScene::draw()
@@ -123,18 +118,36 @@ void LevelSelectScene::draw()
         SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, 255 * 0.95f);
         SDL_RenderClear(Game::GetRenderer());
 
+        int levelNumberBaseX = 20;
+        int levelNumberBaseY = 20;
+        int levelNumberWidth = 40;
+        int levelNumberHeight = 40;
+        int levelNumberGap = 5;
+
+        int cursorX = mLvlIdx * levelNumberWidth + mLvlIdx * levelNumberGap;
+        int diff = cursorX - panel.w * 3 / 4 > 0 ? cursorX - panel.w * 3 / 4 : 0;
+        static int diffState = 0;
+        diffState = easings::easeOut(diffState, diff, 0.1);
+
         for (int i = 0; i < mLevelCount; i++)
         {
-            int lw = 40;
-            int lh = 40;
-            int gap = 5;
-            SDL_Rect l = {20 + i * (lw + gap), 20, lw, lh};
+            int offsetX = i * levelNumberWidth + (i)*levelNumberGap;
+
             SDL_SetRenderDrawColor(Game::GetRenderer(), 30, 30, 30, 255);
             if (i == mLvlIdx)
+            {
                 SDL_SetRenderDrawColor(Game::GetRenderer(), 60, 60, 60, 255);
-            SDL_RenderFillRect(Game::GetRenderer(), &l);
-            Game::Text(l.x + l.w / 2, l.y + l.h / 2, std::format("{}", i + 1),
-                       {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
+            }
+
+            SDL_Rect levelNumberRect = {
+                levelNumberBaseX + offsetX - diffState,
+                levelNumberBaseY,
+                levelNumberWidth,
+                levelNumberHeight,
+            };
+            SDL_RenderFillRect(Game::GetRenderer(), &levelNumberRect);
+            Game::Text(levelNumberRect.x + levelNumberRect.w / 2, levelNumberRect.y + levelNumberRect.h / 2,
+                       std::format("{}", i + 1), {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
         }
 
         if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
