@@ -232,6 +232,7 @@ void Game::init()
         success = false;
     }
     Asset::SetRenderer(mRenderer);
+    SDL_RenderSetLogicalSize(mRenderer, this->mScreenWidth, this->mScreenHeight);
 
     int imgFlags = IMG_INIT_PNG;
     if (!(IMG_Init(imgFlags) & imgFlags))
