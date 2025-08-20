@@ -105,6 +105,7 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->anim.duration = 0.15f;
     this->anim.stop();
     this->animProp.addKeyframesEvenly(FRAMES.at(BlockVisualTransition::IDLE_UP).frames);
+    this->anim.events.clear();
     this->anim.addEvent(1.f, []() { Game::PlaySound("assets/sfx/block_move.ogg"); });
 
     this->animFallStart.duration = 0.5f;
@@ -112,6 +113,7 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->animFallStartProp.interpolationType = InterpolationType::EASE_IN;
     this->animFallStartProp.addKeyframe(0.f, 1.f);
     this->animFallStartProp.addKeyframe(1.f, 0.0f);
+    this->animFallStart.events.clear();
     this->animFallStart.addEvent(1.f, []() { Game::PlaySound("assets/sfx/snd_gunshot1.ogg"); });
 
     this->animFlyEnd.duration = 0.5f;
@@ -120,6 +122,7 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->animFlyEndProp.interpolationType = InterpolationType::EASE_IN;
     this->animFlyEndProp.addKeyframe(0.f, 0.f);
     this->animFlyEndProp.addKeyframe(1.f, 1.0f);
+    this->animFlyEnd.events.clear();
     this->animFlyEnd.addEvent(0.f, []() { Game::PlaySound("assets/sfx/uff.ogg"); });
 }
 

@@ -9,6 +9,7 @@
 
 #include "animation.hpp"
 #include "block.hpp"
+#include "particle.hpp"
 #include <format>
 #include <span>
 
@@ -30,6 +31,9 @@ void debug_animation2_draw();
 void debug_block_update(float dt);
 void debug_block_draw();
 
+void debug_particle_update(float dt);
+void debug_particle_draw();
+
 inline const char* toString(BootDebugType state)
 {
     switch (state)
@@ -46,6 +50,8 @@ inline const char* toString(BootDebugType state)
         return "Animation 2";
     case BootDebugType::DEBUG_TYPE_BLOCK:
         return "Block";
+    case BootDebugType::DEBUG_TYPE_PARTICLE:
+        return "Particle";
     default:
         return "UNKNOWN";
     }
@@ -86,6 +92,10 @@ void BootScene::setDebugType(BootDebugType type)
     case BootDebugType::DEBUG_TYPE_BLOCK:
         this->debug_update_func = debug_block_update;
         this->debug_draw_func = debug_block_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_PARTICLE:
+        this->debug_update_func = debug_particle_update;
+        this->debug_draw_func = debug_particle_draw;
         break;
     default:
         break;
@@ -229,6 +239,8 @@ void debug_dynamic_text_draw()
 static bool debug_sprite_positioning_initted = false;
 static int startX, startY = 0;
 static Sprite spr = {};
+static int sprite_positioning_mousex;
+static int sprite_positioning_mousey;
 
 void debug_sprite_positioning_update(float dt)
 {
@@ -239,6 +251,9 @@ void debug_sprite_positioning_update(float dt)
         startY = Game::ScreenHeight() / 2;
         spr = Game::GetSprite(SPR_BLOCK_UP);
     }
+
+    Input::MousePosition(&sprite_positioning_mousex, &sprite_positioning_mousey);
+    sprite_positioning_mousey -= 20;
 
     int dir = 0;
     if (Input::JustPressed(SDL_SCANCODE_RIGHT))
@@ -274,8 +289,10 @@ void debug_sprite_positioning_draw()
     Game::Text(10, 10,
                std::format("start: {} {}\n"
                            "origin: {} {}\n"
-                           "spritesheet: {} {}",
-                           startX, startY, spr.originX, spr.originY, spr.tx / 128, (spr.ty - 64) / 128));
+                           "spritesheet: {} {}\n"
+                           "mouse: {}, {}",
+                           startX, startY, spr.originX, spr.originY, spr.tx / 128, (spr.ty - 64) / 128,
+                           sprite_positioning_mousex - startX, sprite_positioning_mousey - startY));
 
     Game::Text(10, Game::ScreenHeight() - 10,
                "change sprite: LEFT/RIGHT\n"
@@ -304,6 +321,9 @@ void debug_sprite_positioning_draw()
     SDL_RenderDrawPoint(Game::GetRenderer(), startX, startY);
     SDL_SetRenderDrawColor(Game::GetRenderer(), 200, 200, 20, 255);
     SDL_RenderDrawPoint(Game::GetRenderer(), startX - spr.originX, startY - spr.originY);
+
+    SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
+    SDL_RenderDrawPoint(Game::GetRenderer(), sprite_positioning_mousex, sprite_positioning_mousey);
 }
 
 ////////////////////
@@ -587,4 +607,83 @@ void debug_block_draw()
 
     // draw block
     blockVisual.draw(startX, startY, 64);
+}
+
+/////////////////////
+// PARTICLE SYSTEM //
+/////////////////////
+
+static bool debug_particle_initted = false;
+static ParticleSystem particle_particleSystem;
+static BlockVisual particle_blockVisual;
+
+void debug_particle_update(float dt)
+{
+    if (!debug_particle_initted)
+    {
+        startX = Game::ScreenWidth() / 2;
+        startY = Game::ScreenHeight() / 2;
+        particle_blockVisual.init({0, 0}, BlockState::UP);
+        particle_particleSystem.startColor = {220, 200, 200, 255};
+        particle_particleSystem.endColor = {220, 200, 200, 0};
+        particle_particleSystem.vx = 5.f;
+        particle_particleSystem.vy = 2.f;
+        particle_particleSystem.gravity = 2.f;
+        particle_particleSystem.minLife = 0.3f;
+        particle_particleSystem.maxLife = 0.5f;
+        particle_blockVisual.startFall([]() {
+            int x, y;
+            IsoToWorld(particle_blockVisual.currSim.x, particle_blockVisual.currSim.y, 64, 32, &x, &y);
+            x += startX;
+            y += startY;
+
+            float x1 = x + 0;
+            float y1 = y + 16;
+            float x2 = x + 32;
+            float y2 = y + 32;
+            float x3 = x + 64;
+            float y3 = y + 16;
+            particle_particleSystem.emitLine(x1, y1, x2, y2, 50);
+            particle_particleSystem.emitLine(x2, y2, x3, y3, 50);
+        });
+        debug_particle_initted = true;
+    }
+
+    if (Input::JustPressed(SDL_SCANCODE_F5))
+    {
+        debug_particle_initted = false;
+        return;
+    }
+
+    if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+    {
+        int mx, my;
+        Input::MousePosition(&mx, &my);
+        // particle_particleSystem.emit(mx, my, 100);
+        particle_particleSystem.emitLine(mx - 50, my, mx + 50, my, 100);
+    }
+
+    particle_blockVisual.update(dt);
+
+    particle_particleSystem.update(dt);
+}
+
+void debug_particle_draw()
+{
+    // draw floors
+    for (int y = -2; y < 3; y++)
+    {
+        for (int x = -2; x < 3; x++)
+        {
+            int sx;
+            int sy;
+            IsoToWorld(x, y, 64, 32, &sx, &sy);
+            Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
+        }
+    }
+
+    // draw block
+    particle_blockVisual.draw(startX, startY, 64);
+
+    particle_particleSystem.draw();
 }
