@@ -634,8 +634,6 @@ void debug_particle_update(float dt)
         particle_blockVisual.startFall([]() {
             int x, y;
             IsoToWorld(particle_blockVisual.currSim.x, particle_blockVisual.currSim.y, 64, 32, &x, &y);
-            x += startX;
-            y += startY;
 
             float x1 = x + 0;
             float y1 = y + 16;
@@ -685,5 +683,5 @@ void debug_particle_draw()
     // draw block
     particle_blockVisual.draw(startX, startY, 64);
 
-    particle_particleSystem.draw();
+    particle_particleSystem.draw(startX, startY);
 }

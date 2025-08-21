@@ -24,7 +24,7 @@ void Particle::update(float dt)
     }
 }
 
-void Particle::draw() const
+void Particle::draw(int levelX, int levelY) const
 {
     if (life > 0)
     {
@@ -37,7 +37,7 @@ void Particle::draw() const
         Log::debug("life: %f; color: %d, %d, %d, %d", life, c.r, c.g, c.b, c.a);
         SDL_SetRenderDrawColor(Game::GetRenderer(), c.r, c.g, c.b, c.a);
         SDL_SetRenderDrawBlendMode(Game::GetRenderer(), SDL_BLENDMODE_BLEND);
-        SDL_RenderDrawPointF(Game::GetRenderer(), pos.x, pos.y);
+        SDL_RenderDrawPointF(Game::GetRenderer(), levelX + pos.x, levelY + pos.y);
     }
 }
 
@@ -81,10 +81,10 @@ void ParticleSystem::update(float dt)
                     particles.end());
 }
 
-void ParticleSystem::draw()
+void ParticleSystem::draw(int levelX, int levelY)
 {
     for (auto& p : particles)
     {
-        p.draw();
+        p.draw(levelX, levelY);
     }
 }

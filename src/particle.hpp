@@ -22,7 +22,7 @@ struct Particle
 
     void update(float dt);
 
-    void draw() const;
+    void draw(int levelX, int levelY) const;
 };
 
 class ParticleSystem
@@ -40,7 +40,7 @@ class ParticleSystem
     void emit(float x, float y, int count = 10);
     void emitLine(float x1, float y1, float x2, float y2, int count = 10);
     void update(float dt);
-    void draw();
+    void draw(int levelX, int levelY);
 };
 
 #endif

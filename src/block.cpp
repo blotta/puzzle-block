@@ -106,7 +106,10 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->anim.stop();
     this->animProp.addKeyframesEvenly(FRAMES.at(BlockVisualTransition::IDLE_UP).frames);
     this->anim.events.clear();
-    this->anim.addEvent(1.f, []() { Game::PlaySound("assets/sfx/block_move.ogg"); });
+    this->anim.addEvent(1.f, [this]() {
+        Game::PlaySound("assets/sfx/block_move.ogg");
+        this->hitFloor = true;
+    });
 
     this->animFallStart.duration = 0.5f;
     this->animFallStart.stop();
@@ -114,7 +117,10 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->animFallStartProp.addKeyframe(0.f, 1.f);
     this->animFallStartProp.addKeyframe(1.f, 0.0f);
     this->animFallStart.events.clear();
-    this->animFallStart.addEvent(1.f, []() { Game::PlaySound("assets/sfx/snd_gunshot1.ogg"); });
+    this->animFallStart.addEvent(1.f, [this]() {
+        Game::PlaySound("assets/sfx/snd_gunshot1.ogg");
+        this->hitFloor = true;
+    });
 
     this->animFlyEnd.duration = 0.5f;
     this->animFlyEnd.mode = AnimationPlayMode::ONCE;
@@ -124,6 +130,15 @@ void BlockVisual::init(const vec2& pos, BlockState state)
     this->animFlyEndProp.addKeyframe(1.f, 1.0f);
     this->animFlyEnd.events.clear();
     this->animFlyEnd.addEvent(0.f, []() { Game::PlaySound("assets/sfx/uff.ogg"); });
+
+    this->particleSystem.startColor = {180, 150, 150, 255};
+    this->particleSystem.endColor = this->particleSystem.startColor;
+    this->particleSystem.endColor.a = 0;
+    this->particleSystem.vx = .5f;
+    this->particleSystem.vy = .2f;
+    this->particleSystem.gravity = 0.f;
+    this->particleSystem.minLife = 0.3f;
+    this->particleSystem.maxLife = 0.5f;
 }
 
 void BlockVisual::update(float dt)
@@ -192,6 +207,8 @@ void BlockVisual::update(float dt)
             // this->vState = BlockVisualState::IDLE;
         }
     }
+
+    this->particleSystem.update(dt);
 }
 
 void BlockVisual::draw(int levelX, int levelY, int cellSize)
@@ -242,6 +259,50 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         // Log::debug("heightPerc: %f", heightPerc);
         Game::DrawSprite(levelX + sx, levelY + sy - height, sprId);
     }
+
+    if (hitFloor)
+    {
+        this->hitFloor = false;
+
+        int bx, by;
+        IsoToWorld(currSim.x, currSim.y, cellSize, cellSize / 2, &bx, &by);
+
+        const int quarterCS = cellSize / 4;
+        const int halfCS = cellSize / 2;
+        const int threeForthsCS = cellSize * 3 / 4;
+        const int oneAndHalfCS = cellSize * 1.5f;
+
+        // currSim.state == BlockState::UP
+        float x1 = bx + 0;
+        float y1 = by + quarterCS;
+        float x2 = bx + halfCS;
+        float y2 = by + halfCS;
+        float x3 = bx + cellSize;
+        float y3 = by + quarterCS;
+        if (currSim.state == BlockState::LONG)
+        {
+            x1 = bx - halfCS;
+            y1 = by + halfCS;
+            x2 = bx + 0;
+            y2 = by + threeForthsCS;
+            x3 = bx + cellSize;
+            y3 = by + quarterCS;
+        }
+        else if (currSim.state == BlockState::WIDE)
+        {
+            x1 = bx + 0;
+            y1 = by + quarterCS;
+            x2 = bx + cellSize;
+            y2 = by + threeForthsCS;
+            x3 = bx + oneAndHalfCS;
+            y3 = by + halfCS;
+        }
+
+        particleSystem.emitLine(x1, y1, x2, y2, 50);
+        particleSystem.emitLine(x2, y2, x3, y3, 50);
+    }
+
+    particleSystem.draw(levelX, levelY);
 }
 
 void BlockVisual::startFall()

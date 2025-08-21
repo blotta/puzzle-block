@@ -8,6 +8,7 @@
 #include "level.hpp"
 #include "util.hpp"
 #include <utility>
+#include "particle.hpp"
 
 enum BlockState
 {
@@ -73,8 +74,10 @@ struct BlockVisual
     AnimationProperty<float> animFallStartProp;
     Animation animFlyEnd;
     AnimationProperty<float> animFlyEndProp;
+    ParticleSystem particleSystem;
     Level* level = nullptr;
     bool moved = false;
+    bool hitFloor = false;
     void init(const vec2& pos, BlockState state);
     void update(float dt);
     void draw(int levelX, int levelY, int cellSize);
