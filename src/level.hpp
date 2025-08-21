@@ -1,15 +1,15 @@
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 
+#include "animation.hpp"
+#include "data.hpp"
+#include "game.hpp"
+#include "log.hpp"
+#include "util.hpp"
 #include <SDL2/SDL.h>
 #include <array>
 #include <span>
 #include <vector>
-
-#include "data.hpp"
-#include "game.hpp"
-#include "util.hpp"
-#include "animation.hpp"
 
 class Game;
 struct LevelData;

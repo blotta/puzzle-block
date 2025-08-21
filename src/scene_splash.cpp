@@ -2,6 +2,7 @@
 #include "game.hpp"
 #include "input_manager.hpp"
 #include "log.hpp"
+#include "util.hpp"
 
 void SplashScene::init()
 {

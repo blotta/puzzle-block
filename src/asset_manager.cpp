@@ -1,7 +1,7 @@
 #include "asset_manager.hpp"
+#include "log.hpp"
 #include <SDL2/SDL_image.h>
 #include <format>
-#include "log.hpp"
 
 Asset& Asset::get()
 {

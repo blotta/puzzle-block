@@ -1,8 +1,7 @@
 #include "camera.hpp"
+#include "easings.hpp"
 #include <math.h>
 #include <stdio.h>
-
-#include "util.hpp"
 
 void Camera::update(float dt)
 {

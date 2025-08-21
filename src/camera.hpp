@@ -1,7 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include "util.hpp"
+#include "vmath.hpp"
 
 struct Camera
 {

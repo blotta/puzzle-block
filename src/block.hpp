@@ -1,14 +1,13 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
-#include <SDL2/SDL.h>
-
 #include "animation.hpp"
 #include "game.hpp"
 #include "level.hpp"
-#include "util.hpp"
-#include <utility>
 #include "particle.hpp"
+#include "util.hpp"
+#include <SDL2/SDL.h>
+#include <utility>
 
 enum BlockState
 {

@@ -1,19 +1,16 @@
 #ifndef ASSET_HPP
 #define ASSET_HPP
 
+#include "data.hpp"
+#include "font.hpp"
+#include "texture.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
-
-#include "data.hpp"
-#include "font.hpp"
-#include "texture.hpp"
-
 
 class Asset
 {

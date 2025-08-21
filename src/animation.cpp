@@ -1,7 +1,6 @@
 #include "animation.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>
-#include <algorithm>
 
 void AnimationSprite::start()
 {
@@ -65,7 +64,8 @@ void Animation::start()
     time = 0.0f;
     playing = true;
     reverse = false;
-    for (auto& e : events) e.triggered = false;
+    for (auto& e : events)
+        e.triggered = false;
 }
 
 void Animation::stop()
@@ -87,7 +87,8 @@ void Animation::update(float dt)
     {
         if (!e.triggered && progress >= e.triggerTime)
         {
-            if (e.action) e.action();
+            if (e.action)
+                e.action();
             e.triggered = true;
         }
     }

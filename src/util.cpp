@@ -1,5 +1,6 @@
 #include "util.hpp"
 #include "data.hpp"
+#include "vmath.hpp"
 #include <math.h>
 #include <random>
 
@@ -157,10 +158,7 @@ vec2 easeOutBack(const vec2& a, const vec2& b, float t)
     float c3 = c1 + 1.0f;
     float tt = t - 1.0f;
     float easedT = 1.0f + c3 * (tt * tt * tt) + c1 * (tt * tt);
-    return vec2(
-        static_cast<int>(a.x + (b.x - a.x) * easedT),
-        static_cast<int>(a.y + (b.y - a.y) * easedT)
-    );
+    return vec2(static_cast<int>(a.x + (b.x - a.x) * easedT), static_cast<int>(a.y + (b.y - a.y) * easedT));
 }
 
 SpriteID easeOutBack(const SpriteID& a, const SpriteID& b, float t)
@@ -194,8 +192,6 @@ SpriteID snap(const SpriteID& a, const SpriteID& b, float t)
 {
     return (t >= 1.0f) ? b : a;
 }
-
-
 
 } // namespace easings
 

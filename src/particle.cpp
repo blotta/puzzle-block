@@ -1,5 +1,7 @@
 #include "particle.hpp"
 #include "game.hpp"
+#include "easings.hpp"
+#include "util.hpp"
 #include <algorithm>
 #include <vector>
 

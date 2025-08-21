@@ -1,13 +1,14 @@
 #ifndef SCENE_OPTIONS_HPP
 #define SCENE_OPTIONS_HPP
 
-#include "scene.hpp"
 #include "animation.hpp"
+#include "scene.hpp"
+#include <SDL2/SDL.h>
 
 enum class OptionsState
 {
-  IDLE,
-  EXITING,
+    IDLE,
+    EXITING,
 };
 
 class OptionsScene : public Scene

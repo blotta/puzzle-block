@@ -1,9 +1,9 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
-#include <vector>
+#include "vmath.hpp"
 #include <SDL2/SDL.h>
-#include "util.hpp"
+#include <vector>
 
 #define MAX_PARTICLES 500
 
