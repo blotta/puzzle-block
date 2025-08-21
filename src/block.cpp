@@ -3,6 +3,8 @@
 #include "input_manager.hpp"
 #include "log.hpp"
 
+static const int cellSize = 64;
+
 std::pair<vec2, vec2> BlockSim::GetBlockPositionsForState(const vec2& pos, BlockState state)
 {
     if (state == BlockState::LONG)
@@ -204,14 +206,13 @@ void BlockVisual::update(float dt)
         if (this->animFlyEnd.getProgress() >= 1.0f)
         {
             this->animFlyEnd.stop();
-            // this->vState = BlockVisualState::IDLE;
         }
     }
 
     this->particleSystem.update(dt);
 }
 
-void BlockVisual::draw(int levelX, int levelY, int cellSize)
+void BlockVisual::draw()
 {
     if (vState == BlockVisualState::IDLE)
     {
@@ -221,7 +222,7 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
                                                              : SPR_BLOCK_WIDE;
         int sx, sy;
         IsoToWorld(currSim.x, currSim.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(levelX + sx, levelY + sy, sprId);
+        Game::DrawSprite(this->pos.x + sx, this->pos.y + sy, sprId);
     }
     else if (vState == BlockVisualState::MOVING)
     {
@@ -230,7 +231,7 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         int sx, sy;
         BlockSim& sim = transitionData.useCurrSim ? currSim : nextSim;
         IsoToWorld(sim.x, sim.y, cellSize, cellSize / 2, &sx, &sy);
-        Game::DrawSprite(levelX + sx, levelY + sy, sprId);
+        Game::DrawSprite(this->pos.x + sx, this->pos.y + sy, sprId);
     }
     else if (vState == BlockVisualState::FALLING_LEVEL_START)
     {
@@ -242,8 +243,8 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         IsoToWorld(currSim.x, currSim.y, cellSize, cellSize / 2, &sx, &sy);
 
         auto heightPerc = animFallStartProp.evaluate(animFallStart.getProgress());
-        float height = (levelY + sy + 200) * heightPerc;
-        Game::DrawSprite(levelX + sx, levelY + sy - height, sprId);
+        float height = (sy + 400) * heightPerc;
+        Game::DrawSprite(this->pos.x + sx, this->pos.y + sy - height, sprId);
     }
     else if (vState == BlockVisualState::FLYING_LEVEL_END)
     {
@@ -255,9 +256,8 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         IsoToWorld(currSim.x, currSim.y, cellSize, cellSize / 2, &sx, &sy);
 
         auto heightPerc = animFlyEndProp.evaluate(animFlyEnd.getProgress());
-        float height = (levelY + sy + 200) * heightPerc;
-        // Log::debug("heightPerc: %f", heightPerc);
-        Game::DrawSprite(levelX + sx, levelY + sy - height, sprId);
+        float height = (sy + 400) * heightPerc;
+        Game::DrawSprite(this->pos.x + sx, this->pos.y + sy - height, sprId);
     }
 
     if (hitFloor)
@@ -302,7 +302,7 @@ void BlockVisual::draw(int levelX, int levelY, int cellSize)
         particleSystem.emitLine(x2, y2, x3, y3, 50);
     }
 
-    particleSystem.draw(levelX, levelY);
+    particleSystem.draw(this->pos.x, this->pos.y);
 }
 
 void BlockVisual::startFall()

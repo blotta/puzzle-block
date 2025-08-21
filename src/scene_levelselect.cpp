@@ -3,7 +3,7 @@
 #include "input_manager.hpp"
 #include <format>
 
-const int OFFSCREEN_LEVEL_OFFSET = 600;
+const int OFFSCREEN_LEVEL_OFFSET = 1200;
 
 void LevelSelectScene::init()
 {
@@ -94,6 +94,27 @@ void LevelSelectScene::update(float dt)
 
         animLevelSlide.start();
     }
+
+    int w = Game::ScreenWidth() * 0.7;
+    int h = Game::ScreenHeight() * 0.7;
+    if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
+    {
+        int lx = animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
+
+        level.pos = vec2f{(float)(w / 2 + lx), (float)(h / 2 - 100)};
+        levelAux.pos = vec2f{(float)(w / 2 - OFFSCREEN_LEVEL_OFFSET + lx), (float)(h / 2 - 100)};
+    }
+    else if (mState == LevelSelectState::SLIDING_LEVEL_RIGHT)
+    {
+        int lx = -1 * animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
+
+        level.pos = vec2f{(float)(w / 2 + lx), (float)(h / 2 - 100)};
+        levelAux.pos = vec2f{(float)(w / 2 + OFFSCREEN_LEVEL_OFFSET + lx), (float)(h / 2 - 100)};
+    }
+    else
+    {
+        level.pos = vec2f{(float)(w / 2), (float)(h / 2 - 100)};
+    }
 }
 
 void LevelSelectScene::draw()
@@ -150,24 +171,8 @@ void LevelSelectScene::draw()
                        std::format("{}", i + 1), {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
         }
 
-        if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
-        {
-            int lx = animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-
-            level.draw(w / 2 + lx, h / 2 - 100, 64);
-            levelAux.draw(w / 2 - OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);
-        }
-        else if (mState == LevelSelectState::SLIDING_LEVEL_RIGHT)
-        {
-            int lx = -1 * animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-
-            level.draw(w / 2 + lx, h / 2 - 100, 64);
-            levelAux.draw(w / 2 + OFFSCREEN_LEVEL_OFFSET + lx, h / 2 - 100, 64);
-        }
-        else
-        {
-            level.draw(w / 2, h / 2 - 100, 64);
-        }
+        level.draw();
+        levelAux.draw();
 
         SDL_SetRenderTarget(Game::GetRenderer(), nullptr);
     }

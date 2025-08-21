@@ -18,8 +18,6 @@ class MainMenuScene : public Scene
   private:
     LevelVisual level;
     BlockVisual block;
-    Camera camera;
-    int cellSize = 64;
 };
 
 #endif

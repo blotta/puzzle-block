@@ -40,6 +40,12 @@ struct vec2f
     vec2f(float x, float y) : x(x), y(y)
     {
     }
+    vec2f(const vec2& vi) : x(static_cast<float>(vi.x)), y(static_cast<float>(vi.y))
+    {
+    }
+    vec2f(int x, int y) : x(static_cast<float>(x)), y(static_cast<float>(y))
+    {
+    }
 
     vec2f operator+(const vec2f& other) const
     {
@@ -117,8 +123,6 @@ SpriteID snap(const SpriteID& a, const SpriteID& b, float t);
 void IsoToWorld(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldToIso(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int* x, int* y);
-
-float linear_interpolate(float v0, float v1, float t);
 
 int cycleIndex(int currIdx, int length, int amount);
 

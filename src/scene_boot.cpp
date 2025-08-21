@@ -34,6 +34,9 @@ void debug_block_draw();
 void debug_particle_update(float dt);
 void debug_particle_draw();
 
+void debug_camera_update(float dt);
+void debug_camera_draw();
+
 inline const char* toString(BootDebugType state)
 {
     switch (state)
@@ -52,6 +55,8 @@ inline const char* toString(BootDebugType state)
         return "Block";
     case BootDebugType::DEBUG_TYPE_PARTICLE:
         return "Particle";
+    case BootDebugType::DEBUG_TYPE_CAMERA:
+        return "Camera";
     default:
         return "UNKNOWN";
     }
@@ -96,6 +101,10 @@ void BootScene::setDebugType(BootDebugType type)
     case BootDebugType::DEBUG_TYPE_PARTICLE:
         this->debug_update_func = debug_particle_update;
         this->debug_draw_func = debug_particle_draw;
+        break;
+    case BootDebugType::DEBUG_TYPE_CAMERA:
+        this->debug_update_func = debug_camera_update;
+        this->debug_draw_func = debug_camera_draw;
         break;
     default:
         break;
@@ -606,7 +615,7 @@ void debug_block_draw()
     }
 
     // draw block
-    blockVisual.draw(startX, startY, 64);
+    blockVisual.draw();
 }
 
 /////////////////////
@@ -681,7 +690,74 @@ void debug_particle_draw()
     }
 
     // draw block
-    particle_blockVisual.draw(startX, startY, 64);
+    particle_blockVisual.draw();
 
     particle_particleSystem.draw(startX, startY);
+}
+
+
+////////////
+// CAMERA //
+////////////
+
+static bool debug_camera_initted = false;
+static vec2f camera_pos;
+
+void debug_camera_update(float dt)
+{
+    if (!debug_camera_initted)
+    {
+        camera_pos = vec2f(0, 0);
+        debug_camera_initted = true;
+    }
+
+    if (Input::JustPressed(SDL_SCANCODE_F5))
+    {
+        debug_camera_initted = false;
+        return;
+    }
+
+    if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+    {
+        int mx, my;
+        Input::MousePosition(&mx, &my);
+    }
+
+    float camSpeed = 100.f;
+    if (Input::Pressed(SDL_SCANCODE_RIGHT))
+    {
+        camera_pos.x += camSpeed * dt;
+    }
+    if (Input::Pressed(SDL_SCANCODE_LEFT))
+    {
+        camera_pos.x -= camSpeed * dt;
+    }
+    if (Input::Pressed(SDL_SCANCODE_UP))
+    {
+        camera_pos.y -= camSpeed * dt;
+    }
+    if (Input::Pressed(SDL_SCANCODE_DOWN))
+    {
+        camera_pos.y += camSpeed * dt;
+    }
+
+    Game::CameraSetPosition(camera_pos);
+}
+
+void debug_camera_draw()
+{
+    Game::BeginCamera();
+
+    Game::DrawLine(0, 0, Game::ScreenWidth(), Game::ScreenHeight(), {255, 255, 255, 255});
+
+    Game::DrawPoint(0, 0, {0, 255, 0, 255}); // green
+    Game::DrawPoint(Game::ScreenWidth()/2, Game::ScreenHeight()/2, {255, 0, 0, 255}); // red
+    Game::DrawPoint(Game::ScreenWidth(), Game::ScreenHeight(), {0, 0, 255, 255}); // blue
+
+    Game::EndCamera();
+
+    // camera center
+    Game::DrawPoint(Game::ScreenWidth()/2, Game::ScreenHeight()/2, {255, 255, 255, 255}); // white
+
+    Game::Text(20, Game::ScreenHeight()/2, std::format("camera\nposition: {}, {}", camera_pos.x, camera_pos.y));
 }

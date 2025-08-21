@@ -1,5 +1,7 @@
 #include "scene_main_menu.hpp"
 
+static const int cellSize = 64;
+
 static LevelData lvl = {.cols = 7,
                         .rows = 7,
                         .data = {"0003000"
@@ -26,21 +28,14 @@ void MainMenuScene::init()
     block.init(startPos, BlockState::UP);
     block.level = &level.mModel;
 
-    camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
-    int tx, ty;
-    IsoToWorld(startPos.x, startPos.y, cellSize, cellSize / 2, &tx, &ty);
-    camera.target.x = tx + cellSize / 2;
-    camera.target.y = ty - 100;
+    vec2 camPos(cellSize/2, 0);
+    Game::CameraSetPosition(camPos);
 
     choseOption = false;
     showText = false;
 
     block.vState = BlockVisualState::INVISIBLE;
-    level.startRise([this]() {
-        this->block.startFall([](){
-            showText = true;
-        });
-    });
+    level.startRise([this]() { this->block.startFall([]() { showText = true; }); });
 }
 
 void MainMenuScene::dispose()
@@ -58,7 +53,6 @@ void MainMenuScene::onPopReturn()
 
 void MainMenuScene::update(float dt)
 {
-    camera.update(dt);
     block.update(dt);
     level.update(dt);
 
@@ -99,27 +93,27 @@ void MainMenuScene::draw()
     Sprite titleSprite = Game::GetSprite(SPR_TITLE);
     Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
 
-    level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
-    block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
+    Game::BeginCamera();
+
+    level.draw();
+    block.draw();
 
     int txtX, txtY;
 
     if (showText)
     {
         IsoToWorld(3, 0, cellSize, cellSize / 2, &txtX, &txtY);
-        Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
-                   txtY - cellSize / 2 + camera.offset.y - camera.pos.y, "START");
+        Game::Text(txtX + cellSize * 1.5, txtY - cellSize / 2, "START");
 
         IsoToWorld(3, 6, cellSize, cellSize / 2, &txtX, &txtY);
-        Game::Text(txtX - cellSize / 2 + camera.offset.x - camera.pos.x,
-                   txtY + cellSize / 2 + camera.offset.y - camera.pos.y, "EXIT", {.align = TextAlign::RIGHT});
+        Game::Text(txtX - cellSize / 2, txtY + cellSize / 2, "EXIT", {.align = TextAlign::RIGHT});
 
         IsoToWorld(0, 3, cellSize, cellSize / 2, &txtX, &txtY);
-        Game::Text(txtX - cellSize / 2 + camera.offset.x - camera.pos.x,
-                   txtY - cellSize / 2 + camera.offset.y - camera.pos.y, "OPTIONS", {.align = TextAlign::RIGHT});
+        Game::Text(txtX - cellSize / 2, txtY - cellSize / 2, "OPTIONS", {.align = TextAlign::RIGHT});
 
         IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
-        Game::Text(txtX + cellSize * 1.5 + camera.offset.x - camera.pos.x,
-                   txtY + cellSize / 2 + camera.offset.y - camera.pos.y, "LEVEL SELECT");
+        Game::Text(txtX + cellSize * 1.5, txtY + cellSize / 2, "LEVEL SELECT");
     }
+
+    Game::EndCamera();
 }

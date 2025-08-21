@@ -227,11 +227,6 @@ void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int* 
         *y -= 1;
 }
 
-float linear_interpolate(float v0, float v1, float t)
-{
-    return (1.f - t) * v0 + t * v1;
-}
-
 int cycleIndex(int currIdx, int length, int amount)
 {
     if (amount == 0)

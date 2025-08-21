@@ -17,8 +17,6 @@ class IsoLevelScene : public Scene
   private:
     LevelVisual level;
     BlockVisual block;
-    Camera camera;
-    int cellSize = 64;
     void reset();
     std::string mTitleText;
     bool mLevelCleared = false;

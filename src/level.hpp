@@ -68,6 +68,7 @@ struct Level
 
 struct LevelVisual
 {
+    vec2f pos;
     Level mModel;
     LevelVisualState mVisualState;
     Animation animRise;
@@ -77,7 +78,7 @@ struct LevelVisual
 
     void init(const LevelData& ld);
     void update(float dt);
-    void draw(int x, int y, int cellSize);
+    void draw();
 };
 
 #endif

@@ -3,6 +3,8 @@
 #include "log.hpp"
 #include <format>
 
+static const int cellSize = 64;
+
 void IsoLevelScene::init()
 {
     Log::info("Loading IsoLevel scene\n");
@@ -41,12 +43,6 @@ void IsoLevelScene::reset()
     auto startPos = level.mModel.getStartPos();
     block.init(startPos, BlockState::UP);
     block.level = &level.mModel;
-
-    camera.offset = vec2(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2);
-    int tx, ty;
-    IsoToWorld(block.currSim.x, block.currSim.y, cellSize, cellSize / 2, &tx, &ty);
-    camera.target.x = tx;
-    camera.target.y = ty;
 
     mLevelCleared = false;
 
@@ -93,8 +89,6 @@ void IsoLevelScene::update(float dt)
         reset();
     }
 
-    vec2 mousePos;
-    Input::MousePosition(&mousePos.x, &mousePos.y);
 
     if (block.moved)
     {
@@ -116,24 +110,29 @@ void IsoLevelScene::update(float dt)
 
     if (Input::MousePressed(SDL_BUTTON_LEFT))
     {
-        camera.target.x = mousePos.x - camera.offset.x;
-        camera.target.y = mousePos.y - camera.offset.y;
+        vec2 mouseScreenPos;
+        Input::MousePosition(&mouseScreenPos.x, &mouseScreenPos.y);
+        auto mouseWorldPos = Game::ScreenToWorld(mouseScreenPos);
+        mouseWorldPos = mouseWorldPos * 0.5f;
+        Game::CameraSetTarget(mouseWorldPos);
     }
     else
     {
         int tx, ty;
         IsoToWorld(block.nextSim.x, block.nextSim.y, cellSize, cellSize / 2, &tx, &ty);
-        camera.target.x = (float)tx;
-        camera.target.y = (float)ty;
-        camera.target.x += cellSize / 2;
+        Game::CameraSetTarget(vec2f{(float)(tx + cellSize/2), (float)ty});
     }
-    camera.update(dt);
 }
 
 void IsoLevelScene::draw()
 {
-    level.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
-    block.draw(camera.offset.x - camera.pos.x, camera.offset.y - camera.pos.y, cellSize);
+
+    Game::BeginCamera();
+
+    level.draw();
+    block.draw();
+
+    Game::EndCamera();
 
     Game::Text(Game::ScreenWidth() / 2, 10, mTitleText, {.align = TextAlign::CENTER});
 
@@ -143,8 +142,4 @@ void IsoLevelScene::draw()
         Game::Text(x, Game::ScreenHeight() / 4, "LEVEL CLEARED",
                    {.color = {200, 255, 200, 255}, .align = TextAlign::CENTER});
     }
-
-    // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 128);
-    // SDL_RenderDrawLine(Game::GetRenderer(), Game::ScreenWidth()/2, 0, Game::ScreenWidth()/2, Game::ScreenHeight());
-    // SDL_RenderDrawLine(Game::GetRenderer(), 0, Game::ScreenHeight()/2, Game::ScreenWidth(), Game::ScreenHeight()/2);
 }

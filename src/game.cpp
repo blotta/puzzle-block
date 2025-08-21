@@ -110,6 +110,83 @@ int Game::AddLevelData(const LevelData& ld)
     return Game::get().mLevels.size() - 1;
 }
 
+void Game::CameraSetSize(const vec2& size)
+{
+    Game::get().mCamera.offset = vec2(size.x/2, size.y/2);
+}
+
+void Game::CameraSetTarget(const vec2f& target)
+{
+    Game::get().mCamera.target = target;
+}
+
+void Game::CameraSetTarget(const vec2& target)
+{
+    Game::get().mCamera.target = vec2f((float)target.x, (float)target.y);
+}
+
+void Game::CameraSetPosition(const vec2f& pos)
+{
+    auto& g = Game::get();
+    g.mCamera.pos = pos;
+    g.mCamera.target = pos;
+}
+
+void Game::CameraSetPosition(const vec2& pos)
+{
+    auto& g = Game::get();
+    g.mCamera.pos = vec2f((float)pos.x, (float)pos.y);
+    g.mCamera.target = vec2f((float)pos.x, (float)pos.y);
+}
+
+vec2f Game::ScreenToWorld(const vec2f& screenPos)
+{
+    vec2f camDiff = Game::get().getCameraDiff(true);
+    return vec2f(screenPos.x - camDiff.x, screenPos.y - camDiff.y);
+}
+
+vec2f Game::WorldToScreen(const vec2f& worldPos)
+{
+    vec2f camDiff = Game::get().getCameraDiff(true);
+    return vec2f(worldPos.x + camDiff.x, worldPos.y + camDiff.y);
+}
+
+void Game::BeginCamera()
+{
+    Game::get().mCameraEnabled = true;
+}
+
+void Game::EndCamera()
+{
+    Game::get().mCameraEnabled = false;
+}
+
+void Game::DrawPoint(int x, int y, SDL_Color color)
+{
+    auto& g = Game::get();
+
+    vec2f camDiff = g.getCameraDiff(false);
+    x += camDiff.x;
+    y += camDiff.y;
+
+    SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawPointF(g.mRenderer, x, y);
+}
+
+void Game::DrawLine(int x1, int y1, int x2, int y2, SDL_Color color)
+{
+    auto& g = Game::get();
+    SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
+
+    vec2f camDiff = g.getCameraDiff(false);
+    x1 += camDiff.x;
+    y1 += camDiff.y;
+    x2 += camDiff.x;
+    y2 += camDiff.y;
+
+    SDL_RenderDrawLine(g.mRenderer, x1, y1, x2, y2);
+}
+
 const Sprite& Game::GetSprite(SpriteID id)
 {
     return Game::get().mData.Sprites[id];
@@ -121,6 +198,10 @@ void Game::DrawSprite(int x, int y, SpriteID sprId)
     const Sprite* spr = &g.mData.Sprites[sprId];
     SDL_Rect src = {spr->tx, spr->ty, spr->tw, spr->th};
     SDL_Rect dest = {x - spr->originX, y - spr->originY, spr->tw, spr->th};
+
+    vec2f camDiff = g.getCameraDiff(false);
+    dest.x += camDiff.x;
+    dest.y += camDiff.y;
 
     g.pActiveTexture->drawTile(&src, &dest);
 }
@@ -177,6 +258,11 @@ void Game::SetFontSize(int ptsize)
 void Game::Text(int x, int y, const std::string& text, const FontDrawOptions& options)
 {
     auto& g = Game::get();
+
+    vec2f camDiff = g.getCameraDiff(false);
+    x += camDiff.x;
+    y += camDiff.y;
+
     g.mActiveFont->drawText(x, y, text, options);
 }
 
@@ -263,6 +349,11 @@ void Game::init()
 
     loadAssets();
 
+
+    // start with world 0,0 on the top left
+    Game::CameraSetSize({mScreenWidth, mScreenHeight});
+    Game::CameraSetPosition(vec2f(mScreenWidth / 2, mScreenHeight / 2));
+
     mSceneManager.init(mStartScene);
 
     if (!success)
@@ -327,6 +418,7 @@ void Game::tick()
     }
 
     // update
+    mCamera.update(dt);
     mSceneManager.update(dt);
 
     // draw
@@ -342,6 +434,19 @@ void Game::tick()
         mFpsCounter = 0;
     }
     mFpsCounter += 1;
+}
+
+vec2f Game::getCameraDiff(bool asEnabled)
+{
+    vec2f diff(0, 0);
+
+    if (this->mCameraEnabled || asEnabled)
+    {
+        diff.x += this->mCamera.offset.x - this->mCamera.pos.x;
+        diff.y += this->mCamera.offset.y - this->mCamera.pos.y;
+    }
+
+    return diff;
 }
 
 void Game::loadAssets()

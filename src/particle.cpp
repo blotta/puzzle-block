@@ -1,6 +1,5 @@
 #include "particle.hpp"
 #include "game.hpp"
-#include "log.hpp"
 #include <algorithm>
 #include <vector>
 
@@ -34,10 +33,8 @@ void Particle::draw(int levelX, int levelY) const
             (Uint8)easings::lerp((int)startColor.b, (int)endColor.b, 1.f - (life / maxLife)),
             (Uint8)easings::lerp((int)startColor.a, (int)endColor.a, 1.f - (life / maxLife)),
         };
-        Log::debug("life: %f; color: %d, %d, %d, %d", life, c.r, c.g, c.b, c.a);
-        SDL_SetRenderDrawColor(Game::GetRenderer(), c.r, c.g, c.b, c.a);
         SDL_SetRenderDrawBlendMode(Game::GetRenderer(), SDL_BLENDMODE_BLEND);
-        SDL_RenderDrawPointF(Game::GetRenderer(), levelX + pos.x, levelY + pos.y);
+        Game::DrawPoint(levelX + pos.x, levelY + pos.y, c);
     }
 }
 

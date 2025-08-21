@@ -5,6 +5,8 @@
 #include <math.h>
 #include <string>
 
+static const int cellSize = 64;
+
 const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file   "
                                        " F3: save new file    F4: random    F5: reset level    NUMPAD Arrows: "
                                        "resize grid";
@@ -47,20 +49,10 @@ void LevelEditScene::reset()
 
 void LevelEditScene::resize()
 {
-    // view sizes
-    cellSize = 64;
-    vec2 boundLeft, boundRight;
-    IsoToWorld(0, level.mModel.rows - 1, cellSize, cellSize / 2, &boundLeft.x, &boundLeft.y);
-    IsoToWorld(level.mModel.cols - 1, 0, cellSize, cellSize / 2, &boundRight.x, &boundRight.y);
-    int width = boundRight.x + cellSize / 2 - boundLeft.x;
-
-    vec2 boundTop, boundBottom;
-    IsoToWorld(0, 0, cellSize, cellSize / 2, &boundTop.x, &boundTop.y);
+    vec2 boundBottom;
     IsoToWorld(level.mModel.cols - 1, level.mModel.rows - 1, cellSize, cellSize / 2, &boundBottom.x, &boundBottom.y);
-    int height = boundBottom.y + cellSize / 2 / 2 - boundTop.y;
 
-    offsetX = ((Game::ScreenWidth() - width) / 2) - boundLeft.x - cellSize / 2;
-    offsetY = (Game::ScreenHeight() - height) / 2;
+    Game::CameraSetPosition(vec2f{(float)cellSize/2, (float)(boundBottom.y / 2)});
 }
 
 void LevelEditScene::save(bool newLevel, bool saveToFile)
@@ -104,8 +96,8 @@ void LevelEditScene::levelChanged()
 void LevelEditScene::update(float dt)
 {
     Input::MousePosition(&mousePos.x, &mousePos.y);
-    WorldToIso(mousePos.x - offsetX, mousePos.y - offsetY, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
-    // Log::debug("mouseIso : %d %d\n", mouseIsoPos.x, mouseIsoPos.y);
+    auto mouseWorldPos = Game::ScreenToWorld(mousePos);
+    WorldToIso((int)mouseWorldPos.x, (int)mouseWorldPos.y, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
 
     if (switchEditing)
     {
@@ -223,44 +215,42 @@ void LevelEditScene::update(float dt)
 
 void LevelEditScene::draw()
 {
-    level.draw(offsetX, offsetY, cellSize);
-    block.draw(offsetX, offsetY, cellSize);
+    Game::BeginCamera();
+
+    level.draw();
+    block.draw();
 
     // outline
     {
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 40, 200, 80, 255); // green
+        SDL_Color outlineColor = {40, 200, 80, 255}; // green
         if (!level.mModel.isValid())
-            SDL_SetRenderDrawColor(Game::GetRenderer(), 200, 40, 80, 255); // orange
+            outlineColor = {200, 40, 80, 255}; // orange
         else if (!saved)
-            SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 20, 255); // yellow
+            outlineColor = {255, 255, 20, 255}; // yellow
 
         int topX, topY, rightX, rightY, botX, botY, leftX, leftY = 0;
         IsoToWorld(0, 0, cellSize, cellSize / 2, &topX, &topY);
         IsoToWorld(level.mModel.cols, 0, cellSize, cellSize / 2, &rightX, &rightY);
         IsoToWorld(level.mModel.cols, level.mModel.rows, cellSize, cellSize / 2, &botX, &botY);
         IsoToWorld(0, level.mModel.rows, cellSize, cellSize / 2, &leftX, &leftY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
-                           offsetX + rightX + cellSize / 2, offsetY + rightY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + topX + cellSize / 2, offsetY + topY,
-                           offsetX + leftX + cellSize / 2, offsetY + leftY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize / 2, offsetY + botY,
-                           offsetX + rightX + cellSize / 2, offsetY + rightY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + botX + cellSize / 2, offsetY + botY,
-                           offsetX + leftX + cellSize / 2, offsetY + leftY);
+
+        Game::DrawLine(topX + cellSize / 2, topY, rightX + cellSize / 2, rightY, outlineColor);
+        Game::DrawLine(topX + cellSize / 2, topY, leftX + cellSize / 2, leftY, outlineColor);
+        Game::DrawLine(botX + cellSize / 2, botY, rightX + cellSize / 2, rightY, outlineColor);
+        Game::DrawLine(botX + cellSize / 2, botY, leftX + cellSize / 2, leftY, outlineColor);
     }
 
     // level switches
     for (int i = 0; i < level.mModel.switchCount; i++)
     {
         LevelSwitch& sw = level.mModel.switches[i];
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 180, 0, 255);
+        SDL_Color switchColor = {255, 180, 0, 255};
         if (sw.on)
-            SDL_SetRenderDrawColor(Game::GetRenderer(), 180, 255, 0, 255);
+            switchColor = {180, 255, 0, 255};
         int swX, swY, swfX, swfY;
         IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &swX, &swY);
         IsoToWorld(sw.floorX, sw.floorY, cellSize, cellSize / 2, &swfX, &swfY);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + swX + cellSize / 2, offsetY + swY + cellSize / 4,
-                           offsetX + swfX + cellSize / 2, offsetY + swfY + cellSize / 4);
+        Game::DrawLine(swX + cellSize / 2, swY + cellSize / 4, swfX + cellSize / 2, swfY + cellSize / 4, switchColor);
     }
 
     // switch editing
@@ -269,11 +259,11 @@ void LevelEditScene::draw()
         int swX, swY, swfX, swfY;
         IsoToWorld(tmpSwitch.x, tmpSwitch.y, cellSize, cellSize / 2, &swX, &swY);
         IsoToWorld(tmpSwitch.floorX, tmpSwitch.floorY, cellSize, cellSize / 2, &swfX, &swfY);
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 120, 0, 255);
-        Game::DrawSprite(swX + offsetX, swY + offsetY, SPR_FLOOR_HIGHLIGHT);
-        Game::DrawSprite(swfX + offsetX, swfY + offsetY, SPR_FLOOR_HIGHLIGHT);
-        SDL_RenderDrawLine(Game::GetRenderer(), offsetX + swX + cellSize / 2, offsetY + swY + cellSize / 4,
-                           offsetX + swfX + cellSize / 2, offsetY + swfY + cellSize / 4);
+
+        Game::DrawSprite(swX, swY, SPR_FLOOR_HIGHLIGHT);
+        Game::DrawSprite(swfX, swfY, SPR_FLOOR_HIGHLIGHT);
+        Game::DrawLine(swX + cellSize / 2, swY + cellSize / 4, swfX + cellSize / 2, swfY + cellSize / 4,
+                       {255, 120, 0, 255});
     }
 
     // editor
@@ -281,8 +271,10 @@ void LevelEditScene::draw()
     {
         int mix, miy;
         IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize / 2, &mix, &miy);
-        Game::DrawSprite(mix + offsetX, miy + offsetY, SPR_FLOOR_HIGHLIGHT);
+        Game::DrawSprite(mix, miy, SPR_FLOOR_HIGHLIGHT);
     }
+
+    Game::EndCamera();
 
     // Mode
     if (switchEditing)
@@ -292,5 +284,6 @@ void LevelEditScene::draw()
 
     // Level Info
     Game::Text(10, Game::ScreenHeight() - 35,
-               std::format("Level {} {}x{} {}", lvlIdx + 1, levelRect.w, levelRect.h, (level.mModel.isValid() ? "OK" : "NOK")));
+               std::format("Level {} {}x{} {}", lvlIdx + 1, levelRect.w, levelRect.h,
+                           (level.mModel.isValid() ? "OK" : "NOK")));
 }

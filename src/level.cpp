@@ -4,6 +4,8 @@
 #include "level.hpp"
 #include "util.hpp"
 
+static const int cellSize = 64;
+
 void Level::clear()
 {
     for (auto& row : grid)
@@ -518,7 +520,7 @@ void LevelVisual::update(float dt)
     }
 }
 
-void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
+void LevelVisual::draw()
 {
     for (int i = 0; i < mModel.cols; i++)
     {
@@ -557,7 +559,7 @@ void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
                 posDiff = tileAnims[j][i].evaluate(animRise.getProgress());
             }
 
-            Game::DrawSprite(offsetX + sx + posDiff.x, offsetY + sy + posDiff.y, sprId);
+            Game::DrawSprite(this->pos.x + sx + posDiff.x, this->pos.y + sy + posDiff.y, sprId);
 
             for (int sidx = 0; sidx < this->mModel.switchCount; sidx++)
             {
@@ -569,7 +571,7 @@ void LevelVisual::draw(int offsetX, int offsetY, int cellSize)
                 int sy;
                 IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
 
-                Game::DrawSprite(offsetX + sx + posDiff.x, offsetY + sy + posDiff.y,
+                Game::DrawSprite(this->pos.x + sx + posDiff.x, this->pos.y + sy + posDiff.y,
                                  sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
             }
         }

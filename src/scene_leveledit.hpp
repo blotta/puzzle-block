@@ -22,9 +22,6 @@ class LevelEditScene : public Scene
     LevelVisual level;
     int lvlIdx;
     BlockVisual block;
-    int offsetX = 100;
-    int offsetY = 100;
-    int cellSize = 64;
     vec2 moveDir;
     vec2 mousePos;
     vec2 mouseIsoPos;

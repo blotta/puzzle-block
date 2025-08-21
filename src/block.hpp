@@ -65,6 +65,7 @@ struct BlockVisualTransitionData
 
 struct BlockVisual
 {
+    vec2f pos;
     BlockSim currSim, nextSim;
     BlockVisualState vState = BlockVisualState::IDLE;
     Animation anim;
@@ -80,7 +81,7 @@ struct BlockVisual
     bool hitFloor = false;
     void init(const vec2& pos, BlockState state);
     void update(float dt);
-    void draw(int levelX, int levelY, int cellSize);
+    void draw();
     void startFall();
     void startFall(const std::function<void()>& onComplete);
     void startFly(const std::function<void()>& onComplete);
