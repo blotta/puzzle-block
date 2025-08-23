@@ -1,6 +1,8 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include "entity.hpp"
+
 enum class Scenes
 {
     NONE = 0,
@@ -12,10 +14,14 @@ enum class Scenes
     OPTIONS,
     LEVEL_SELECT,
     PAUSE,
+    UNITY,
 };
 
 class Scene
 {
+  friend class SceneManager;
+  protected:
+    EntityManager entities;
   public:
     virtual ~Scene() = 0;
     virtual void init();

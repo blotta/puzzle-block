@@ -7,6 +7,7 @@
 #include "scene_options.hpp"
 #include "scene_levelselect.hpp"
 #include "scene_pause.hpp"
+#include "scene_unity.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -28,6 +29,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<LevelSelectScene>();
     case Scenes::PAUSE:
         return std::make_unique<PauseScene>();
+    case Scenes::UNITY:
+        return std::make_unique<UnityScene>();
     default:
         return nullptr;
     }
@@ -38,7 +41,10 @@ void SceneManager::init(Scenes startScene)
     sceneStack.clear();
     sceneStack.push_back(createScene(startScene));
     if (sceneStack.back())
+    {
+        sceneStack.back()->entities.init();
         sceneStack.back()->init();
+    }
 }
 
 void SceneManager::requestSwitch(Scenes next)
@@ -64,21 +70,31 @@ void SceneManager::update(float dt)
 
     if (transitionScene)
     {
+        transitionScene->entities.update(dt);
         transitionScene->update(dt);
         return;
     }
 
     if (!sceneStack.empty())
+    {
+        sceneStack.back()->entities.update(dt);
         sceneStack.back()->update(dt);
+    }
 }
 
 void SceneManager::draw()
 {
     for (auto& scene : sceneStack)
+    {
+        scene->entities.draw();
         scene->draw();
+    }
 
     if (transitionScene)
+    {
+        transitionScene->entities.draw();
         transitionScene->draw();
+    }
 }
 
 void SceneManager::dispose()

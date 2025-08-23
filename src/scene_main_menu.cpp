@@ -1,4 +1,5 @@
 #include "scene_main_menu.hpp"
+#include "input_manager.hpp"
 
 static const int cellSize = 64;
 
@@ -55,6 +56,12 @@ void MainMenuScene::update(float dt)
 {
     block.update(dt);
     level.update(dt);
+
+    if (Input::JustPressed(SDL_SCANCODE_F11))
+    {
+        Game::LoadScene(Scenes::UNITY);
+        return;
+    }
 
     if (!choseOption)
     {
