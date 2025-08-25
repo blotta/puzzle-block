@@ -8,3 +8,4 @@ testscripts/
 assets-projects/anim-ref/*.png
 
 .cpm/
+cpm.json

@@ -1,0 +1,68 @@
+#include "vmath.hpp"
+
+#include <math.h>
+
+vec2 vec2::operator+(const vec2& other) const
+{
+    return vec2(this->x + other.x, this->y + other.y);
+}
+vec2 vec2::operator-(const vec2& other) const
+{
+    return vec2(this->x - other.x, this->y - other.y);
+}
+vec2 vec2::operator*(int scalar) const
+{
+    return vec2(this->x * scalar, this->y * scalar);
+}
+bool vec2::operator==(const vec2& other) const
+{
+    return this->x == other.x && this->y == other.y;
+}
+
+vec2f vec2f::operator+(const vec2f& other) const
+{
+    return vec2f(this->x + other.x, this->y + other.y);
+}
+vec2f vec2f::operator-(const vec2f& other) const
+{
+    return vec2f(this->x - other.x, this->y - other.y);
+}
+vec2f vec2f::operator*(float scalar) const
+{
+    return vec2f(this->x * scalar, this->y * scalar);
+}
+
+bool vec2f::operator==(const vec2& other) const
+{
+    return this->x == other.x && this->y == other.y;
+}
+void vec2f::operator+=(const vec2f& other)
+{
+    this->x += other.x;
+    this->y += other.y;
+}
+
+float vec2f::length() const
+{
+    return std::sqrt(x * x + y * y);
+}
+
+void vec2f::normalize()
+{
+    float len = length();
+    if (len > 0.0f)
+    {
+        x /= len;
+        y /= len;
+    }
+}
+
+vec2f vec2f::normalized() const
+{
+    float len = length();
+    if (len > 0.0f)
+    {
+        return vec2f(x / len, y / len);
+    }
+    return vec2f(0, 0);
+}

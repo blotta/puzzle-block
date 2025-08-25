@@ -1,23 +1,5 @@
 #include "entity.hpp"
 
-void Component::init()
-{
-}
-void Component::update(float dt)
-{
-}
-void Component::draw()
-{
-}
-void Component::onEnable()
-{
-}
-void Component::onDisable()
-{
-}
-void Component::onDestroy()
-{
-}
 
 Entity::Entity(size_t id) : mId(id)
 {

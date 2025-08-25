@@ -11,22 +11,10 @@ struct vec2
     {
     }
 
-    vec2 operator+(const vec2& other) const
-    {
-        return vec2(this->x + other.x, this->y + other.y);
-    }
-    vec2 operator-(const vec2& other) const
-    {
-        return vec2(this->x - other.x, this->y - other.y);
-    }
-    vec2 operator*(int scalar) const
-    {
-        return vec2(this->x * scalar, this->y * scalar);
-    }
-    bool operator==(const vec2& other) const
-    {
-        return this->x == other.x && this->y == other.y;
-    }
+    vec2 operator+(const vec2& other) const;
+    vec2 operator-(const vec2& other) const;
+    vec2 operator*(int scalar) const;
+    bool operator==(const vec2& other) const;
 };
 
 struct vec2f
@@ -45,31 +33,22 @@ struct vec2f
     {
     }
 
-    vec2f operator+(const vec2f& other) const
-    {
-        return vec2f(this->x + other.x, this->y + other.y);
-    }
-    vec2f operator-(const vec2f& other) const
-    {
-        return vec2f(this->x - other.x, this->y - other.y);
-    }
-    vec2f operator*(float scalar) const
-    {
-        return vec2f(this->x * scalar, this->y * scalar);
-    }
-
-    bool operator==(const vec2& other) const
-    {
-        return this->x == other.x && this->y == other.y;
-    }
+    vec2f operator+(const vec2f& other) const;
+    vec2f operator-(const vec2f& other) const;
+    vec2f operator*(float scalar) const;
+    bool operator==(const vec2& other) const;
+    void operator+=(const vec2f& other);
+    float length() const;
+    void normalize();
+    vec2f normalized() const;
 };
 
-struct Rect {
+struct Rect
+{
     int x;
     int y;
     int w;
     int h;
 };
-
 
 #endif

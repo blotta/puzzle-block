@@ -23,6 +23,22 @@ class Component
     virtual void onDestroy();
 };
 
+
+////////////////////////
+// Builtin Components //
+////////////////////////
+class CTransform : public Component
+{
+  public:
+    vec2f pos;
+    CTransform(const vec2f& p);
+};
+
+
+////////////
+// ENTITY //
+////////////
+
 class Entity
 {
     friend class EntityManager;
@@ -64,6 +80,10 @@ class Entity
     void destroy();
     bool isActive() const;
 };
+
+////////////////////
+// ENTITY MANAGER //
+////////////////////
 
 class EntityManager
 {

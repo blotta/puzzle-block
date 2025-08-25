@@ -39,6 +39,11 @@ int Game::TargetFPS()
     return Game::get().mTargetFPS;
 }
 
+int Game::FPS()
+{
+    return Game::get().mRunFps;
+}
+
 const GameSettings& Game::Settings()
 {
     return Game::get().settings;
@@ -431,6 +436,7 @@ void Game::tick()
     {
         mFPSTimer.reset();
         // Log::info("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
+        mRunFps = mFpsCounter;
         mFpsCounter = 0;
     }
     mFpsCounter += 1;

@@ -24,6 +24,7 @@ class Game
     static int ScreenWidth();
     static int ScreenHeight();
     static int TargetFPS();
+    static int FPS();
     static const GameSettings& Settings();
 
     static void Run();
@@ -95,6 +96,7 @@ class Game
     Timer mUpdateTimer;
     Timer mFPSTimer;
     int mFpsCounter = 0;
+    int mRunFps = 0;
 
     bool mRunning = false;
 
