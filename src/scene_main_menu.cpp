@@ -1,5 +1,6 @@
 #include "scene_main_menu.hpp"
 #include "input_manager.hpp"
+#include "component_block.hpp"
 
 static const int cellSize = 64;
 
@@ -13,31 +14,74 @@ static LevelData lvl = {.cols = 7,
                                  "0001000"
                                  "0003000"}};
 
-static bool choseOption = false;
 static bool showText = false;
+
+void MainMenuScene::preload()
+{
+    auto level = entities.add("level");
+    level->addComponent<CTransform>();
+    auto lc = level->addComponent<LevelComponent>(-1, lvl);
+
+    auto block = entities.add("block");
+    block->addComponent<CTransform>();
+    auto bc = block->addComponent<BlockComponent>();
+
+    bc->level = lc;
+    lc->block = bc;
+
+    Game::SetFontSize(20);
+}
 
 void MainMenuScene::init()
 {
     Log::info("Loading Menu scene\n");
     Game::PlayMusic("assets/sfx/music_ambient_01.ogg");
-    Game::SetFontSize(20);
 
-    level.init(lvl);
+    showText = false;
 
-    // block setup
-    auto startPos = level.mModel.getStartPos();
-    block.init(startPos, BlockState::UP);
-    block.level = &level.mModel;
+    auto lc = entities.get("level")[0]->getComponent<LevelComponent>();
+    auto bc = entities.get("block")[0]->getComponent<BlockComponent>();
+
+    lc->onLevelCleared = [bc]() {
+        showText = false;
+        vec2 optionPos(bc->currSim.x, bc->currSim.y);
+
+        // Start
+        if (optionPos == vec2{3, 0})
+        {
+            bc->startFly([]() { Game::LoadScene(Scenes::LEVEL); });
+        }
+
+        // Exit
+        if (optionPos == vec2{3, 6})
+        {
+            bc->startFly([]() { Game::Exit(); });
+        }
+
+        // Options
+        if (optionPos == vec2{0, 3})
+        {
+            bc->startFly([]() { Game::PushScene(Scenes::OPTIONS); });
+        }
+
+        // Level Select
+        if (optionPos == vec2{6, 3})
+        {
+            bc->startFly([]() { Game::PushScene(Scenes::LEVEL_SELECT); });
+        }
+    };
 
     vec2 camPos(cellSize/2, 0);
     Game::CameraSetPosition(camPos);
 
-    choseOption = false;
-    showText = false;
-
-    block.vState = BlockVisualState::INVISIBLE;
-    level.startRise([this]() { this->block.startFall([]() { showText = true; }); });
+    bc->vState = BlockVisualState::INVISIBLE;
+    lc->startRise([bc]() {
+        bc->startFall([](){
+            showText = true;
+        });
+    });
 }
+
 
 void MainMenuScene::dispose()
 {
@@ -46,65 +90,38 @@ void MainMenuScene::dispose()
 
 void MainMenuScene::onPopReturn()
 {
-    auto startPos = level.mModel.getStartPos();
-    block.init(startPos, BlockState::UP);
-    block.startFall();
-    choseOption = false;
+    showText = false;
+
+    auto lc = entities.get("level")[0]->getComponent<LevelComponent>();
+    auto bc = entities.get("block")[0]->getComponent<BlockComponent>();
+
+    auto startPos = lc->mModel.getStartPos();
+    bc->currSim.x = startPos.x;
+    bc->currSim.y = startPos.y;
+
+    bc->vState = BlockVisualState::INVISIBLE;
+    bc->startFall([](){
+        showText = true;
+    });
 }
 
 void MainMenuScene::update(float dt)
 {
-    block.update(dt);
-    level.update(dt);
-
     if (Input::JustPressed(SDL_SCANCODE_F11))
     {
         Game::LoadScene(Scenes::UNITY);
         return;
     }
 
-    if (!choseOption)
+    if (Input::JustPressed(SDL_SCANCODE_F10))
     {
-        // Start
-        if (block.currSim.x == 3 && block.currSim.y == 0)
-        {
-            choseOption = true;
-            block.startFly([]() { Game::LoadScene(Scenes::ISOLEVEL); });
-        }
-
-        // Exit
-        if (block.currSim.x == 3 && block.currSim.y == 6)
-        {
-            choseOption = true;
-            block.startFly([]() { Game::Exit(); });
-        }
-
-        // Options
-        if (block.currSim.x == 0 && block.currSim.y == 3)
-        {
-            choseOption = true;
-            block.startFly([]() { Game::PushScene(Scenes::OPTIONS); });
-        }
-
-        // Level Select
-        if (block.currSim.x == 6 && block.currSim.y == 3)
-        {
-            choseOption = true;
-            block.startFly([]() { Game::PushScene(Scenes::LEVEL_SELECT); });
-        }
+        Game::LoadScene(Scenes::LEVEL);
+        return;
     }
 }
 
 void MainMenuScene::draw()
 {
-    Sprite titleSprite = Game::GetSprite(SPR_TITLE);
-    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
-
-    Game::BeginCamera();
-
-    level.draw();
-    block.draw();
-
     int txtX, txtY;
 
     if (showText)
@@ -121,6 +138,10 @@ void MainMenuScene::draw()
         IsoToWorld(6, 3, cellSize, cellSize / 2, &txtX, &txtY);
         Game::Text(txtX + cellSize * 1.5, txtY + cellSize / 2, "LEVEL SELECT");
     }
+}
 
-    Game::EndCamera();
+void MainMenuScene::drawGUI()
+{
+    Sprite titleSprite = Game::GetSprite(SPR_TITLE);
+    Game::DrawSprite(Game::ScreenWidth() / 2 - titleSprite.tw / 2, 50, SPR_TITLE);
 }

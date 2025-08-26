@@ -8,6 +8,7 @@
 #include "scene_levelselect.hpp"
 #include "scene_pause.hpp"
 #include "scene_unity.hpp"
+#include "scene_level.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -31,6 +32,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<PauseScene>();
     case Scenes::UNITY:
         return std::make_unique<UnityScene>();
+    case Scenes::LEVEL:
+        return std::make_unique<LevelScene>();
     default:
         return nullptr;
     }
@@ -42,7 +45,9 @@ void SceneManager::init(Scenes startScene)
     sceneStack.push_back(createScene(startScene));
     if (sceneStack.back())
     {
-        sceneStack.back()->entities.init();
+        Log::debug("Scene manager init -- preload");
+        sceneStack.back()->preload();
+        sceneStack.back()->entities.removeAndAddEntities(true);
         sceneStack.back()->init();
     }
 }
@@ -68,12 +73,12 @@ void SceneManager::update(float dt)
 {
     performSceneChange();
 
-    if (transitionScene)
-    {
-        transitionScene->entities.update(dt);
-        transitionScene->update(dt);
-        return;
-    }
+    // if (transitionScene)
+    // {
+    //     transitionScene->entities.update(dt);
+    //     // transitionScene->update(dt);
+    //     return;
+    // }
 
     if (!sceneStack.empty())
     {
@@ -86,15 +91,20 @@ void SceneManager::draw()
 {
     for (auto& scene : sceneStack)
     {
+        Game::BeginCamera();
         scene->entities.draw();
         scene->draw();
+        Game::EndCamera();
+
+        scene->entities.drawGUI();
+        scene->drawGUI();
     }
 
-    if (transitionScene)
-    {
-        transitionScene->entities.draw();
-        transitionScene->draw();
-    }
+    // if (transitionScene)
+    // {
+    //     transitionScene->entities.draw();
+    //     // transitionScene->draw();
+    // }
 }
 
 void SceneManager::dispose()
@@ -105,10 +115,10 @@ void SceneManager::dispose()
         sceneStack.pop_back();
     }
 
-    if (transitionScene) {
-        transitionScene->dispose();
-        transitionScene.reset();
-    }
+    // if (transitionScene) {
+    //     transitionScene->dispose();
+    //     transitionScene.reset();
+    // }
 
     nextSceneId = Scenes::NONE;
 }
@@ -127,6 +137,9 @@ void SceneManager::performSceneChange() {
             sceneStack.pop_back();
         }
         sceneStack.push_back(createScene(nextSceneId));
+        Log::debug("Scene manager performSceneChange -- preload");
+        sceneStack.back()->preload();
+        sceneStack.back()->entities.removeAndAddEntities(true);
         sceneStack.back()->init();
 
         // Optional: Set transition overlay

@@ -89,7 +89,7 @@ void PauseScene::update(float dt)
     }
 }
 
-void PauseScene::draw()
+void PauseScene::drawGUI()
 {
     SDL_Rect panel = {
         Game::ScreenWidth() / 2 - mPanelWidth / 2,

@@ -429,13 +429,15 @@ void Game::tick()
     // draw
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
+
+    // draws world and gui
     mSceneManager.draw();
+
     SDL_RenderPresent(mRenderer);
 
     if (mFPSTimer.isDone())
     {
         mFPSTimer.reset();
-        // Log::info("FPS: %d ; Avg DT: %.5f\n", mFpsCounter, mAvgDt);
         mRunFps = mFpsCounter;
         mFpsCounter = 0;
     }

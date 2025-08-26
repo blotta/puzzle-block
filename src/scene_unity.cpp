@@ -82,9 +82,9 @@ void UnityScene::init()
     entities.get().reserve(200000);
 
     auto e = entities.add();
-    auto transformComponent = e->addComponent<CTransform>(vec2f{20, 20});
-    auto shapeComponent = e->addComponent<CShape>();
-    auto moveComponent = e->addComponent<CMovement>();
+    e->addComponent<CTransform>(vec2f{20, 20});
+    e->addComponent<CShape>();
+    e->addComponent<CMovement>();
 }
 
 void UnityScene::update(float dt)
@@ -94,9 +94,9 @@ void UnityScene::update(float dt)
         vec2 mousePos;
         Input::MousePosition(&mousePos.x, &mousePos.y);
         auto e = entities.add("up");
-        auto transformComponent = e->addComponent<CTransform>(vec2f{mousePos.x, mousePos.y});
-        auto shapeComponent = e->addComponent<CShape>();
-        auto moveComponent = e->addComponent<CMovement>();
+        e->addComponent<CTransform>(vec2f{mousePos.x, mousePos.y});
+        e->addComponent<CShape>();
+        e->addComponent<CMovement>();
     }
     if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
     {
@@ -105,9 +105,9 @@ void UnityScene::update(float dt)
             vec2 mousePos;
             Input::MousePosition(&mousePos.x, &mousePos.y);
             auto e = entities.add("up");
-            auto transformComponent = e->addComponent<CTransform>(vec2f{mousePos.x, mousePos.y});
-            auto shapeComponent = e->addComponent<CShape>();
-            auto moveComponent = e->addComponent<CMovement>();
+            e->addComponent<CTransform>(vec2f{mousePos.x, mousePos.y});
+            e->addComponent<CShape>();
+            e->addComponent<CMovement>();
         }
     }
     if (Input::JustPressed(SDL_SCANCODE_X))

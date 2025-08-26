@@ -75,7 +75,7 @@ void OptionsScene::update(float dt)
     }
 }
 
-void OptionsScene::draw()
+void OptionsScene::drawGUI()
 {
     SDL_Rect panel = {
         Game::ScreenWidth() / 2 - mPanelWidth / 2,

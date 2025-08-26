@@ -1,5 +1,5 @@
-#ifndef SCENE_LEVEL_HPP
-#define SCENE_LEVEL_HPP
+#ifndef SCENE_LEVELEDIT_HPP
+#define SCENE_LEVELEDIT_HPP
 
 #include "block.hpp"
 #include "level.hpp"

@@ -5,12 +5,25 @@
 Scene::~Scene()
 {
 }
+void Scene::preload()
+{
+    Log::info("scene preload");
+}
 void Scene::init()
 {
-    Log::info("Loading scene\n");
+    Log::info("scene init");
+}
+void Scene::update(float dt)
+{
+}
+void Scene::draw()
+{
+}
+void Scene::drawGUI()
+{
 }
 void Scene::dispose()
 {
-    Log::info("unloading scene\n");
+    Log::info("scene dispose");
 }
 void Scene::onPopReturn() {};

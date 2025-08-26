@@ -1,21 +1,24 @@
-#ifndef SCENE_MAIN_MENU_HPP
-#define SCENE_MAIN_MENU_HPP
+#ifndef SCENE_LEVEL_HPP
+#define SCENE_LEVEL_HPP
 
 #include "block.hpp"
-#include "camera.hpp"
 #include "level.hpp"
 #include "scene.hpp"
+#include "component_level.hpp"
 
-class MainMenuScene : public Scene
+class LevelScene : public Scene
 {
   public:
     void preload() override;
     void init() override;
     void update(float dt) override;
-    void draw() override;
     void drawGUI() override;
     void dispose() override;
-    void onPopReturn() override;
+
+  private:
+    LevelComponent* lc;
+    BlockComponent* bc;
+    std::string title;
 };
 
 #endif

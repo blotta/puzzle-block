@@ -103,7 +103,7 @@ void SplashScene::update(float dt)
     fadeAnim.update(dt);
 }
 
-void SplashScene::draw()
+void SplashScene::drawGUI()
 {
     float camShake = animShake.evaluate(splashAnim.getProgress());
     vec2 cam{(int)(camShake * randomNeg1to1()), (int)(camShake * randomNeg1to1())};

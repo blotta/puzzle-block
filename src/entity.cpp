@@ -1,6 +1,5 @@
 #include "entity.hpp"
 
-
 Entity::Entity(size_t id) : mId(id)
 {
 }
@@ -41,6 +40,14 @@ void Entity::draw()
         return;
     for (auto& c : components)
         c->draw();
+}
+
+void Entity::drawGUI()
+{
+    if (!active)
+        return;
+    for (auto& c : components)
+        c->drawGUI();
 }
 
 void Entity::setActive(bool state)
@@ -101,7 +108,7 @@ void EntityManager::init()
         e->init();
 }
 
-void EntityManager::update(float dt)
+void EntityManager::removeAndAddEntities(bool initEntities)
 {
     // remove deleted entities
     mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(),
@@ -121,9 +128,15 @@ void EntityManager::update(float dt)
     {
         mEntities.push_back(e);
         mEntityMap[e->tag()].push_back(e);
-        e->init();
+        if (initEntities)
+            e->init();
     }
     mEntitiesToAdd.clear();
+}
+
+void EntityManager::update(float dt)
+{
+    this->removeAndAddEntities(true);
 
     // update entities
     for (auto& e : mEntities)
@@ -136,4 +149,11 @@ void EntityManager::draw()
     for (auto& e : mEntities)
         if (e->isActive())
             e->draw();
+}
+
+void EntityManager::drawGUI()
+{
+    for (auto& e : mEntities)
+        if (e->isActive())
+            e->drawGUI();
 }

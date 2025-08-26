@@ -9,6 +9,9 @@ void Component::update(float dt)
 void Component::draw()
 {
 }
+void Component::drawGUI()
+{
+}
 void Component::onEnable()
 {
 }
@@ -22,6 +25,9 @@ void Component::onDestroy()
 /////////////////////////
 // Transform Component //
 /////////////////////////
+CTransform::CTransform()
+{
+}
 CTransform::CTransform(const vec2f& p) : pos(p)
 {
 }

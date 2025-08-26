@@ -16,7 +16,7 @@ class OptionsScene : public Scene
   public:
     void init() override;
     void update(float dt) override;
-    void draw() override;
+    void drawGUI() override;
     void dispose() override;
 
   private:

@@ -15,6 +15,7 @@ enum class Scenes
     LEVEL_SELECT,
     PAUSE,
     UNITY,
+    LEVEL,
 };
 
 class Scene
@@ -24,9 +25,11 @@ class Scene
     EntityManager entities;
   public:
     virtual ~Scene() = 0;
-    virtual void init();
-    virtual void update(float dt) = 0;
-    virtual void draw() = 0;
+    virtual void preload(); // entity setup
+    virtual void init(); // after entity init
+    virtual void update(float dt);
+    virtual void draw(); // camera offset enabled
+    virtual void drawGUI(); // camera offset disabled
     virtual void dispose();
     virtual void onPopReturn();
 };

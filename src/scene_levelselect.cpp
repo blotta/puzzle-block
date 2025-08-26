@@ -117,7 +117,7 @@ void LevelSelectScene::update(float dt)
     }
 }
 
-void LevelSelectScene::draw()
+void LevelSelectScene::drawGUI()
 {
     int w = Game::ScreenWidth() * 0.7;
     int h = Game::ScreenHeight() * 0.7;

@@ -21,7 +21,7 @@ class SceneManager
     void performSceneChange();
 
     std::vector<std::unique_ptr<Scene>> sceneStack;
-    std::unique_ptr<Scene> transitionScene;
+    // std::unique_ptr<Scene> transitionScene;
 
     Scenes nextSceneId = Scenes::NONE;
     bool doPush = false;

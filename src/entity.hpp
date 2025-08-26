@@ -18,6 +18,7 @@ class Component
     virtual void init();
     virtual void update(float dt);
     virtual void draw();
+    virtual void drawGUI();
     virtual void onEnable();
     virtual void onDisable();
     virtual void onDestroy();
@@ -31,6 +32,7 @@ class CTransform : public Component
 {
   public:
     vec2f pos;
+    CTransform();
     CTransform(const vec2f& p);
 };
 
@@ -52,13 +54,13 @@ class Entity
     Entity(size_t id);
     Entity(size_t id, const std::string& tag);
 
-    template <typename T, typename... Args> T& addComponent(Args&&... args)
+    template <typename T, typename... Args> T* addComponent(Args&&... args)
     {
         auto comp = std::make_unique<T>(std::forward<Args>(args)...);
         comp->owner = this;
-        T& ref = *comp;
         components.push_back(std::move(comp));
-        return ref;
+        T* ptr = static_cast<T*>(components.back().get());
+        return ptr;
     }
 
     template <typename T> T* getComponent()
@@ -76,6 +78,7 @@ class Entity
     void init();
     void update(float dt);
     void draw();
+    void drawGUI();
     void setActive(bool state);
     void destroy();
     bool isActive() const;
@@ -98,8 +101,10 @@ class EntityManager
     std::vector<std::shared_ptr<Entity>>& get();
     std::vector<std::shared_ptr<Entity>>& get(const std::string& tag);
     void init();
+    void removeAndAddEntities(bool initEntities);
     void update(float dt);
     void draw();
+    void drawGUI();
 };
 
 #endif
