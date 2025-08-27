@@ -57,6 +57,8 @@ class Game
 
     static void DrawPoint(int x, int y, SDL_Color color);
     static void DrawLine(int x1, int y1, int x2, int y2, SDL_Color color);
+    static void DrawRect(int x, int y, int w, int h, SDL_Color color);
+    static void DrawFilledRect(int x, int y, int w, int h, SDL_Color color);
 
     static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);
@@ -70,6 +72,7 @@ class Game
     static void SetFontSize(int ptsize);
     static void Text(int x, int y, const std::string& text, const FontDrawOptions& = {});
     static int TextWidth(const std::string& text, const FontDrawOptions& = {});
+    static vec2 TextSize(const std::string& text, const FontDrawOptions& = {});
 
 
   private:

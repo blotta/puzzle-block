@@ -192,6 +192,38 @@ void Game::DrawLine(int x1, int y1, int x2, int y2, SDL_Color color)
     SDL_RenderDrawLine(g.mRenderer, x1, y1, x2, y2);
 }
 
+void Game::DrawRect(int x, int y, int w, int h, SDL_Color color)
+{
+    auto& g = Game::get();
+    SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
+
+    SDL_Rect r = {
+        x, y, w, h
+    };
+
+    vec2f camDiff = g.getCameraDiff(false);
+    r.x += camDiff.x;
+    r.y += camDiff.y;
+
+    SDL_RenderDrawRect(g.mRenderer, &r);
+}
+
+void Game::DrawFilledRect(int x, int y, int w, int h, SDL_Color color)
+{
+    auto& g = Game::get();
+    SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
+
+    SDL_Rect r = {
+        x, y, w, h
+    };
+
+    vec2f camDiff = g.getCameraDiff(false);
+    r.x += camDiff.x;
+    r.y += camDiff.y;
+
+    SDL_RenderFillRect(g.mRenderer, &r);
+}
+
 const Sprite& Game::GetSprite(SpriteID id)
 {
     return Game::get().mData.Sprites[id];
@@ -275,6 +307,13 @@ int Game::TextWidth(const std::string& text, const FontDrawOptions& options)
 {
     auto& g = Game::get();
     return g.mActiveFont->measureText(text, options).width;
+}
+
+vec2 Game::TextSize(const std::string& text, const FontDrawOptions& options)
+{
+    auto& g = Game::get();
+    auto ts = g.mActiveFont->measureText(text, options);
+    return vec2(ts.width, ts.height);
 }
 
 void Game::Run()

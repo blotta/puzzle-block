@@ -66,3 +66,23 @@ vec2f vec2f::normalized() const
     }
     return vec2f(0, 0);
 }
+
+vec2 Rect::center() const
+{
+    return vec2(x + w/2, y + h/2);
+}
+
+bool Rect::contains(int px, int py) const
+{
+    return px >= x && px < x + w && py >= y && py < y + h;
+}
+
+int Rect::right() const
+{
+    return x + w;
+}
+
+int Rect::bottom() const
+{
+    return y + h;
+}

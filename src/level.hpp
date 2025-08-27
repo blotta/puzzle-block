@@ -42,15 +42,15 @@ struct Level
     void set(int x, int y, CellType value);
     void load(const LevelData& ld);
     void toLevelData(LevelData* ld);
-    vec2 getStartPos();
+    vec2 getStartPos() const;
     bool isValidPos(const vec2& pos) const;
-    bool isValid();
+    bool isValid() const;
     bool hasFloorAt(const vec2& pos) const;
     bool hasSwitchAt(const vec2& pos, LevelSwitch** sw);
     bool checkAndTriggerSwitches(const vec2& pos1, const vec2& pos2);
     bool isCleared(const vec2& pos1, const vec2& pos2);
     void toggleThinFloor(const vec2& pos);
-    CellType cellAt(const vec2& pos);
+    CellType cellAt(const vec2& pos) const;
     Rect rect() const;
 
     void toggleFloor(const vec2& pos);

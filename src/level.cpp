@@ -107,7 +107,7 @@ void Level::toLevelData(LevelData* ld)
     ld->switchCount = this->switchCount;
 }
 
-vec2 Level::getStartPos()
+vec2 Level::getStartPos() const
 {
     for (int j = 0; j < this->rows; j++)
     {
@@ -126,7 +126,7 @@ bool Level::isValidPos(const vec2& pos) const
     return pos.x >= 0 && pos.x < cols && pos.y >= 0 && pos.y < rows;
 }
 
-bool Level::isValid()
+bool Level::isValid() const
 {
     int startCount = 0;
     int finishCount = 0;
@@ -220,7 +220,7 @@ void Level::toggleThinFloor(const vec2& pos)
     }
 }
 
-CellType Level::cellAt(const vec2& pos)
+CellType Level::cellAt(const vec2& pos) const
 {
     return grid[pos.y][pos.x];
 }

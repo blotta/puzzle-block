@@ -49,6 +49,11 @@ struct Rect
     int y;
     int w;
     int h;
+
+    vec2 center() const;
+    bool contains(int x, int y) const;
+    int right() const;
+    int bottom() const;
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include "scene_pause.hpp"
 #include "scene_unity.hpp"
 #include "scene_level.hpp"
+#include "scene_leveleditnew.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -34,6 +35,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<UnityScene>();
     case Scenes::LEVEL:
         return std::make_unique<LevelScene>();
+    case Scenes::LEVEL_EDIT_NEW:
+        return std::make_unique<LevelEditNewScene>();
     default:
         return nullptr;
     }

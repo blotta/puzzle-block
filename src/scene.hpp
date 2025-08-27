@@ -16,6 +16,7 @@ enum class Scenes
     PAUSE,
     UNITY,
     LEVEL,
+    LEVEL_EDIT_NEW,
 };
 
 class Scene

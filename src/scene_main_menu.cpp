@@ -109,7 +109,7 @@ void MainMenuScene::update(float dt)
 {
     if (Input::JustPressed(SDL_SCANCODE_F11))
     {
-        Game::LoadScene(Scenes::UNITY);
+        Game::LoadScene(Scenes::LEVEL_EDIT_NEW);
         return;
     }
 
