@@ -210,7 +210,8 @@ void Panel::draw()
             headerBgColor = {60, 60, 90, 255};
         Game::DrawFilledRect(header.x, header.y, header.w, header.h, headerBgColor);
         Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor); // header border
-        Game::Text(header.x + 10, header.y + 5, title);
+        Game::SetFontSize(12);
+        Game::Text(header.x + 10, header.y + header.h / 2, title, {.valign = VerticalAlign::MIDDLE});
     }
 
     // body
@@ -242,7 +243,6 @@ bool Panel::handleEvent(const GuiEvent& e)
     switch (e.type)
     {
     case GuiEventType::MouseDown:
-        Log::debug("mouse down");
         if (isOnDragHandle(e.mousePos))
         {
             dragOffset = e.mousePos - vec2(rect.x, rect.y);
@@ -254,7 +254,6 @@ bool Panel::handleEvent(const GuiEvent& e)
         break;
 
     case GuiEventType::MouseMove:
-        Log::debug("mouse move; Dragging: %d", dragging);
         if ((e.mousePos - dragStartPos).length() > 5.0f && !dragging && validDragStart && isOnDragHandle(dragStartPos))
         {
             dragging = true;
@@ -280,7 +279,6 @@ bool Panel::handleEvent(const GuiEvent& e)
     case GuiEventType::MouseUp:
         if (dragging)
         {
-            Log::debug("mouse up & drag");
             onDragEnd(e.mousePos);
             dragging = false;
             validDragStart = false;

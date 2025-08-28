@@ -292,6 +292,12 @@ void Game::SetFontSize(int ptsize)
     g.mActiveFont = Asset::GetFont(g.mActiveFont->fontPath, ptsize);
 }
 
+int Game::GetFontSize()
+{
+    auto& g = Game::get();
+    return g.mActiveFont->fontSize;
+}
+
 void Game::Text(int x, int y, const std::string& text, const FontDrawOptions& options)
 {
     auto& g = Game::get();

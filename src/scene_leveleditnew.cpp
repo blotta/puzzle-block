@@ -206,6 +206,8 @@ void LevelEditNewScene::draw()
 
 void LevelEditNewScene::drawGUI()
 {
+    Game::SetFontSize(16);
+
     if (mMode == LevelEditMode::NORMAL)
     {
         Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() - 20, "-- NORMAL --",

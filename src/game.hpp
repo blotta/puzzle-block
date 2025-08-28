@@ -70,6 +70,7 @@ class Game
 
     static void SetFont(const std::string& path, int ptsize);
     static void SetFontSize(int ptsize);
+    static int GetFontSize();
     static void Text(int x, int y, const std::string& text, const FontDrawOptions& = {});
     static int TextWidth(const std::string& text, const FontDrawOptions& = {});
     static vec2 TextSize(const std::string& text, const FontDrawOptions& = {});

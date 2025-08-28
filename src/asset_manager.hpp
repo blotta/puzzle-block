@@ -12,6 +12,44 @@
 #include <unordered_map>
 #include <vector>
 
+using PathId = uint32_t;
+
+class PathTable
+{
+    std::unordered_map<std::string, PathId> mPathToId;
+    std::vector<std::string> mIdToPath;
+
+  public:
+    PathId intern(const std::string& path)
+    {
+        auto it = mPathToId.find(path);
+        if (it != mPathToId.end())
+            return it->second;
+
+        PathId id = (PathId)mIdToPath.size();
+        mIdToPath.push_back(path);
+        mPathToId.emplace(mIdToPath.back(), id);
+        return id;
+    }
+
+    const std::string& resolve(PathId id) const
+    {
+        return mIdToPath[id];
+    }
+};
+
+
+struct FontKey {
+    PathId pathId;
+    int ptsize;
+
+    bool operator==(const FontKey& other) const noexcept;
+};
+
+struct FontKeyHash {
+    std::size_t operator()(const FontKey& k) const noexcept;
+};
+
 class Asset
 {
   public:
@@ -36,11 +74,12 @@ class Asset
     Asset();
     static Asset& get();
 
+    PathTable pathTable;
     SDL_Renderer* pRenderer = nullptr;
     std::unordered_map<std::string, Texture> mTextures;
     std::unordered_map<std::string, Mix_Chunk*> mSounds;
     std::unordered_map<std::string, Mix_Music*> mMusics;
-    std::unordered_map<std::string, Font> mFonts;
+    std::unordered_map<FontKey, Font, FontKeyHash> mFonts;
 };
 
 #endif

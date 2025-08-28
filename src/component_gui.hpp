@@ -79,7 +79,7 @@ class Panel : public Container
   public:
     Panel(int x, int y, int w, int h);
     std::string title;
-    int headerHeight = 30;
+    int headerHeight = 20;
     bool hoveringDragHandle = false;
     bool dragging = false;
     vec2 dragOffset;

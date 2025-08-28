@@ -2,6 +2,7 @@
 #include "log.hpp"
 #include <SDL2/SDL_image.h>
 #include <format>
+#include <string_view>
 
 Asset& Asset::get()
 {
@@ -99,11 +100,23 @@ void Asset::LoadMusic(const std::string& path)
 // FONT //
 //////////
 
+bool FontKey::operator==(const FontKey& other) const noexcept
+{
+    return pathId == other.pathId && ptsize == other.ptsize;
+}
+
+std::size_t FontKeyHash::operator()(const FontKey& k) const noexcept
+{
+    return (std::hash<PathId>{}(k.pathId) ^ (std::hash<int>{}(k.ptsize) << 1));
+}
+
 const Font* Asset::GetFont(const std::string& path, int ptsize)
 {
-    std::string key = std::format("{}:{}", path, ptsize);
-
     auto& mgr = Asset::get();
+    PathId pid = mgr.pathTable.intern(path);
+    FontKey key{pid, ptsize};
+    // std::string key = std::format("{}:{}", path, ptsize);
+
     auto it = mgr.mFonts.find(key);
     if (it == mgr.mFonts.end())
         LoadFont(path, ptsize);
@@ -113,9 +126,11 @@ const Font* Asset::GetFont(const std::string& path, int ptsize)
 
 void Asset::LoadFont(const std::string& path, int ptsize)
 {
-    std::string key = std::format("{}:{}", path, ptsize);
-
     auto& mgr = Asset::get();
+    PathId pid = mgr.pathTable.intern(path);
+    FontKey key{pid, ptsize};
+    // std::string key = std::format("{}:{}", path, ptsize);
+
     Font font(mgr.pRenderer, path, ptsize);
     mgr.mFonts.emplace(key, std::move(font));
 }
