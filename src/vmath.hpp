@@ -15,6 +15,7 @@ struct vec2
     vec2 operator-(const vec2& other) const;
     vec2 operator*(int scalar) const;
     bool operator==(const vec2& other) const;
+    int length() const;
 };
 
 struct vec2f
@@ -51,7 +52,9 @@ struct Rect
     int h;
 
     vec2 center() const;
+    vec2 pos() const;
     bool contains(int x, int y) const;
+    bool contains(const vec2& pos) const;
     int right() const;
     int bottom() const;
 };

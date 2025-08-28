@@ -8,6 +8,7 @@ struct MouseState
     int x;
     int y;
     uint8_t button[6] = {};
+    bool moved = false;
 };
 
 class Input
@@ -24,6 +25,7 @@ class Input
     static bool MouseJustPressed(uint8_t btn);
     static bool MouseJustReleased(uint8_t btn);
     static void MousePosition(int* x, int* y);
+    static bool MouseMoved();
 
   private:
     Input();

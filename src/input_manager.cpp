@@ -41,6 +41,8 @@ void Input::Update(float dt)
 
     SDL_GetMouseState(&mgr.mMouse.x, &mgr.mMouse.y);
 
+    mgr.mMouse.moved = false;
+
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -65,6 +67,10 @@ void Input::Update(float dt)
         break;
         case SDL_MOUSEBUTTONUP: {
             mgr.mMouse.button[event.button.button] = 3;
+        }
+        break;
+        case SDL_MOUSEMOTION: {
+            mgr.mMouse.moved = true;
         }
         break;
         }
@@ -116,4 +122,9 @@ void Input::MousePosition(int* x, int* y)
 {
     *x = Input::get().mMouse.x;
     *y = Input::get().mMouse.y;
+}
+
+bool Input::MouseMoved()
+{
+    return Input::get().mMouse.moved;
 }

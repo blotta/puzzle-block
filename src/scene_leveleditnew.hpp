@@ -5,6 +5,7 @@
 #include "level.hpp"
 #include "scene.hpp"
 #include "component_leveledit.hpp"
+#include "component_gui.hpp"
 
 enum class LevelEditMode
 {
@@ -23,6 +24,7 @@ class LevelEditNewScene : public Scene
 
   private:
     LevelEditComponent* lc;
+    GuiComponent* gui;
     LevelSwitch tmpSwitch = {};
     vec2 mouseIsoPos;
     LevelEditMode mMode = LevelEditMode::NORMAL;

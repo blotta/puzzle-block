@@ -19,6 +19,11 @@ bool vec2::operator==(const vec2& other) const
     return this->x == other.x && this->y == other.y;
 }
 
+int vec2::length() const
+{
+    return std::sqrt(x * x + y * y);
+}
+
 vec2f vec2f::operator+(const vec2f& other) const
 {
     return vec2f(this->x + other.x, this->y + other.y);
@@ -72,9 +77,19 @@ vec2 Rect::center() const
     return vec2(x + w/2, y + h/2);
 }
 
+vec2 Rect::pos() const
+{
+    return vec2(x, y);
+}
+
 bool Rect::contains(int px, int py) const
 {
     return px >= x && px < x + w && py >= y && py < y + h;
+}
+
+bool Rect::contains(const vec2& pos) const
+{
+    return this->contains(pos.x, pos.y);
 }
 
 int Rect::right() const

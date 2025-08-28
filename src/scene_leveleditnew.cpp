@@ -20,23 +20,30 @@ void LevelEditNewScene::preload()
 
     auto guiEntity = entities.add("gui");
     guiEntity->addComponent<CTransform>();
-    auto gui = guiEntity->addComponent<GuiComponent>();
+    this->gui = guiEntity->addComponent<GuiComponent>();
 
-    auto saveCurrentButton = gui->addChild<Button>(10, 10, 0, 0, "SAVE");
-    saveCurrentButton->onClick = [this]() {
+    // auto btnOther = gui->addChild<Button>(230, 230, 100, 100, "OTHER");
+    // btnOther->onClickEvent = [this]() { Log::debug("Other Button"); };
+
+    auto panel = gui->addChild<Panel>(500, 200, 400, 300);
+    panel->title = "Panel 1";
+
+    auto btnSaveCurrent = panel->addChild<Button>(0, 0, "SAVE");
+    btnSaveCurrent->onClickEvent = [this]() {
         Log::debug("Saving current level");
         this->lc->save(false, true);
     };
 
-    auto saveNewButton =
-        gui->addChild<Button>(saveCurrentButton->rect.right(), 10, 0, saveCurrentButton->rect.h, "SAVE NEW");
-    saveNewButton->onClick = [this]() {
+    auto btnSaveNew = panel->addChild<Button>(btnSaveCurrent->rectInit.right(), btnSaveCurrent->rectInit.y, 0,
+                                             btnSaveCurrent->rect.h, "SAVE NEW");
+    btnSaveNew->onClickEvent = [this]() {
         Log::debug("Saving new level");
         this->lc->save(true, true);
     };
 
-    auto resetButton = gui->addChild<Button>(saveNewButton->rect.right(), 10, 0, saveNewButton->rect.h, "RESET");
-    resetButton->onClick = [this]() {
+    auto btnReset = panel->addChild<Button>(btnSaveNew->rectInit.right(), btnSaveNew->rectInit.y, 0,
+                                           btnSaveNew->rectInit.h, "RESET");
+    btnReset->onClickEvent = [this]() {
         Log::debug("Resetting level");
         this->lc->load(this->lc->lvlIdx, Game::GetLevelData(this->lc->lvlIdx));
 
@@ -72,8 +79,16 @@ void LevelEditNewScene::update(float dt)
     auto mouseWorldPos = Game::ScreenToWorld(vec2{mx, my});
     WorldToIso((int)mouseWorldPos.x, (int)mouseWorldPos.y, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
 
-    if (mMode == LevelEditMode::NORMAL)
+    if (gui->isInteracting())
     {
+
+    }
+    else if (mMode == LevelEditMode::NORMAL)
+    {
+        if (Input::JustPressed(SDL_SCANCODE_SPACE))
+        {
+            Log::debug("");
+        }
         if (Input::JustPressed(SDL_SCANCODE_E))
         {
             // exit level edit
@@ -145,7 +160,11 @@ void LevelEditNewScene::update(float dt)
 
 void LevelEditNewScene::draw()
 {
-    if (mMode == LevelEditMode::NORMAL)
+    if (gui->isInteracting())
+    {
+
+    }
+    else if (mMode == LevelEditMode::NORMAL)
     {
         if (lc->isValidPos(mouseIsoPos))
         {

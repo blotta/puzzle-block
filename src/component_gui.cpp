@@ -1,14 +1,291 @@
 #include "component_gui.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 
-Widget::Widget(int x, int y, int w, int h) // : x(x), y(y), width(w), height(h)
+Widget::Widget(int x, int y, int w, int h) : rectInit(x, y, w, h), rect(x, y, w, h)
 {
-    this->rect = {x, y, w, h};
 }
 
 void Widget::update(float dt)
 {
+}
+
+bool Widget::isOnDragHandle(const vec2& pos) const
+{
+    return rect.contains(pos);
+}
+
+bool Widget::handleEvent(const GuiEvent& e)
+{
+    if (!visible)
+        return false;
+
+    switch (e.type)
+    {
+    case GuiEventType::MouseMove: {
+        if (rect.contains(e.mousePos))
+        {
+            if (!hovered)
+            {
+                hovered = true;
+                onMouseEnter();
+            }
+            return true; // hovered
+        }
+        else if (hovered)
+        {
+            hovered = false;
+            onMouseExit();
+        }
+        break;
+    }
+
+    case GuiEventType::MouseDown: {
+        if (rect.contains(e.mousePos))
+        {
+            onMouseDown(e.mousePos);
+            return true;
+        }
+        break;
+    }
+
+    case GuiEventType::MouseUp: {
+        if (rect.contains(e.mousePos))
+        {
+            onMouseUp(e.mousePos);
+            onClick();
+            return true;
+        }
+        else
+        {
+            onMouseUp(e.mousePos);
+        }
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
+void Widget::onMouseEnter()
+{
+}
+
+void Widget::onMouseExit()
+{
+}
+
+void Widget::onMouseDown(vec2 pos)
+{
+}
+
+void Widget::onMouseUp(vec2 pos)
+{
+}
+
+void Widget::onClick()
+{
+}
+
+void Widget::onDragStart(vec2 pos)
+{
+}
+
+void Widget::onDrag(vec2 pos)
+{
+}
+
+void Widget::onDragEnd(vec2 pos)
+{
+}
+
+///////////////
+// CONTAINER //
+///////////////
+
+Container::Container(int x, int y) : Widget(x, y, 0, 0)
+{
+    isContainer = true;
+}
+
+Container::Container(int x, int y, int w, int h) : Widget(x, y, w, h)
+{
+    isContainer = true;
+}
+
+void Container::draw()
+{
+    for (auto& c : children)
+    {
+        if (c->visible)
+        {
+            c->draw();
+        }
+    }
+}
+
+bool Container::handleEvent(const GuiEvent& e)
+{
+    // Pass event to children first (iterate backwards so top-most handles first)
+    for (auto it = children.rbegin(); it != children.rend(); ++it)
+    {
+        Widget* w = it->get();
+        if (!w->visible)
+            continue;
+
+        // If it's a container, recurse
+        if (w->isContainer)
+        {
+            if (static_cast<Container*>(w)->handleEvent(e))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (w->handleEvent(e))
+            {
+                return true;
+            }
+        }
+    }
+
+    // If no child consumed it, let this container handle it itself
+    return Widget::handleEvent(e);
+}
+
+void Container::update(float dt)
+{
+    for (auto& c : children)
+    {
+        if (c->visible)
+            c->update(dt);
+    }
+}
+
+void Container::arrange()
+{
+    for (auto& c : children)
+    {
+        c->rect.x = c->rectInit.x + this->rect.x;
+        c->rect.y = c->rectInit.y + this->rect.y;
+        Log::debug("%d, %d", c->rect.x, c->rect.y);
+    }
+}
+
+///////////
+// PANEL //
+///////////
+
+Panel::Panel(int x, int y, int w, int h) : Container(x, y, w, h)
+{
+    draggable = true;
+}
+
+void Panel::update(float dt)
+{
+    Container::update(dt);
+}
+
+void Panel::draw()
+{
+    SDL_Color headerBgColor = {40, 40, 80, 255};
+    SDL_Color headerBorderColor = {100, 100, 100, 255};
+    SDL_Color bodyBgColor = {40, 40, 40, 255};
+    SDL_Color bodyBorderColor = {80, 80, 80, 255};
+
+    // header
+    if (headerHeight > 0)
+    {
+        SDL_Rect header = {rect.x, rect.y, rect.w, headerHeight};
+        if (hoveringDragHandle)
+            headerBgColor = {60, 60, 90, 255};
+        Game::DrawFilledRect(header.x, header.y, header.w, header.h, headerBgColor);
+        Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor); // header border
+        Game::Text(header.x + 10, header.y + 5, title);
+    }
+
+    // body
+    SDL_Rect body = {rect.x, rect.y + headerHeight, rect.w, rect.h - headerHeight};
+    Game::DrawFilledRect(body.x, body.y, body.w, body.h, bodyBgColor);
+    Game::DrawRect(body.x, body.y, body.w, body.h, bodyBorderColor);
+
+    // draw children
+    Container::draw();
+}
+
+void Panel::arrange()
+{
+    for (auto& c : children)
+    {
+        c->rect.x = c->rectInit.x + this->rect.x;
+        c->rect.y = c->rectInit.y + this->rect.y + headerHeight;
+    }
+}
+
+bool Panel::isOnDragHandle(const vec2& pos) const
+{
+    Rect header = {rect.x, rect.y, rect.w, headerHeight};
+    return header.contains(pos);
+}
+
+bool Panel::handleEvent(const GuiEvent& e)
+{
+    switch (e.type)
+    {
+    case GuiEventType::MouseDown:
+        Log::debug("mouse down");
+        if (isOnDragHandle(e.mousePos))
+        {
+            dragOffset = e.mousePos - vec2(rect.x, rect.y);
+            dragStartPos = e.mousePos;
+            validDragStart = true;
+            dragging = false;
+            return true;
+        }
+        break;
+
+    case GuiEventType::MouseMove:
+        Log::debug("mouse move; Dragging: %d", dragging);
+        if ((e.mousePos - dragStartPos).length() > 5.0f && !dragging && validDragStart && isOnDragHandle(dragStartPos))
+        {
+            dragging = true;
+            onDragStart(dragStartPos);
+        }
+        if (dragging)
+        {
+            rect.x = e.mousePos.x - dragOffset.x;
+            rect.y = e.mousePos.y - dragOffset.y;
+            if (rect.x < 0) rect.x = 0;
+            if (rect.y < 0) rect.y = 0;
+            arrange();
+            onDrag(e.mousePos);
+            return true;
+        }
+        hoveringDragHandle = isOnDragHandle(e.mousePos);
+        break;
+
+    case GuiEventType::MouseUp:
+        if (dragging)
+        {
+            Log::debug("mouse up & drag");
+            onDragEnd(e.mousePos);
+            dragging = false;
+            validDragStart = false;
+            return true;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // fallback: normal child handling
+    return Container::handleEvent(e);
 }
 
 ///////////
@@ -19,9 +296,14 @@ Label::Label(int x, int y, int w, int h, std::string t) : Widget(x, y, w, h), te
 {
     auto size = Game::TextSize(text);
     if (w <= 0)
-        rect.w = size.x + 10;
+        rectInit.w = size.x + 10;
     if (h <= 0)
-        rect.h = size.y + 5;
+        rectInit.h = size.y + 5;
+    rect = rectInit;
+}
+
+Label::Label(int x, int y, std::string t) : Label(x, y, 0, 0, t)
+{
 }
 
 void Label::draw()
@@ -38,21 +320,26 @@ Button::Button(int x, int y, int w, int h, std::string cap) : Widget(x, y, w, h)
 {
     auto size = Game::TextSize(caption);
     if (w <= 0)
-        rect.w = size.x + 10;
+        rectInit.w = size.x + 10;
     if (h <= 0)
-        rect.h = size.y + 5;
+        rectInit.h = size.y + 5;
+    rect = rectInit;
+}
+
+Button::Button(int x, int y, std::string cap) : Button(x, y, 0, 0, cap)
+{
 }
 
 void Button::draw()
 {
     SDL_Color color = {180, 180, 180, 255};
     SDL_Color bgColor = {30, 30, 30, 255};
-    if (state == WidgetState::HOVER)
+    if (hovering)
     {
         color = {255, 255, 255, 255};
         bgColor = {50, 50, 50, 255};
     }
-    else if (state == WidgetState::CLICK)
+    if (clicking)
     {
         color = {100, 100, 100, 255};
         bgColor = {20, 20, 20, 255};
@@ -65,9 +352,69 @@ void Button::draw()
                {.color = color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
 }
 
+void Button::onMouseEnter()
+{
+    hovering = true;
+}
+
+void Button::onMouseExit()
+{
+    hovering = false;
+}
+
+void Button::onMouseDown(vec2 pos)
+{
+    clicking = true;
+}
+
+void Button::onMouseUp(vec2 pos)
+{
+    clicking = false;
+}
+
+void Button::onClick()
+{
+    if (onClickEvent)
+        onClickEvent();
+}
+
 ///////////////////
 // GUI COMPONENT //
 ///////////////////
+
+void GuiComponent::dispatchEvent(const GuiEvent& e)
+{
+    hoveredWidget = nullptr;
+
+    for (auto it = children.rbegin(); it != children.rend(); ++it)
+    {
+        Widget* w = it->get();
+        if (!w->visible)
+            continue;
+
+        if (w->isContainer)
+        {
+            if (static_cast<Container*>(w)->handleEvent(e))
+            {
+                hoveredWidget = w;
+                break;
+            }
+        }
+        else
+        {
+            if (w->handleEvent(e))
+            {
+                hoveredWidget = w;
+                break;
+            }
+        }
+    }
+
+    if (e.type == GuiEventType::MouseDown)
+        activeWidget = hoveredWidget;
+    else if (e.type == GuiEventType::MouseUp)
+        activeWidget = nullptr;
+}
 
 void GuiComponent::init()
 {
@@ -76,50 +423,23 @@ void GuiComponent::init()
 
 void GuiComponent::update(float dt)
 {
-    vec2 mousePos;
-    Input::MousePosition(&mousePos.x, &mousePos.y);
+    GuiEvent e;
+    Input::MousePosition(&e.mousePos.x, &e.mousePos.y);
 
-    bool hoverEventHandled = false;
-    bool clickEventHandled = true;
-
-    if (Input::MousePressed(SDL_BUTTON_LEFT))
-        clickEventHandled = false;
-
-    // Iterate backwards so elements on top handle the event first
-    for (auto it = children.rbegin(); it != children.rend(); ++it)
+    if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
     {
-        Widget* w = (*it).get();
-
-        if (false == hoverEventHandled && w->rect.contains(mousePos.x, mousePos.y))
-        {
-            // hovering widget
-            hoverEventHandled = true;
-            if (w->state == WidgetState::NORMAL)
-            {
-                w->state = WidgetState::HOVER;
-                if (w->onHover)
-                    w->onHover();
-            }
-
-            if (false == clickEventHandled)
-            {
-                // clicked on hovered widget
-                clickEventHandled = true;
-                if (w->state == WidgetState::HOVER && w->onClick)
-                {
-                    w->onClick();
-                }
-                w->state = WidgetState::CLICK;
-            }
-            else if (w->state == WidgetState::CLICK)
-            {
-                w->state = WidgetState::HOVER;
-            }
-        }
-        else
-        {
-            w->state = WidgetState::NORMAL;
-        }
+        e.type = GuiEventType::MouseDown;
+        dispatchEvent(e);
+    }
+    else if (Input::MouseJustReleased(SDL_BUTTON_LEFT))
+    {
+        e.type = GuiEventType::MouseUp;
+        dispatchEvent(e);
+    }
+    else if (Input::MouseMoved())
+    {
+        e.type = GuiEventType::MouseMove;
+        dispatchEvent(e);
     }
 
     for (auto& c : children)
@@ -136,4 +456,9 @@ void GuiComponent::drawGUI()
         if (c->visible)
             c->draw();
     }
+}
+
+bool GuiComponent::isInteracting() const
+{
+    return hoveredWidget != nullptr || activeWidget != nullptr;
 }
