@@ -57,6 +57,7 @@ struct Rect
     bool contains(const vec2& pos) const;
     int right() const;
     int bottom() const;
+    void clampInside(const Rect& parent);
 };
 
 #endif

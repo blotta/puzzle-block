@@ -74,7 +74,7 @@ vec2f vec2f::normalized() const
 
 vec2 Rect::center() const
 {
-    return vec2(x + w/2, y + h/2);
+    return vec2(x + w / 2, y + h / 2);
 }
 
 vec2 Rect::pos() const
@@ -100,4 +100,16 @@ int Rect::right() const
 int Rect::bottom() const
 {
     return y + h;
+}
+
+void Rect::clampInside(const Rect& parent)
+{
+    if (right() > parent.right())
+        x = parent.right() - w;
+    if (x < parent.x)
+        x = parent.x;
+    if (bottom() > parent.bottom())
+        y = parent.bottom() - h;
+    if (y < parent.y)
+        y = parent.y;
 }

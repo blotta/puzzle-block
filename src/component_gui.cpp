@@ -107,6 +107,10 @@ void Widget::onDragEnd(vec2 pos)
 // CONTAINER //
 ///////////////
 
+Container::Container() : Widget(0, 0, 0, 0)
+{
+}
+
 Container::Container(int x, int y) : Widget(x, y, 0, 0)
 {
     isContainer = true;
@@ -258,10 +262,14 @@ bool Panel::handleEvent(const GuiEvent& e)
         }
         if (dragging)
         {
-            rect.x = e.mousePos.x - dragOffset.x;
-            rect.y = e.mousePos.y - dragOffset.y;
-            if (rect.x < 0) rect.x = 0;
-            if (rect.y < 0) rect.y = 0;
+            Rect header = rect;
+            header.h = headerHeight;
+            header.x = e.mousePos.x - dragOffset.x;
+            header.y = e.mousePos.y - dragOffset.y;
+            header.clampInside(parent->rect);
+            rect.x = header.x;
+            rect.y = header.y;
+
             arrange();
             onDrag(e.mousePos);
             return true;
@@ -378,6 +386,46 @@ void Button::onClick()
         onClickEvent();
 }
 
+///////////////////////////////
+// ROOT CONTAINER (internal) //
+///////////////////////////////
+
+_RootContainer::_RootContainer() : Container(0, 0, Game::ScreenWidth(), Game::ScreenHeight())
+{
+}
+
+bool _RootContainer::handleEvent(const GuiEvent& e)
+{
+    // Only the children pass from the Container widget
+    for (auto it = children.rbegin(); it != children.rend(); ++it)
+    {
+        Widget* w = it->get();
+        if (!w->visible)
+            continue;
+
+        // If it's a container, recurse
+        if (w->isContainer)
+        {
+            if (static_cast<Container*>(w)->handleEvent(e))
+            {
+                this->hoveredWidget = w;
+                return true;
+            }
+        }
+        else
+        {
+            if (w->handleEvent(e))
+            {
+                this->hoveredWidget = w;
+                return true;
+            }
+        }
+    }
+
+    // Unlike the "Container" widget, _RootContainer itself can't handle events
+    return false;
+}
+
 ///////////////////
 // GUI COMPONENT //
 ///////////////////
@@ -386,29 +434,8 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
 {
     hoveredWidget = nullptr;
 
-    for (auto it = children.rbegin(); it != children.rend(); ++it)
-    {
-        Widget* w = it->get();
-        if (!w->visible)
-            continue;
-
-        if (w->isContainer)
-        {
-            if (static_cast<Container*>(w)->handleEvent(e))
-            {
-                hoveredWidget = w;
-                break;
-            }
-        }
-        else
-        {
-            if (w->handleEvent(e))
-            {
-                hoveredWidget = w;
-                break;
-            }
-        }
-    }
+    if (root.handleEvent(e))
+        hoveredWidget = root.hoveredWidget;
 
     if (e.type == GuiEventType::MouseDown)
         activeWidget = hoveredWidget;
@@ -418,7 +445,7 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
 
 void GuiComponent::init()
 {
-    transform = owner->getComponent<CTransform>();
+    this->transform = owner->getComponent<CTransform>();
 }
 
 void GuiComponent::update(float dt)
@@ -442,20 +469,12 @@ void GuiComponent::update(float dt)
         dispatchEvent(e);
     }
 
-    for (auto& c : children)
-    {
-        if (c->visible)
-            c->update(dt);
-    }
+    root.update(dt);
 }
 
 void GuiComponent::drawGUI()
 {
-    for (auto& c : children)
-    {
-        if (c->visible)
-            c->draw();
-    }
+    root.draw();
 }
 
 bool GuiComponent::isInteracting() const

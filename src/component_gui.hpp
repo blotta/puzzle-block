@@ -56,6 +56,7 @@ class Container : public Widget
 {
   public:
     std::vector<std::unique_ptr<Widget>> children;
+    Container();
     Container(int x, int y);
     Container(int x, int y, int w, int h);
 
@@ -118,17 +119,23 @@ class Button : public Widget
     std::function<void()> onClickEvent = nullptr;
 };
 
+class _RootContainer : public Container
+{
+  public:
+    _RootContainer();
+    bool handleEvent(const GuiEvent& e) override;
+    Widget* hoveredWidget;
+};
+
 class GuiComponent : public Component
 {
   public:
-    std::vector<std::unique_ptr<Widget>> children;
     CTransform* transform;
     Widget* hoveredWidget = nullptr;
     Widget* activeWidget = nullptr;
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
-        children.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-        T* ptr = static_cast<T*>(children.back().get());
+        T* ptr = root.addChild<T>(std::forward<Args>(args)...);
         return ptr;
     }
 
@@ -138,6 +145,7 @@ class GuiComponent : public Component
     bool isInteracting() const;
 
   private:
+    _RootContainer root;
     void dispatchEvent(const GuiEvent& e);
 };
 
