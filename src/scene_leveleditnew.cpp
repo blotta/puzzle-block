@@ -55,7 +55,7 @@ void LevelEditNewScene::preload()
         bc->nextSim = bc->currSim;
     };
 
-    auto panel2 = gui->addChild<Panel>(300, 100, 200, 100);
+    auto panel2 = gui->addChild<Panel>(400, 150, 200, 100);
     panel2->title = "Panel 2";
     static bool darkTheme = true;
     panel2->addChild<Button>("Toggle Theme")->onClickEvent = [&]() {

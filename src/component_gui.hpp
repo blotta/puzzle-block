@@ -34,6 +34,7 @@ class Widget
     Rect rect;     // used to draw, bounds check and handled by containers
     bool visible = true;
     bool draggable = false;
+    bool focusable = false;
     Container* parent = nullptr;
     bool isContainer = false;
     bool hovered = false;
@@ -56,6 +57,7 @@ class Widget
     virtual void onDragEnd(vec2 pos);
     const Widget* getRoot() const;
     const GuiTheme& theme() const;
+    const Widget* getClosestFocusable() const;
 };
 
 class Container : public Widget
@@ -79,6 +81,7 @@ class Container : public Widget
     void draw() override;
     bool handleEvent(const GuiEvent& e) override;
     virtual void arrange();
+    void bringToFront(Widget* widget);
 };
 
 class Panel : public Container

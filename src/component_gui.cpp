@@ -118,6 +118,21 @@ const GuiTheme& Widget::theme() const
     return *this->system->theme();
 }
 
+const Widget* Widget::getClosestFocusable() const
+{
+    const Widget* p = this;
+
+    while (p != nullptr)
+    {
+        if (p->focusable)
+            return p;
+
+        p = p->parent;
+    }
+
+    return nullptr;
+}
+
 ///////////////
 // CONTAINER //
 ///////////////
@@ -195,6 +210,18 @@ void Container::arrange()
     }
 }
 
+void Container::bringToFront(Widget* widget)
+{
+    auto it = std::find_if(children.begin(), children.end(), [widget](auto& w) { return w.get() == widget; });
+
+    if (it != children.end())
+    {
+        auto ptr = std::move(*it);
+        children.erase(it);
+        children.push_back(std::move(ptr));
+    }
+}
+
 ///////////
 // PANEL //
 ///////////
@@ -202,6 +229,7 @@ void Container::arrange()
 Panel::Panel(int x, int y, int w, int h) : Container(x, y, w, h)
 {
     draggable = true;
+    focusable = true;
 }
 
 void Panel::update(float dt)
@@ -291,11 +319,11 @@ bool Panel::handleEvent(const GuiEvent& e)
         break;
 
     case GuiEventType::MouseUp:
+        validDragStart = false;
         if (dragging)
         {
             onDragEnd(e.mousePos);
             dragging = false;
-            validDragStart = false;
             return true;
         }
         break;
@@ -455,6 +483,16 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
         activeWidget = hoveredWidget;
     else if (e.type == GuiEventType::MouseUp)
         activeWidget = nullptr;
+
+    if (activeWidget != nullptr)
+    {
+        auto focused = activeWidget->getClosestFocusable();
+        if (focused)
+        {
+            focused->parent->bringToFront((Widget*)focused);
+        }
+    }
+
 }
 
 GuiComponent::GuiComponent() : root(this)
