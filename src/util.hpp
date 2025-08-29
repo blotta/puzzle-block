@@ -3,12 +3,15 @@
 
 #include <random>
 #include <initializer_list>
+#include <SDL2/SDL.h>
 
 void IsoToWorld(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldToIso(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int* x, int* y);
 
 int cycleIndex(int currIdx, int length, int amount);
+
+int clamp(int val, int min, int max);
 
 float random01();
 float randomNeg1to1();
@@ -23,5 +26,24 @@ E randomFrom(std::initializer_list<E> values) {
     std::advance(it, dist(gen));
     return *it;
 }
+
+typedef uint8_t u8;
+
+struct Color
+{
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+
+    Color();
+    Color(const SDL_Color& sdlColor);
+    Color(int r, int g, int b, int a);
+    Color(int rgb);
+    Color(int rgb, int a);
+
+    Color operator+(int val) const;
+    SDL_Color toSDL() const;
+};
 
 #endif

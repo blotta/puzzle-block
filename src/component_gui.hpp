@@ -2,6 +2,7 @@
 #define COMPONENT_GUI_HPP
 
 #include "entity.hpp"
+#include "util.hpp"
 #include "vmath.hpp"
 #include <functional>
 
@@ -23,6 +24,8 @@ struct GuiEvent
 };
 
 class Container;
+class GuiComponent;
+class GuiTheme;
 
 class Widget
 {
@@ -34,6 +37,7 @@ class Widget
     Container* parent = nullptr;
     bool isContainer = false;
     bool hovered = false;
+    const GuiComponent* system;
 
     Widget(int x, int y, int w, int h);
     virtual ~Widget() = default;
@@ -50,6 +54,8 @@ class Widget
     virtual void onDragStart(vec2 pos);
     virtual void onDrag(vec2 pos);
     virtual void onDragEnd(vec2 pos);
+    const Widget* getRoot() const;
+    const GuiTheme& theme() const;
 };
 
 class Container : public Widget
@@ -65,6 +71,7 @@ class Container : public Widget
         children.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         T* ptr = static_cast<T*>(children.back().get());
         ptr->parent = this;
+        ptr->system = getRoot()->system;
         this->arrange();
         return ptr;
     }
@@ -110,6 +117,7 @@ class Button : public Widget
     std::string caption;
     Button(int x, int y, int w, int h, std::string cap);
     Button(int x, int y, std::string cap);
+    Button(std::string cap);
     void draw() override;
     void onMouseEnter() override;
     void onMouseExit() override;
@@ -122,17 +130,71 @@ class Button : public Widget
 class _RootContainer : public Container
 {
   public:
-    _RootContainer();
+    _RootContainer(const GuiComponent* system);
     bool handleEvent(const GuiEvent& e) override;
     Widget* hoveredWidget;
+};
+
+struct GuiColorSet
+{
+    Color normal;
+    Color hover;
+    Color active;
+    Color disabled;
+};
+
+struct GuiTheme
+{
+    int fontSize = 14;
+
+    // Global colors
+    Color textColor = {220};
+    Color textDisabledColor = {128};
+
+    Color windowBg = {30};
+    Color childBg = {35};
+    Color popupBg = {40};
+
+    Color borderColor = {80};
+    Color shadowColor = {0, 120};
+
+    // Widgets
+    GuiColorSet button = {{60}, {90}, {110}, {40}};
+    GuiColorSet checkbox = {{50}, {70}, {90}, {35}};
+    GuiColorSet panelHeader = {{45}, {65}, {90}, {25}};
+    GuiColorSet inputField = {{55}, {70}, {95}, {30}};
+    GuiColorSet slider = {{70}, {100}, {130}, {50}};
+    GuiColorSet scrollbar = {{60}, {80}, {100}, {40, 180}};
+
+    // Layout
+    int windowPaddingX = 8;
+    int windowPaddingY = 8;
+    int framePaddingX = 6;
+    int framePaddingY = 4;
+    int itemSpacingX = 8;
+    int itemSpacingy = 6;
+
+    // Borders / Rounding
+    float borderThickness = 1.0f;
+    float cornerRadius = 4.0f;
+
+    // transparency
+    float windowAlpha = 1.0f;
+
+    GuiTheme() = default;
+
+    static const GuiTheme& Dark();
+    static const GuiTheme& Light();
 };
 
 class GuiComponent : public Component
 {
   public:
+    GuiComponent();
     CTransform* transform;
     Widget* hoveredWidget = nullptr;
     Widget* activeWidget = nullptr;
+    const GuiTheme* mTheme;
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
         T* ptr = root.addChild<T>(std::forward<Args>(args)...);
@@ -143,6 +205,9 @@ class GuiComponent : public Component
     void update(float dt) override;
     void drawGUI() override;
     bool isInteracting() const;
+
+    void setTheme(const GuiTheme& theme);
+    const GuiTheme* theme() const;
 
   private:
     _RootContainer root;

@@ -103,6 +103,21 @@ void Widget::onDragEnd(vec2 pos)
 {
 }
 
+const Widget* Widget::getRoot() const
+{
+    const Widget* p = this;
+    while (p->parent != nullptr)
+    {
+        p = p->parent;
+    }
+    return p;
+}
+
+const GuiTheme& Widget::theme() const
+{
+    return *this->system->theme();
+}
+
 ///////////////
 // CONTAINER //
 ///////////////
@@ -177,7 +192,6 @@ void Container::arrange()
     {
         c->rect.x = c->rectInit.x + this->rect.x;
         c->rect.y = c->rectInit.y + this->rect.y;
-        Log::debug("%d, %d", c->rect.x, c->rect.y);
     }
 }
 
@@ -197,27 +211,27 @@ void Panel::update(float dt)
 
 void Panel::draw()
 {
-    SDL_Color headerBgColor = {40, 40, 80, 255};
-    SDL_Color headerBorderColor = {100, 100, 100, 255};
-    SDL_Color bodyBgColor = {40, 40, 40, 255};
-    SDL_Color bodyBorderColor = {80, 80, 80, 255};
+    Color headerBgColor = theme().panelHeader.normal;
+    Color headerBorderColor = theme().borderColor;
+    Color bodyBgColor = theme().windowBg;
+    Color bodyBorderColor = theme().borderColor;
 
     // header
     if (headerHeight > 0)
     {
         SDL_Rect header = {rect.x, rect.y, rect.w, headerHeight};
         if (hoveringDragHandle)
-            headerBgColor = {60, 60, 90, 255};
-        Game::DrawFilledRect(header.x, header.y, header.w, header.h, headerBgColor);
-        Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor); // header border
-        Game::SetFontSize(12);
-        Game::Text(header.x + 10, header.y + header.h / 2, title, {.valign = VerticalAlign::MIDDLE});
+            headerBgColor = theme().panelHeader.hover.toSDL(); // {60, 60, 90, 255};
+        Game::DrawFilledRect(header.x, header.y, header.w, header.h, headerBgColor.toSDL());
+        Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor.toSDL()); // header border
+        Game::Text(header.x + 10, header.y + header.h / 2, title,
+                   {.color = theme().textColor.toSDL(), .valign = VerticalAlign::MIDDLE});
     }
 
     // body
     SDL_Rect body = {rect.x, rect.y + headerHeight, rect.w, rect.h - headerHeight};
-    Game::DrawFilledRect(body.x, body.y, body.w, body.h, bodyBgColor);
-    Game::DrawRect(body.x, body.y, body.w, body.h, bodyBorderColor);
+    Game::DrawFilledRect(body.x, body.y, body.w, body.h, bodyBgColor.toSDL());
+    Game::DrawRect(body.x, body.y, body.w, body.h, bodyBorderColor.toSDL());
 
     // draw children
     Container::draw();
@@ -314,8 +328,7 @@ Label::Label(int x, int y, std::string t) : Label(x, y, 0, 0, t)
 
 void Label::draw()
 {
-    SDL_Color color = {180, 180, 180, 255};
-    Game::Text(rect.x, rect.y, text, {.color = color});
+    Game::Text(rect.x, rect.y, text, {.color = theme().textColor.toSDL()});
 }
 
 ////////////
@@ -336,26 +349,28 @@ Button::Button(int x, int y, std::string cap) : Button(x, y, 0, 0, cap)
 {
 }
 
+Button::Button(std::string cap) : Button(0, 0, 0, 0, cap)
+{
+}
+
 void Button::draw()
 {
-    SDL_Color color = {180, 180, 180, 255};
-    SDL_Color bgColor = {30, 30, 30, 255};
+    Color color = theme().textColor;
+    Color bgColor = theme().button.normal;
     if (hovering)
     {
-        color = {255, 255, 255, 255};
-        bgColor = {50, 50, 50, 255};
+        bgColor = theme().button.hover;
     }
     if (clicking)
     {
-        color = {100, 100, 100, 255};
-        bgColor = {20, 20, 20, 255};
+        bgColor = theme().button.active;
     }
 
-    Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, bgColor);
-    Game::DrawRect(rect.x, rect.y, rect.w, rect.h, color);
+    Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, bgColor.toSDL());
+    Game::DrawRect(rect.x, rect.y, rect.w, rect.h, color.toSDL());
     auto center = rect.center();
     Game::Text(center.x, center.y, caption,
-               {.color = color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
+               {.color = color.toSDL(), .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
 }
 
 void Button::onMouseEnter()
@@ -388,8 +403,9 @@ void Button::onClick()
 // ROOT CONTAINER (internal) //
 ///////////////////////////////
 
-_RootContainer::_RootContainer() : Container(0, 0, Game::ScreenWidth(), Game::ScreenHeight())
+_RootContainer::_RootContainer(const GuiComponent* system) : Container(0, 0, Game::ScreenWidth(), Game::ScreenHeight())
 {
+    this->system = system;
 }
 
 bool _RootContainer::handleEvent(const GuiEvent& e)
@@ -441,6 +457,11 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
         activeWidget = nullptr;
 }
 
+GuiComponent::GuiComponent() : root(this)
+{
+    this->mTheme = &GuiTheme::Dark();
+}
+
 void GuiComponent::init()
 {
     this->transform = owner->getComponent<CTransform>();
@@ -472,10 +493,45 @@ void GuiComponent::update(float dt)
 
 void GuiComponent::drawGUI()
 {
+    Game::SetFontSize(theme()->fontSize);
     root.draw();
 }
 
 bool GuiComponent::isInteracting() const
 {
     return hoveredWidget != nullptr || activeWidget != nullptr;
+}
+
+void GuiComponent::setTheme(const GuiTheme& theme)
+{
+    mTheme = &theme;
+}
+
+const GuiTheme* GuiComponent::theme() const
+{
+    return mTheme;
+}
+
+const GuiTheme& GuiTheme::Dark()
+{
+    static GuiTheme theme;
+    return theme;
+}
+
+const GuiTheme& GuiTheme::Light()
+{
+    static GuiTheme t;
+    t.textColor = {30};
+    t.textDisabledColor = {150};
+    t.windowBg = {240};
+    t.childBg = {250};
+    t.popupBg = {255};
+    t.borderColor = {200};
+    t.shadowColor = {0, 60};
+
+    t.button = {{220}, {200}, {180}, {240}};
+
+    t.panelHeader = {{210}, {190}, {170}, {240}};
+
+    return t;
 }

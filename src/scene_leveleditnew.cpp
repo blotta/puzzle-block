@@ -35,14 +35,14 @@ void LevelEditNewScene::preload()
     };
 
     auto btnSaveNew = panel->addChild<Button>(btnSaveCurrent->rectInit.right(), btnSaveCurrent->rectInit.y, 0,
-                                             btnSaveCurrent->rect.h, "SAVE NEW");
+                                              btnSaveCurrent->rect.h, "SAVE NEW");
     btnSaveNew->onClickEvent = [this]() {
         Log::debug("Saving new level");
         this->lc->save(true, true);
     };
 
     auto btnReset = panel->addChild<Button>(btnSaveNew->rectInit.right(), btnSaveNew->rectInit.y, 0,
-                                           btnSaveNew->rectInit.h, "RESET");
+                                            btnSaveNew->rectInit.h, "RESET");
     btnReset->onClickEvent = [this]() {
         Log::debug("Resetting level");
         this->lc->load(this->lc->lvlIdx, Game::GetLevelData(this->lc->lvlIdx));
@@ -53,6 +53,22 @@ void LevelEditNewScene::preload()
         bc->currSim.y = startPos.y;
         bc->currSim.state = BlockState::UP;
         bc->nextSim = bc->currSim;
+    };
+
+    auto panel2 = gui->addChild<Panel>(300, 100, 200, 100);
+    panel2->title = "Panel 2";
+    static bool darkTheme = true;
+    panel2->addChild<Button>("Toggle Theme")->onClickEvent = [&]() {
+        if (darkTheme)
+        {
+            gui->setTheme(GuiTheme::Light());
+            darkTheme = false;
+        }
+        else
+        {
+            gui->setTheme(GuiTheme::Dark());
+            darkTheme = true;
+        }
     };
 
     Game::SetFontSize(16);
@@ -81,7 +97,6 @@ void LevelEditNewScene::update(float dt)
 
     if (gui->isInteracting())
     {
-
     }
     else if (mMode == LevelEditMode::NORMAL)
     {
@@ -162,7 +177,6 @@ void LevelEditNewScene::draw()
 {
     if (gui->isInteracting())
     {
-
     }
     else if (mMode == LevelEditMode::NORMAL)
     {

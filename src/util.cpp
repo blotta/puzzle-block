@@ -241,6 +241,15 @@ int cycleIndex(int currIdx, int length, int amount)
     return next;
 }
 
+int clamp(int val, int min, int max)
+{
+    if (val < min)
+        val = min;
+    if (val > max)
+        val = max;
+    return val;
+}
+
 float random01()
 {
     static std::mt19937 rng(std::random_device{}());
@@ -251,4 +260,38 @@ float random01()
 float randomNeg1to1()
 {
     return random01() * 2.0f - 1.0f;
+}
+
+Color::Color()
+{
+}
+
+Color::Color(const SDL_Color& sdlColor) : r(sdlColor.r), g(sdlColor.g), b(sdlColor.b), a(sdlColor.a)
+{
+}
+
+Color::Color(int r, int g, int b, int a) : r(r), g(g), b(b), a(a)
+{
+}
+
+Color::Color(int rgb) : r(rgb), g(rgb), b(rgb), a(255)
+{
+}
+
+Color::Color(int rgb, int a) : r(rgb), g(rgb), b(rgb), a(a)
+{
+}
+
+Color Color::operator+(int val) const
+{
+    int nr = clamp((int)r + val, 0, 255);
+    int ng = clamp((int)g + val, 0, 255);
+    int nb = clamp((int)b + val, 0, 255);
+    int na = clamp((int)a + val, 0, 255);
+    return Color{nr, ng, nb, na};
+}
+
+SDL_Color Color::toSDL() const
+{
+    return SDL_Color{r, g, b, a};
 }
