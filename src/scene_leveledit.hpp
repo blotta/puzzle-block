@@ -1,33 +1,33 @@
-#ifndef SCENE_LEVELEDIT_HPP
-#define SCENE_LEVELEDIT_HPP
+#ifndef SCENE_LEVELEDITNEW_HPP
+#define SCENE_LEVELEDITNEW_HPP
 
 #include "block.hpp"
 #include "level.hpp"
 #include "scene.hpp"
+#include "component_leveledit.hpp"
+#include "component_gui.hpp"
+
+enum class LevelEditMode
+{
+  NORMAL,
+  SWITCH
+};
 
 class LevelEditScene : public Scene
 {
   public:
+    void preload() override;
     void init() override;
     void update(float dt) override;
     void draw() override;
-    void dispose() override;
+    void drawGUI() override;
 
   private:
-    void reset();
-    void resize();
-    void save(bool newLevel, bool saveToFile);
-    void levelChanged();
-
-    LevelVisual level;
-    int lvlIdx;
-    BlockVisual block;
-    vec2 moveDir;
-    vec2 mousePos;
-    vec2 mouseIsoPos;
-    bool saved = true;
-    bool switchEditing = false;
+    LevelEditComponent* lc;
+    GuiComponent* gui;
     LevelSwitch tmpSwitch = {};
+    vec2 mouseIsoPos;
+    LevelEditMode mMode = LevelEditMode::NORMAL;
 };
 
 #endif

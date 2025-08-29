@@ -51,7 +51,7 @@ void LevelComponent::update(float dt)
 {
     if (mVisualState == LevelVisualState::IDLE)
     {
-        if (block->moved)
+        if (block && block->moved)
         {
             auto positions = block->currSim.getPositions();
             mModel.checkAndTriggerSwitches(positions.first, positions.second);

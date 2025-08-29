@@ -9,14 +9,12 @@ enum class Scenes
     BOOT,
     SPLASH,
     MAIN_MENU,
+    LEVEL,
     LEVEL_EDIT,
-    ISOLEVEL,
     OPTIONS,
     LEVEL_SELECT,
     PAUSE,
     UNITY,
-    LEVEL,
-    LEVEL_EDIT_NEW,
 };
 
 class Scene

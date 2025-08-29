@@ -1,260 +1,193 @@
 #include "scene_leveledit.hpp"
+#include "component_gui.hpp"
+#include "component_leveledit.hpp"
 #include "input_manager.hpp"
-#include "log.hpp"
 #include <format>
-#include <math.h>
-#include <string>
 
 static const int cellSize = 64;
 
-const char* NORMAL_MODE_INSTRUCTIONS = "[NORMAL] LMB: toggle floor    RMB: toggle start/finish    F2: save file   "
-                                       " F3: save new file    F4: random    F5: reset level    NUMPAD Arrows: "
-                                       "resize grid";
-const char* SWITCH_MODE_INSTRUCTIONS = "[SWITCH] LMB: set switch destination    RMB: toggle floor ";
+void LevelEditScene::preload()
+{
+    auto lvlIdx = std::stoi(Game::GetOrCreateState("curr_level", "0"));
 
-Rect levelRect;
+    auto levelEntity = entities.add("level");
+    levelEntity->addComponent<CTransform>();
+    this->lc = levelEntity->addComponent<LevelEditComponent>(lvlIdx, Game::GetLevelData(lvlIdx));
+
+    auto blockEntity = entities.add("block");
+    blockEntity->addComponent<CTransform>();
+    blockEntity->addComponent<BlockComponent>();
+
+    auto guiEntity = entities.add("gui");
+    guiEntity->addComponent<CTransform>();
+    this->gui = guiEntity->addComponent<GuiComponent>();
+
+    // auto btnOther = gui->addChild<Button>(230, 230, 100, 100, "OTHER");
+    // btnOther->onClickEvent = [this]() { Log::debug("Other Button"); };
+
+    auto panel = gui->addChild<Window>(500, 200, 0, 0);
+    panel->title = "Window 1";
+
+    auto btnSaveCurrent = panel->addChild<Button>(0, 0, "SAVE");
+    btnSaveCurrent->onClickEvent = [this]() {
+        Log::debug("Saving current level");
+        this->lc->save(false, true);
+    };
+
+    auto btnSaveNew = panel->addChild<Button>(btnSaveCurrent->rectInit.right(), btnSaveCurrent->rectInit.y, 0,
+                                              btnSaveCurrent->rect.h, "SAVE NEW");
+    btnSaveNew->onClickEvent = [this]() {
+        Log::debug("Saving new level");
+        this->lc->save(true, true);
+    };
+
+    auto btnReset = panel->addChild<Button>(btnSaveNew->rectInit.right(), btnSaveNew->rectInit.y, 0,
+                                            btnSaveNew->rectInit.h, "RESET");
+    btnReset->onClickEvent = [this]() {
+        Log::debug("Resetting level");
+        this->lc->load(this->lc->lvlIdx, Game::GetLevelData(this->lc->lvlIdx));
+
+        auto bc = this->entities.get("block")[0]->getComponent<BlockComponent>();
+        auto startPos = lc->getStartPos();
+        bc->currSim.x = startPos.x;
+        bc->currSim.y = startPos.y;
+        bc->currSim.state = BlockState::UP;
+        bc->nextSim = bc->currSim;
+    };
+
+    auto panel2 = gui->addChild<Window>(400, 150, 200, 100);
+    panel2->title = "Window 2";
+    static bool darkTheme = true;
+    panel2->addChild<Button>("Toggle Theme")->onClickEvent = [&]() {
+        if (darkTheme)
+        {
+            gui->setTheme(GuiTheme::Light());
+            darkTheme = false;
+        }
+        else
+        {
+            gui->setTheme(GuiTheme::Dark());
+            darkTheme = true;
+        }
+    };
+
+    Game::SetFontSize(16);
+}
 
 void LevelEditScene::init()
 {
-    Log::info("Loading Editor scene\n");
-    this->reset();
-}
+    auto bc = entities.get("block")[0]->getComponent<BlockComponent>();
+    auto startPos = lc->getStartPos();
+    bc->currSim.x = startPos.x;
+    bc->currSim.y = startPos.y;
+    bc->currSim.state = BlockState::UP;
+    bc->nextSim = bc->currSim;
 
-void LevelEditScene::dispose()
-{
-    Log::info("Unloading Editor scene\n");
-}
-
-void LevelEditScene::reset()
-{
-    auto lvl = Game::GetOrCreateState("curr_level", "0");
-    lvlIdx = std::stoi(lvl);
-    Log::info("Loading level %d\n", lvlIdx + 1);
-    if (lvlIdx >= Game::GetLevelsSize())
-        lvlIdx = 0;
-    level.mModel.load(Game::GetLevelData(lvlIdx));
-    level.mModel.cols = MAX_GRID_SIZE;
-    level.mModel.rows = MAX_GRID_SIZE;
-    level.mModel.centerCells();
-    levelRect = level.mModel.rect();
-
-    auto startPos = level.mModel.getStartPos();
-    block.init(startPos, BlockState::UP);
-
-    saved = true;
-    Game::SetFontSize(16);
-
-    resize();
-}
-
-void LevelEditScene::resize()
-{
-    vec2 boundBottom;
-    IsoToWorld(level.mModel.cols - 1, level.mModel.rows - 1, cellSize, cellSize / 2, &boundBottom.x, &boundBottom.y);
-
-    Game::CameraSetPosition(vec2f{(float)cellSize/2, (float)(boundBottom.y / 2)});
-}
-
-void LevelEditScene::save(bool newLevel, bool saveToFile)
-{
-    // save current
-    level.mModel.trim();
-    LevelData ld = {};
-    level.mModel.toLevelData(&ld);
-
-    if (newLevel)
-    {
-        lvlIdx = Game::AddLevelData(ld);
-        Game::SetState("curr_level", std::to_string(lvlIdx));
-    }
-    else
-        Game::SaveLevelData(ld, lvlIdx);
-
-    saved = true;
-
-    if (saveToFile)
-    {
-#ifndef __EMSCRIPTEN__
-        char fileName[50] = {};
-        sprintf(fileName, "assets-build/levels/%d.txt", lvlIdx + 1);
-        FILE* f = fopen(fileName, "w");
-        ld.print(f);
-        fclose(f);
-#endif
-    }
-
-    reset();
-}
-
-void LevelEditScene::levelChanged()
-{
-    saved = false;
-    level.mModel.centerCells();
-    levelRect = level.mModel.rect();
+    int cx, cy;
+    IsoToWorld(MAX_GRID_SIZE / 2, MAX_GRID_SIZE / 2, cellSize, cellSize / 2, &cx, &cy);
+    Game::CameraSetPosition(vec2f{cx + cellSize / 2, cy});
 }
 
 void LevelEditScene::update(float dt)
 {
-    Input::MousePosition(&mousePos.x, &mousePos.y);
-    auto mouseWorldPos = Game::ScreenToWorld(mousePos);
+    int mx, my;
+    Input::MousePosition(&mx, &my);
+    auto mouseWorldPos = Game::ScreenToWorld(vec2{mx, my});
     WorldToIso((int)mouseWorldPos.x, (int)mouseWorldPos.y, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
 
-    if (switchEditing)
+    if (gui->isInteracting())
     {
-        if (Input::JustPressed(SDL_SCANCODE_S))
+    }
+    else if (mMode == LevelEditMode::NORMAL)
+    {
+        if (Input::JustPressed(SDL_SCANCODE_SPACE))
         {
-            switchEditing = false;
+            Log::debug("");
         }
-
-        tmpSwitch.floorX = mouseIsoPos.x;
-        tmpSwitch.floorY = mouseIsoPos.y;
-
-        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
+        if (Input::JustPressed(SDL_SCANCODE_E))
         {
-            level.mModel.toggleFloor(mouseIsoPos);
-            levelChanged();
-        }
-
-        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
-        {
-            if (level.mModel.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::EMPTY)
+            // exit level edit
+            if (this->lc->isValid())
             {
-                level.mModel.addSwitch(tmpSwitch);
-                switchEditing = false;
-                levelChanged();
+                lc->save(false, false);
+                Game::LoadScene(Scenes::LEVEL);
+                return;
             }
         }
 
-        return;
-    }
-
-    if (Input::JustPressed(SDL_SCANCODE_E))
-    {
-        // exit level edit
-        if (level.mModel.isValid())
+        if (lc->isValidPos(mouseIsoPos))
         {
-            save(false, false);
-            Game::LoadScene(Scenes::ISOLEVEL);
-            return;
-        }
-    }
-
-    if (level.mModel.isValidPos(mouseIsoPos))
-    {
-        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
-        {
-            level.mModel.toggleFloor(mouseIsoPos);
-            levelChanged();
-        }
-
-        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
-        {
-            level.mModel.toggleSpecialFloor(mouseIsoPos);
-            levelChanged();
-        }
-
-        if (level.mModel.grid[mouseIsoPos.y][mouseIsoPos.x] == CellType::FLOOR)
-        {
-            if (Input::JustPressed(SDL_SCANCODE_S))
+            if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
             {
-                // enter switch edit mode if no switch in gridpos
-                LevelSwitch* sw;
-                if (level.mModel.hasSwitchAt(mouseIsoPos, &sw))
+                lc->toggleFloor(mouseIsoPos);
+            }
+
+            if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
+            {
+                lc->toggleSpecialFloor(mouseIsoPos);
+            }
+
+            if (lc->cellAt(mouseIsoPos) == CellType::FLOOR)
+            {
+                if (Input::JustPressed(SDL_SCANCODE_S))
                 {
-                    level.mModel.removeSwitch(mouseIsoPos);
-                    levelChanged();
-                }
-                else
-                {
-                    switchEditing = true;
-                    tmpSwitch.x = mouseIsoPos.x;
-                    tmpSwitch.y = mouseIsoPos.y;
+                    // enter switch edit mode if no switch in gridpos
+                    LevelSwitch* sw;
+                    if (lc->hasSwitchAt(mouseIsoPos, &sw))
+                    {
+                        lc->removeSwitch(mouseIsoPos);
+                    }
+                    else
+                    {
+                        this->mMode = LevelEditMode::SWITCH;
+                        this->tmpSwitch.x = this->mouseIsoPos.x;
+                        this->tmpSwitch.y = this->mouseIsoPos.y;
+                    }
                 }
             }
         }
     }
+    else if (mMode == LevelEditMode::SWITCH)
+    {
+        this->tmpSwitch.floorX = this->mouseIsoPos.x;
+        this->tmpSwitch.floorY = this->mouseIsoPos.y;
 
-    if (Input::JustPressed(SDL_SCANCODE_F2) && level.mModel.isValid())
-    {
-        // save current
-        levelChanged();
-        save(false, true);
-    }
-    else if (Input::JustPressed(SDL_SCANCODE_F3) && level.mModel.isValid())
-    {
-        // save new
-        levelChanged();
-        save(true, true);
-    }
+        if (Input::JustPressed(SDL_SCANCODE_ESCAPE) || Input::JustPressed(SDL_SCANCODE_S))
+        {
+            mMode = LevelEditMode::NORMAL;
+        }
 
-    if (Input::JustPressed(SDL_SCANCODE_F4))
-    {
-        auto randLvl = generateRandomLevel(20);
-        level.mModel.load(randLvl);
-        level.mModel.cols = MAX_GRID_SIZE;
-        level.mModel.rows = MAX_GRID_SIZE;
-        level.mModel.centerCells();
-        auto startPos = level.mModel.getStartPos();
-        block.init(startPos, BlockState::UP);
-        return;
-    }
+        if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
+        {
+            lc->toggleFloor(mouseIsoPos);
+        }
 
-    if (Input::JustPressed(SDL_SCANCODE_F5))
-    {
-        reset();
-        return;
-    }
-
-    block.update(dt);
-    if (block.moved)
-    {
-        auto positions = block.currSim.getPositions();
-        level.mModel.checkAndTriggerSwitches(positions.first, positions.second);
+        if (Input::MouseJustPressed(SDL_BUTTON_LEFT))
+        {
+            if (lc->cellAt(mouseIsoPos) == CellType::EMPTY)
+            {
+                lc->addSwitch(tmpSwitch);
+                mMode = LevelEditMode::NORMAL;
+            }
+        }
     }
 }
 
 void LevelEditScene::draw()
 {
-    Game::BeginCamera();
-
-    level.draw();
-    block.draw();
-
-    // outline
+    if (gui->isInteracting())
     {
-        SDL_Color outlineColor = {40, 200, 80, 255}; // green
-        if (!level.mModel.isValid())
-            outlineColor = {200, 40, 80, 255}; // orange
-        else if (!saved)
-            outlineColor = {255, 255, 20, 255}; // yellow
-
-        int topX, topY, rightX, rightY, botX, botY, leftX, leftY = 0;
-        IsoToWorld(0, 0, cellSize, cellSize / 2, &topX, &topY);
-        IsoToWorld(level.mModel.cols, 0, cellSize, cellSize / 2, &rightX, &rightY);
-        IsoToWorld(level.mModel.cols, level.mModel.rows, cellSize, cellSize / 2, &botX, &botY);
-        IsoToWorld(0, level.mModel.rows, cellSize, cellSize / 2, &leftX, &leftY);
-
-        Game::DrawLine(topX + cellSize / 2, topY, rightX + cellSize / 2, rightY, outlineColor);
-        Game::DrawLine(topX + cellSize / 2, topY, leftX + cellSize / 2, leftY, outlineColor);
-        Game::DrawLine(botX + cellSize / 2, botY, rightX + cellSize / 2, rightY, outlineColor);
-        Game::DrawLine(botX + cellSize / 2, botY, leftX + cellSize / 2, leftY, outlineColor);
     }
-
-    // level switches
-    for (int i = 0; i < level.mModel.switchCount; i++)
+    else if (mMode == LevelEditMode::NORMAL)
     {
-        LevelSwitch& sw = level.mModel.switches[i];
-        SDL_Color switchColor = {255, 180, 0, 255};
-        if (sw.on)
-            switchColor = {180, 255, 0, 255};
-        int swX, swY, swfX, swfY;
-        IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &swX, &swY);
-        IsoToWorld(sw.floorX, sw.floorY, cellSize, cellSize / 2, &swfX, &swfY);
-        Game::DrawLine(swX + cellSize / 2, swY + cellSize / 4, swfX + cellSize / 2, swfY + cellSize / 4, switchColor);
+        if (lc->isValidPos(mouseIsoPos))
+        {
+            int mix, miy;
+            IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize / 2, &mix, &miy);
+            Game::DrawSprite(mix, miy, SPR_FLOOR_HIGHLIGHT);
+        }
     }
-
-    // switch editing
-    if (switchEditing)
+    else if (mMode == LevelEditMode::SWITCH)
     {
         int swX, swY, swfX, swfY;
         IsoToWorld(tmpSwitch.x, tmpSwitch.y, cellSize, cellSize / 2, &swX, &swY);
@@ -266,24 +199,39 @@ void LevelEditScene::draw()
                        {255, 120, 0, 255});
     }
 
-    // editor
-    if (level.mModel.isValidPos(mouseIsoPos))
+    // outline
+    SDL_Color outlineColor = {40, 200, 80, 255}; // green
+    if (!lc->isValid())
+        outlineColor = {200, 40, 80, 255}; // orange
+    else if (lc->isModified())
+        outlineColor = {255, 255, 20, 255}; // yellow
+
+    int topX, topY, rightX, rightY, botX, botY, leftX, leftY = 0;
+    IsoToWorld(0, 0, cellSize, cellSize / 2, &topX, &topY);
+    IsoToWorld(MAX_GRID_SIZE, 0, cellSize, cellSize / 2, &rightX, &rightY);
+    IsoToWorld(MAX_GRID_SIZE, MAX_GRID_SIZE, cellSize, cellSize / 2, &botX, &botY);
+    IsoToWorld(0, MAX_GRID_SIZE, cellSize, cellSize / 2, &leftX, &leftY);
+
+    Game::DrawLine(topX + cellSize / 2, topY, rightX + cellSize / 2, rightY, outlineColor);
+    Game::DrawLine(topX + cellSize / 2, topY, leftX + cellSize / 2, leftY, outlineColor);
+    Game::DrawLine(botX + cellSize / 2, botY, rightX + cellSize / 2, rightY, outlineColor);
+    Game::DrawLine(botX + cellSize / 2, botY, leftX + cellSize / 2, leftY, outlineColor);
+}
+
+void LevelEditScene::drawGUI()
+{
+    Game::SetFontSize(16);
+
+    if (mMode == LevelEditMode::NORMAL)
     {
-        int mix, miy;
-        IsoToWorld(mouseIsoPos.x, mouseIsoPos.y, cellSize, cellSize / 2, &mix, &miy);
-        Game::DrawSprite(mix, miy, SPR_FLOOR_HIGHLIGHT);
+        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() - 20, "-- NORMAL --",
+                   {.align = TextAlign::CENTER, .valign = VerticalAlign::BOTTOM});
     }
-
-    Game::EndCamera();
-
-    // Mode
-    if (switchEditing)
-        Game::Text(10, 10, SWITCH_MODE_INSTRUCTIONS);
-    else
-        Game::Text(10, 10, NORMAL_MODE_INSTRUCTIONS);
-
-    // Level Info
-    Game::Text(10, Game::ScreenHeight() - 35,
-               std::format("Level {} {}x{} {}", lvlIdx + 1, levelRect.w, levelRect.h,
-                           (level.mModel.isValid() ? "OK" : "NOK")));
+    else if (mMode == LevelEditMode::SWITCH)
+    {
+        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() - 20, "-- SWITCH --",
+                   {.align = TextAlign::CENTER, .valign = VerticalAlign::BOTTOM});
+    }
+    auto st = std::format("Level {}: {}x{}", lc->lvlIdx + 1, lc->cols(), lc->rows());
+    Game::Text(20, Game::ScreenHeight() - 20, st, {.valign = VerticalAlign::BOTTOM});
 }

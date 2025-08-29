@@ -129,7 +129,7 @@ void BlockComponent::update(float dt)
                 }
             }
 
-            transitionData = BLOCK_FRAMES.at(BlockVisual::getTransition(currSim, nextSim));
+            transitionData = BLOCK_FRAMES.at(BlockComponent::getTransition(currSim, nextSim));
             animProp.addKeyframesEvenly(transitionData.frames);
             this->vState = BlockVisualState::MOVING;
             this->anim.start();
@@ -258,4 +258,65 @@ void BlockComponent::draw()
     }
 
     particleSystem.draw(this->transform->pos.x, this->transform->pos.y);
+}
+
+BlockVisualTransition BlockComponent::getTransition(const BlockSim& curr, const BlockSim& next)
+{
+    if (curr.state == BlockState::UP)
+    {
+        if (next.state == BlockState::LONG)
+        {
+            if (next.y > curr.y)
+                return BlockVisualTransition::UP_LONG_BACKWARD;
+            else
+                return BlockVisualTransition::UP_LONG_FORWARD;
+        }
+        if (next.state == BlockState::WIDE)
+        {
+            if (next.x > curr.x)
+                return BlockVisualTransition::UP_WIDE_RIGHT;
+            else
+                return BlockVisualTransition::UP_WIDE_LEFT;
+        }
+        if (next.state == BlockState::UP)
+            return BlockVisualTransition::IDLE_UP;
+    }
+    if (curr.state == BlockState::LONG)
+    {
+        if (next.state == BlockState::UP)
+        {
+            if (next.y > curr.y)
+                return BlockVisualTransition::LONG_UP_BACKWARD;
+            else
+                return BlockVisualTransition::LONG_UP_FORWARD;
+        }
+        if (next.state == BlockState::LONG)
+        {
+            if (next.x > curr.x)
+                return BlockVisualTransition::LONG_LONG_RIGHT;
+            else
+                return BlockVisualTransition::LONG_LONG_LEFT;
+        }
+    }
+    if (curr.state == BlockState::WIDE)
+    {
+        if (next.state == BlockState::UP)
+        {
+            if (next.x > curr.x)
+                return BlockVisualTransition::WIDE_UP_RIGHT;
+            else
+                return BlockVisualTransition::WIDE_UP_LEFT;
+        }
+        if (next.state == BlockState::WIDE)
+        {
+            if (next.y > curr.y)
+                return BlockVisualTransition::WIDE_WIDE_BACKWARD;
+            else
+                return BlockVisualTransition::WIDE_WIDE_FORWARD;
+        }
+    }
+
+    // should not get here
+    Log::error("Invalid block visual transition from %d to %d\n", (int)curr.state, (int)next.state);
+    return BlockVisualTransition::IDLE_UP;
 }

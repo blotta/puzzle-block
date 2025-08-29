@@ -99,7 +99,7 @@ void LevelScene::update(float dt)
     if (Input::JustPressed(SDL_SCANCODE_E))
     {
         // edit this level
-        Game::LoadScene(Scenes::LEVEL_EDIT_NEW);
+        Game::LoadScene(Scenes::LEVEL_EDIT);
         return;
     }
 

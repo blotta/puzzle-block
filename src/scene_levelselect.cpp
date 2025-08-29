@@ -54,7 +54,7 @@ void LevelSelectScene::update(float dt)
         Game::SetState("curr_level", std::to_string(mLvlIdx));
         animPanel.onComplete = []() {
             Game::PopScene();
-            Game::LoadScene(Scenes::ISOLEVEL);
+            Game::LoadScene(Scenes::LEVEL);
         };
         mState = LevelSelectState::EXITING;
         animPanel.start();

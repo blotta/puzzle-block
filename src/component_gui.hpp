@@ -84,10 +84,10 @@ class Container : public Widget
     void bringToFront(Widget* widget);
 };
 
-class Panel : public Container
+class Window : public Container
 {
   public:
-    Panel(int x, int y, int w, int h);
+    Window(int x, int y, int w, int h);
     std::string title;
     int headerHeight = 20;
     bool hoveringDragHandle = false;

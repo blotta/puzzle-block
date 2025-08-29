@@ -222,22 +222,22 @@ void Container::bringToFront(Widget* widget)
     }
 }
 
-///////////
-// PANEL //
-///////////
+////////////
+// WINDOW //
+////////////
 
-Panel::Panel(int x, int y, int w, int h) : Container(x, y, w, h)
+Window::Window(int x, int y, int w, int h) : Container(x, y, w, h)
 {
     draggable = true;
     focusable = true;
 }
 
-void Panel::update(float dt)
+void Window::update(float dt)
 {
     Container::update(dt);
 }
 
-void Panel::draw()
+void Window::draw()
 {
     Color headerBgColor = theme().panelHeader.normal;
     Color headerBorderColor = theme().borderColor;
@@ -252,7 +252,7 @@ void Panel::draw()
             headerBgColor = theme().panelHeader.hover.toSDL(); // {60, 60, 90, 255};
         Game::DrawFilledRect(header.x, header.y, header.w, header.h, headerBgColor.toSDL());
         Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor.toSDL()); // header border
-        Game::Text(header.x + 10, header.y + header.h / 2, title,
+        Game::Text(header.x + theme().windowPaddingX, header.y + header.h / 2, title,
                    {.color = theme().textColor.toSDL(), .valign = VerticalAlign::MIDDLE});
     }
 
@@ -265,22 +265,32 @@ void Panel::draw()
     Container::draw();
 }
 
-void Panel::arrange()
+void Window::arrange()
 {
+    int maxX = rect.right();
+    int maxY = rect.bottom();
     for (auto& c : children)
     {
-        c->rect.x = c->rectInit.x + this->rect.x;
-        c->rect.y = c->rectInit.y + this->rect.y + headerHeight;
+        c->rect.x = c->rectInit.x + this->rect.x + theme().windowPaddingX;
+        c->rect.y = c->rectInit.y + this->rect.y + headerHeight + theme().windowPaddingY;
+
+        if (c->rect.right() + theme().windowPaddingX > maxX)
+            maxX = c->rect.right() + theme().windowPaddingX;
+
+        if (c->rect.bottom() + theme().windowPaddingY > maxY)
+            maxY = c->rect.bottom() + theme().windowPaddingY;
     }
+    rect.w = maxX - rect.x;
+    rect.h = maxY - rect.y;
 }
 
-bool Panel::isOnDragHandle(const vec2& pos) const
+bool Window::isOnDragHandle(const vec2& pos) const
 {
     Rect header = {rect.x, rect.y, rect.w, headerHeight};
     return header.contains(pos);
 }
 
-bool Panel::handleEvent(const GuiEvent& e)
+bool Window::handleEvent(const GuiEvent& e)
 {
     switch (e.type)
     {
@@ -492,7 +502,6 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
             focused->parent->bringToFront((Widget*)focused);
         }
     }
-
 }
 
 GuiComponent::GuiComponent() : root(this)

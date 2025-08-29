@@ -28,9 +28,6 @@ void debug_animation_draw();
 void debug_animation2_update(float dt);
 void debug_animation2_draw();
 
-void debug_block_update(float dt);
-void debug_block_draw();
-
 void debug_particle_update(float dt);
 void debug_particle_draw();
 
@@ -51,8 +48,6 @@ inline const char* toString(BootDebugType state)
         return "Animation";
     case BootDebugType::DEBUG_TYPE_ANIMATION_2:
         return "Animation 2";
-    case BootDebugType::DEBUG_TYPE_BLOCK:
-        return "Block";
     case BootDebugType::DEBUG_TYPE_PARTICLE:
         return "Particle";
     case BootDebugType::DEBUG_TYPE_CAMERA:
@@ -94,10 +89,6 @@ void BootScene::setDebugType(BootDebugType type)
         this->debug_update_func = debug_animation2_update;
         this->debug_draw_func = debug_animation2_draw;
         break;
-    case BootDebugType::DEBUG_TYPE_BLOCK:
-        this->debug_update_func = debug_block_update;
-        this->debug_draw_func = debug_block_draw;
-        break;
     case BootDebugType::DEBUG_TYPE_PARTICLE:
         this->debug_update_func = debug_particle_update;
         this->debug_draw_func = debug_particle_draw;
@@ -109,6 +100,9 @@ void BootScene::setDebugType(BootDebugType type)
     default:
         break;
     }
+
+    Game::CameraSetSize({Game::ScreenWidth(), Game::ScreenHeight()});
+    Game::CameraSetPosition(vec2f(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2));
 }
 
 BootScene::BootScene()
@@ -574,57 +568,12 @@ void debug_animation2_draw()
     Game::Text(10, 70, "Press F5 to reset");
 }
 
-///////////
-// Block //
-///////////
-
-static bool debug_block_initted = false;
-static BlockVisual blockVisual;
-
-void debug_block_update(float dt)
-{
-    if (!debug_block_initted)
-    {
-        blockVisual.init({0, 0}, BlockState::UP);
-        startX = Game::ScreenWidth() / 2;
-        startY = Game::ScreenHeight() / 2;
-        debug_block_initted = true;
-    }
-
-    if (Input::JustPressed(SDL_SCANCODE_F5))
-    {
-        debug_block_initted = false;
-        return;
-    }
-
-    blockVisual.update(dt);
-}
-
-void debug_block_draw()
-{
-    // draw floors
-    for (int y = -2; y < 3; y++)
-    {
-        for (int x = -2; x < 3; x++)
-        {
-            int sx;
-            int sy;
-            IsoToWorld(x, y, 64, 32, &sx, &sy);
-            Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
-        }
-    }
-
-    // draw block
-    blockVisual.draw();
-}
-
 /////////////////////
 // PARTICLE SYSTEM //
 /////////////////////
 
 static bool debug_particle_initted = false;
 static ParticleSystem particle_particleSystem;
-static BlockVisual particle_blockVisual;
 
 void debug_particle_update(float dt)
 {
@@ -632,7 +581,6 @@ void debug_particle_update(float dt)
     {
         startX = Game::ScreenWidth() / 2;
         startY = Game::ScreenHeight() / 2;
-        particle_blockVisual.init({0, 0}, BlockState::UP);
         particle_particleSystem.startColor = {220, 200, 200, 255};
         particle_particleSystem.endColor = {220, 200, 200, 0};
         particle_particleSystem.vx = 5.f;
@@ -640,19 +588,6 @@ void debug_particle_update(float dt)
         particle_particleSystem.gravity = 2.f;
         particle_particleSystem.minLife = 0.3f;
         particle_particleSystem.maxLife = 0.5f;
-        particle_blockVisual.startFall([]() {
-            int x, y;
-            IsoToWorld(particle_blockVisual.currSim.x, particle_blockVisual.currSim.y, 64, 32, &x, &y);
-
-            float x1 = x + 0;
-            float y1 = y + 16;
-            float x2 = x + 32;
-            float y2 = y + 32;
-            float x3 = x + 64;
-            float y3 = y + 16;
-            particle_particleSystem.emitLine(x1, y1, x2, y2, 50);
-            particle_particleSystem.emitLine(x2, y2, x3, y3, 50);
-        });
         debug_particle_initted = true;
     }
 
@@ -666,35 +601,16 @@ void debug_particle_update(float dt)
     {
         int mx, my;
         Input::MousePosition(&mx, &my);
-        // particle_particleSystem.emit(mx, my, 100);
         particle_particleSystem.emitLine(mx - 50, my, mx + 50, my, 100);
     }
-
-    particle_blockVisual.update(dt);
 
     particle_particleSystem.update(dt);
 }
 
 void debug_particle_draw()
 {
-    // draw floors
-    for (int y = -2; y < 3; y++)
-    {
-        for (int x = -2; x < 3; x++)
-        {
-            int sx;
-            int sy;
-            IsoToWorld(x, y, 64, 32, &sx, &sy);
-            Game::DrawSprite(startX + sx, startY + sy, SPR_FLOOR);
-        }
-    }
-
-    // draw block
-    particle_blockVisual.draw();
-
     particle_particleSystem.draw(startX, startY);
 }
-
 
 ////////////
 // CAMERA //
@@ -750,14 +666,14 @@ void debug_camera_draw()
 
     Game::DrawLine(0, 0, Game::ScreenWidth(), Game::ScreenHeight(), {255, 255, 255, 255});
 
-    Game::DrawPoint(0, 0, {0, 255, 0, 255}); // green
-    Game::DrawPoint(Game::ScreenWidth()/2, Game::ScreenHeight()/2, {255, 0, 0, 255}); // red
-    Game::DrawPoint(Game::ScreenWidth(), Game::ScreenHeight(), {0, 0, 255, 255}); // blue
+    Game::DrawPoint(0, 0, {0, 255, 0, 255});                                              // green
+    Game::DrawPoint(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, {255, 0, 0, 255}); // red
+    Game::DrawPoint(Game::ScreenWidth(), Game::ScreenHeight(), {0, 0, 255, 255});         // blue
 
     Game::EndCamera();
 
     // camera center
-    Game::DrawPoint(Game::ScreenWidth()/2, Game::ScreenHeight()/2, {255, 255, 255, 255}); // white
+    Game::DrawPoint(Game::ScreenWidth() / 2, Game::ScreenHeight() / 2, {255, 255, 255, 255}); // white
 
-    Game::Text(20, Game::ScreenHeight()/2, std::format("camera\nposition: {}, {}", camera_pos.x, camera_pos.y));
+    Game::Text(20, Game::ScreenHeight() / 2, std::format("camera\nposition: {}, {}", camera_pos.x, camera_pos.y));
 }

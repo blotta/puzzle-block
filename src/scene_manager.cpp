@@ -1,7 +1,5 @@
 #include "scene_manager.hpp"
 #include "scene_boot.hpp"
-#include "scene_isolevel.hpp"
-#include "scene_leveledit.hpp"
 #include "scene_splash.hpp"
 #include "scene_main_menu.hpp"
 #include "scene_options.hpp"
@@ -9,7 +7,7 @@
 #include "scene_pause.hpp"
 #include "scene_unity.hpp"
 #include "scene_level.hpp"
-#include "scene_leveleditnew.hpp"
+#include "scene_leveledit.hpp"
 
 std::unique_ptr<Scene> createScene(Scenes id)
 {
@@ -21,10 +19,6 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<SplashScene>();
     case Scenes::MAIN_MENU:
         return std::make_unique<MainMenuScene>();
-    case Scenes::LEVEL_EDIT:
-        return std::make_unique<LevelEditScene>();
-    case Scenes::ISOLEVEL:
-        return std::make_unique<IsoLevelScene>();
     case Scenes::OPTIONS:
         return std::make_unique<OptionsScene>();
     case Scenes::LEVEL_SELECT:
@@ -35,8 +29,8 @@ std::unique_ptr<Scene> createScene(Scenes id)
         return std::make_unique<UnityScene>();
     case Scenes::LEVEL:
         return std::make_unique<LevelScene>();
-    case Scenes::LEVEL_EDIT_NEW:
-        return std::make_unique<LevelEditNewScene>();
+    case Scenes::LEVEL_EDIT:
+        return std::make_unique<LevelEditScene>();
     default:
         return nullptr;
     }
