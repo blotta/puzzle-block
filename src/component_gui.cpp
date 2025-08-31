@@ -2,6 +2,7 @@
 #include "game.hpp"
 #include "input_manager.hpp"
 #include "log.hpp"
+#include <format>
 
 Widget::Widget(int x, int y, int w, int h) : rectInit(x, y, w, h), rect(x, y, w, h)
 {
@@ -9,6 +10,11 @@ Widget::Widget(int x, int y, int w, int h) : rectInit(x, y, w, h), rect(x, y, w,
 
 void Widget::update(float dt)
 {
+    if (hovered && system->hoveredWidget != this)
+    {
+        hovered = false;
+        onMouseExit();
+    }
 }
 
 bool Widget::isOnDragHandle(const vec2& pos) const
@@ -16,10 +22,10 @@ bool Widget::isOnDragHandle(const vec2& pos) const
     return rect.contains(pos);
 }
 
-bool Widget::handleEvent(const GuiEvent& e)
+Widget* Widget::handleEvent(const GuiEvent& e)
 {
     if (!visible)
-        return false;
+        return nullptr;
 
     switch (e.type)
     {
@@ -31,12 +37,7 @@ bool Widget::handleEvent(const GuiEvent& e)
                 hovered = true;
                 onMouseEnter();
             }
-            return true; // hovered
-        }
-        else if (hovered)
-        {
-            hovered = false;
-            onMouseExit();
+            return this; // hovered
         }
         break;
     }
@@ -45,7 +46,7 @@ bool Widget::handleEvent(const GuiEvent& e)
         if (rect.contains(e.mousePos))
         {
             onMouseDown(e.mousePos);
-            return true;
+            return this;
         }
         break;
     }
@@ -55,7 +56,7 @@ bool Widget::handleEvent(const GuiEvent& e)
         {
             onMouseUp(e.mousePos);
             onClick();
-            return true;
+            return this;
         }
         else
         {
@@ -68,7 +69,7 @@ bool Widget::handleEvent(const GuiEvent& e)
         break;
     }
 
-    return false;
+    return nullptr;
 }
 
 void Widget::onMouseEnter()
@@ -162,7 +163,7 @@ void Container::draw()
     }
 }
 
-bool Container::handleEvent(const GuiEvent& e)
+Widget* Container::handleEvent(const GuiEvent& e)
 {
     // Pass event to children first (iterate backwards so top-most handles first)
     for (auto it = children.rbegin(); it != children.rend(); ++it)
@@ -174,16 +175,18 @@ bool Container::handleEvent(const GuiEvent& e)
         // If it's a container, recurse
         if (w->isContainer)
         {
-            if (static_cast<Container*>(w)->handleEvent(e))
+            auto widgetHandled = static_cast<Container*>(w)->handleEvent(e);
+            if (widgetHandled != nullptr)
             {
-                return true;
+                return widgetHandled;
             }
         }
         else
         {
-            if (w->handleEvent(e))
+            auto widgetHandled = w->handleEvent(e);
+            if (widgetHandled != nullptr)
             {
-                return true;
+                return widgetHandled;
             }
         }
     }
@@ -290,7 +293,7 @@ bool Window::isOnDragHandle(const vec2& pos) const
     return header.contains(pos);
 }
 
-bool Window::handleEvent(const GuiEvent& e)
+Widget* Window::handleEvent(const GuiEvent& e)
 {
     switch (e.type)
     {
@@ -301,7 +304,7 @@ bool Window::handleEvent(const GuiEvent& e)
             dragStartPos = e.mousePos;
             validDragStart = true;
             dragging = false;
-            return true;
+            return this;
         }
         break;
 
@@ -323,7 +326,7 @@ bool Window::handleEvent(const GuiEvent& e)
 
             arrange();
             onDrag(e.mousePos);
-            return true;
+            return this;
         }
         hoveringDragHandle = isOnDragHandle(e.mousePos);
         break;
@@ -334,7 +337,7 @@ bool Window::handleEvent(const GuiEvent& e)
         {
             onDragEnd(e.mousePos);
             dragging = false;
-            return true;
+            return this;
         }
         break;
 
@@ -395,11 +398,11 @@ void Button::draw()
 {
     Color color = theme().textColor;
     Color bgColor = theme().button.normal;
-    if (hovering)
+    if (system->hoveredWidget == this)
     {
         bgColor = theme().button.hover;
     }
-    if (clicking)
+    if (system->activeWidget == this)
     {
         bgColor = theme().button.active;
     }
@@ -409,16 +412,6 @@ void Button::draw()
     auto center = rect.center();
     Game::Text(center.x, center.y, caption,
                {.color = color.toSDL(), .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-}
-
-void Button::onMouseEnter()
-{
-    hovering = true;
-}
-
-void Button::onMouseExit()
-{
-    hovering = false;
 }
 
 void Button::onMouseDown(vec2 pos)
@@ -446,7 +439,7 @@ _RootContainer::_RootContainer(const GuiComponent* system) : Container(0, 0, Gam
     this->system = system;
 }
 
-bool _RootContainer::handleEvent(const GuiEvent& e)
+Widget* _RootContainer::handleEvent(const GuiEvent& e)
 {
     // Only the children pass from the Container widget
     for (auto it = children.rbegin(); it != children.rend(); ++it)
@@ -458,24 +451,24 @@ bool _RootContainer::handleEvent(const GuiEvent& e)
         // If it's a container, recurse
         if (w->isContainer)
         {
-            if (static_cast<Container*>(w)->handleEvent(e))
+            auto widgetHandled = static_cast<Container*>(w)->handleEvent(e);
+            if (widgetHandled != nullptr)
             {
-                this->hoveredWidget = w;
-                return true;
+                return widgetHandled;
             }
         }
         else
         {
-            if (w->handleEvent(e))
+            auto widgetHandled = w->handleEvent(e);
+            if (widgetHandled != nullptr)
             {
-                this->hoveredWidget = w;
-                return true;
+                return widgetHandled;
             }
         }
     }
 
     // Unlike the "Container" widget, _RootContainer itself can't handle events
-    return false;
+    return nullptr;
 }
 
 ///////////////////
@@ -484,10 +477,7 @@ bool _RootContainer::handleEvent(const GuiEvent& e)
 
 void GuiComponent::dispatchEvent(const GuiEvent& e)
 {
-    hoveredWidget = nullptr;
-
-    if (root.handleEvent(e))
-        hoveredWidget = root.hoveredWidget;
+    hoveredWidget = root.handleEvent(e);
 
     if (e.type == GuiEventType::MouseDown)
         activeWidget = hoveredWidget;
@@ -542,6 +532,56 @@ void GuiComponent::drawGUI()
 {
     Game::SetFontSize(theme()->fontSize);
     root.draw();
+
+    if (auto* btn = dynamic_cast<Button*>(hoveredWidget))
+    {
+        Game::Text(10, 10, std::format("Hovering button {}", btn->caption));
+    }
+    else if (auto* lbl = dynamic_cast<Label*>(hoveredWidget))
+    {
+        Game::Text(10, 10, std::format("Hovering label {}", lbl->text));
+    }
+    else if (auto* win = dynamic_cast<Window*>(hoveredWidget))
+    {
+        Game::Text(10, 10, std::format("Hovering window {}", win->title));
+    }
+    else if (auto* cont = dynamic_cast<Container*>(hoveredWidget))
+    {
+        Game::Text(10, 10, std::format("Hovering container {},{}", cont->rect.x, cont->rect.y));
+    }
+    else if (auto* wid = dynamic_cast<Widget*>(hoveredWidget))
+    {
+        Game::Text(10, 10, std::format("Hovering widget {},{}", wid->rect.x, wid->rect.y));
+    }
+    else
+    {
+        Game::Text(10, 10, "Not hovering a widget");
+    }
+
+    if (auto* btn = dynamic_cast<Button*>(activeWidget))
+    {
+        Game::Text(10, 30, std::format("Active button {}", btn->caption));
+    }
+    else if (auto* lbl = dynamic_cast<Label*>(activeWidget))
+    {
+        Game::Text(10, 30, std::format("Active label {}", lbl->text));
+    }
+    else if (auto* win = dynamic_cast<Window*>(activeWidget))
+    {
+        Game::Text(10, 30, std::format("Active window {}", win->title));
+    }
+    else if (auto* cont = dynamic_cast<Container*>(activeWidget))
+    {
+        Game::Text(10, 30, std::format("Active container {},{}", cont->rect.x, cont->rect.y));
+    }
+    else if (auto* wid = dynamic_cast<Widget*>(activeWidget))
+    {
+        Game::Text(10, 30, std::format("Active widget {},{}", wid->rect.x, wid->rect.y));
+    }
+    else
+    {
+        Game::Text(10, 30, "No active widget");
+    }
 }
 
 bool GuiComponent::isInteracting() const

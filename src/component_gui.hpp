@@ -46,7 +46,7 @@ class Widget
     virtual void draw() = 0;
     virtual void update(float dt);
     virtual bool isOnDragHandle(const vec2& pos) const;
-    virtual bool handleEvent(const GuiEvent& e);
+    virtual Widget* handleEvent(const GuiEvent& e);
     virtual void onMouseEnter();
     virtual void onMouseExit();
     virtual void onMouseDown(vec2 pos);
@@ -79,7 +79,7 @@ class Container : public Widget
     }
     void update(float dt) override;
     void draw() override;
-    bool handleEvent(const GuiEvent& e) override;
+    Widget* handleEvent(const GuiEvent& e) override;
     virtual void arrange();
     void bringToFront(Widget* widget);
 };
@@ -98,7 +98,7 @@ class Window : public Container
     void update(float dt) override;
     void draw() override;
     void arrange() override;
-    bool handleEvent(const GuiEvent& e) override;
+    Widget* handleEvent(const GuiEvent& e) override;
     bool isOnDragHandle(const vec2& pos) const override;
 };
 
@@ -113,7 +113,6 @@ class Label : public Widget
 
 class Button : public Widget
 {
-    bool hovering = false;
     bool clicking = false;
 
   public:
@@ -122,8 +121,6 @@ class Button : public Widget
     Button(int x, int y, std::string cap);
     Button(std::string cap);
     void draw() override;
-    void onMouseEnter() override;
-    void onMouseExit() override;
     void onMouseDown(vec2 pos) override;
     void onMouseUp(vec2 pos) override;
     void onClick() override;
@@ -134,8 +131,7 @@ class _RootContainer : public Container
 {
   public:
     _RootContainer(const GuiComponent* system);
-    bool handleEvent(const GuiEvent& e) override;
-    Widget* hoveredWidget;
+    Widget* handleEvent(const GuiEvent& e) override;
 };
 
 struct GuiColorSet
