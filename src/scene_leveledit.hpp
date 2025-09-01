@@ -27,6 +27,7 @@ class LevelEditScene : public Scene
     GuiComponent* gui;
     LevelSwitch tmpSwitch = {};
     vec2 mouseIsoPos;
+    vec2f camTarget;
     LevelEditMode mMode = LevelEditMode::NORMAL;
 };
 

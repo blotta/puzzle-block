@@ -80,7 +80,8 @@ void LevelEditScene::init()
 
     int cx, cy;
     IsoToWorld(MAX_GRID_SIZE / 2, MAX_GRID_SIZE / 2, cellSize, cellSize / 2, &cx, &cy);
-    Game::CameraSetPosition(vec2f{cx + cellSize / 2, cy});
+    camTarget = vec2f(cx + cellSize / 2, cy);
+    Game::CameraSetPosition(camTarget);
 }
 
 void LevelEditScene::update(float dt)
@@ -89,6 +90,26 @@ void LevelEditScene::update(float dt)
     Input::MousePosition(&mx, &my);
     auto mouseWorldPos = Game::ScreenToWorld(vec2{mx, my});
     WorldToIso((int)mouseWorldPos.x, (int)mouseWorldPos.y, cellSize, cellSize / 2, &mouseIsoPos.x, &mouseIsoPos.y);
+
+    float camSpeed = 500.f;
+    if (Input::Pressed(SDL_SCANCODE_W))
+    {
+        camTarget.y -= camSpeed * dt;
+    }
+    else if (Input::Pressed(SDL_SCANCODE_S))
+    {
+        camTarget.y += camSpeed * dt;
+    }
+
+    if (Input::Pressed(SDL_SCANCODE_A))
+    {
+        camTarget.x -= camSpeed * dt;
+    }
+    else if (Input::Pressed(SDL_SCANCODE_D))
+    {
+        camTarget.x += camSpeed * dt;
+    }
+    Game::CameraSetTarget(camTarget);
 
     if (gui->isInteracting())
     {
