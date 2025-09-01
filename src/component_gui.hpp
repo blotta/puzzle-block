@@ -27,6 +27,21 @@ class Container;
 class GuiComponent;
 class GuiTheme;
 
+struct RectSizing
+{
+  RectSizing();
+  RectSizing(int v);
+  RectSizing(int x, int y);
+
+  void set(int v);
+  void setX(int v);
+  void setY(int v);
+  int left = 0;
+  int top = 0;
+  int right = 0;
+  int bottom = 0;
+};
+
 class Widget
 {
   public:
@@ -38,7 +53,7 @@ class Widget
     Container* parent = nullptr;
     bool isContainer = false;
     bool hovered = false;
-    const GuiComponent* system;
+    GuiComponent* system;
 
     Widget(int x, int y, int w, int h);
     virtual ~Widget() = default;
@@ -55,15 +70,29 @@ class Widget
     virtual void onDragStart(vec2 pos);
     virtual void onDrag(vec2 pos);
     virtual void onDragEnd(vec2 pos);
-    const Widget* getRoot() const;
+    Container* getRoot() const;
+    virtual void applyTheme();
     const GuiTheme& theme() const;
     const Widget* getClosestFocusable() const;
+    virtual void calcSize();
+};
+
+enum class LayoutType
+{
+    None,
+    Row,
+    Column
 };
 
 class Container : public Widget
 {
   public:
     std::vector<std::unique_ptr<Widget>> children;
+    LayoutType layout = LayoutType::None;
+    int gap = 5;
+    int minWidth = 0;
+    int minHeight = 0;
+    RectSizing padding;
     Container();
     Container(int x, int y);
     Container(int x, int y, int w, int h);
@@ -73,8 +102,11 @@ class Container : public Widget
         children.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         T* ptr = static_cast<T*>(children.back().get());
         ptr->parent = this;
-        ptr->system = getRoot()->system;
-        this->arrange();
+        auto root = getRoot();
+        ptr->system = root->system;
+        ptr->applyTheme();
+        root->calcSize();
+        root->arrange();
         return ptr;
     }
     void update(float dt) override;
@@ -82,6 +114,24 @@ class Container : public Widget
     Widget* handleEvent(const GuiEvent& e) override;
     virtual void arrange();
     void bringToFront(Widget* widget);
+    void calcSize() override;
+    void applyTheme() override;
+};
+
+class Panel : public Container
+{
+  public:
+    Panel(int x, int y, int w, int h);
+    std::string title;
+    bool hoveringDragHandle = false;
+    bool dragging = false;
+    vec2 dragOffset;
+    vec2 dragStartPos;
+    bool validDragStart = false;
+    void draw() override;
+
+    Color backgroundColor;
+    void applyTheme() override;
 };
 
 class Window : public Container
@@ -95,11 +145,19 @@ class Window : public Container
     vec2 dragOffset;
     vec2 dragStartPos;
     bool validDragStart = false;
-    void update(float dt) override;
     void draw() override;
     void arrange() override;
     Widget* handleEvent(const GuiEvent& e) override;
     bool isOnDragHandle(const vec2& pos) const override;
+
+    RectSizing headerPadding;
+    Color headerBackgroundColor;
+    Color headerBackgroundColorHover;
+    Color headerBorderColor;
+    Color headerTextColor;
+    Color bodyBackgroundColor;
+    Color bodyBorderColor;
+    void applyTheme() override;
 };
 
 class Label : public Widget
@@ -108,7 +166,10 @@ class Label : public Widget
     std::string text;
     Label(int x, int y, int w, int h, std::string t);
     Label(int x, int y, std::string t);
+    Label(std::string t);
     void draw() override;
+    Color textColor;
+    void applyTheme() override;
 };
 
 class Button : public Widget
@@ -125,13 +186,22 @@ class Button : public Widget
     void onMouseUp(vec2 pos) override;
     void onClick() override;
     std::function<void()> onClickEvent = nullptr;
+
+    Color textColor;
+    Color backgroundColor;
+    Color backgroundColorHover;
+    Color backgroundColorActive;
+    Color borderColor;
+    void applyTheme() override;
 };
 
 class _RootContainer : public Container
 {
   public:
-    _RootContainer(const GuiComponent* system);
+    _RootContainer(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
+    void calcSize() override;
+    void arrange() override;
 };
 
 struct GuiColorSet
@@ -193,6 +263,7 @@ class GuiComponent : public Component
     CTransform* transform;
     Widget* hoveredWidget = nullptr;
     Widget* activeWidget = nullptr;
+    _RootContainer root;
     const GuiTheme* mTheme;
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
@@ -204,12 +275,12 @@ class GuiComponent : public Component
     void update(float dt) override;
     void drawGUI() override;
     bool isInteracting() const;
+    int drawHierarchy(Container* cont, int x, int y) const;
 
     void setTheme(const GuiTheme& theme);
     const GuiTheme* theme() const;
 
   private:
-    _RootContainer root;
     void dispatchEvent(const GuiEvent& e);
 };
 

@@ -59,6 +59,8 @@ class Game
     static void DrawLine(int x1, int y1, int x2, int y2, SDL_Color color);
     static void DrawRect(int x, int y, int w, int h, SDL_Color color);
     static void DrawFilledRect(int x, int y, int w, int h, SDL_Color color);
+    static void PushClipRect(const Rect& r);
+    static void PopClipRect();
 
     static const Sprite& GetSprite(SpriteID id);
     static void DrawSprite(int x, int y, SpriteID sprId);

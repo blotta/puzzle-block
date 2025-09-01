@@ -250,6 +250,16 @@ int clamp(int val, int min, int max)
     return val;
 }
 
+int min(int a, int b)
+{
+    return a > b ? b : a;
+}
+
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+
 float random01()
 {
     static std::mt19937 rng(std::random_device{}());

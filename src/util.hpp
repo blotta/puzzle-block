@@ -12,6 +12,8 @@ void WorldtoGrid(int worldX, int worldY, int cellSize, int cols, int rows, int* 
 int cycleIndex(int currIdx, int length, int amount);
 
 int clamp(int val, int min, int max);
+int min(int a, int b);
+int max(int a, int b);
 
 float random01();
 float randomNeg1to1();

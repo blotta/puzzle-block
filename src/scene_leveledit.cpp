@@ -22,27 +22,26 @@ void LevelEditScene::preload()
     guiEntity->addComponent<CTransform>();
     this->gui = guiEntity->addComponent<GuiComponent>();
 
-    // auto btnOther = gui->addChild<Button>(230, 230, 100, 100, "OTHER");
-    // btnOther->onClickEvent = [this]() { Log::debug("Other Button"); };
+    auto sideBar = gui->addChild<Panel>(0, 0, 200, Game::ScreenHeight());
+    sideBar->layout = LayoutType::Column;
 
-    auto panel = gui->addChild<Window>(500, 200, 0, 0);
-    panel->title = "Window 1";
+    auto buttons = sideBar->addChild<Container>();
+    buttons->layout = LayoutType::Row;
+    buttons->padding.set(0);
 
-    auto btnSaveCurrent = panel->addChild<Button>(0, 0, "SAVE");
+    auto btnSaveCurrent = buttons->addChild<Button>("SAVE");
     btnSaveCurrent->onClickEvent = [this]() {
         Log::debug("Saving current level");
         this->lc->save(false, true);
     };
 
-    auto btnSaveNew = panel->addChild<Button>(btnSaveCurrent->rectInit.right(), btnSaveCurrent->rectInit.y, 0,
-                                              btnSaveCurrent->rect.h, "SAVE NEW");
+    auto btnSaveNew = buttons->addChild<Button>("SAVE NEW");
     btnSaveNew->onClickEvent = [this]() {
         Log::debug("Saving new level");
         this->lc->save(true, true);
     };
 
-    auto btnReset = panel->addChild<Button>(btnSaveNew->rectInit.right(), btnSaveNew->rectInit.y, 0,
-                                            btnSaveNew->rectInit.h, "RESET");
+    auto btnReset = buttons->addChild<Button>("RESET");
     btnReset->onClickEvent = [this]() {
         Log::debug("Resetting level");
         this->lc->load(this->lc->lvlIdx, Game::GetLevelData(this->lc->lvlIdx));
@@ -55,21 +54,17 @@ void LevelEditScene::preload()
         bc->nextSim = bc->currSim;
     };
 
-    auto panel2 = gui->addChild<Window>(400, 150, 200, 100);
-    panel2->title = "Window 2";
-    static bool darkTheme = true;
-    panel2->addChild<Button>("Toggle Theme")->onClickEvent = [&]() {
-        if (darkTheme)
-        {
-            gui->setTheme(GuiTheme::Light());
-            darkTheme = false;
-        }
-        else
-        {
-            gui->setTheme(GuiTheme::Dark());
-            darkTheme = true;
-        }
-    };
+    sideBar->addChild<Label>("HIII");
+
+    auto win = gui->addChild<Window>(300, 300, 200, 200);
+    win->title = "Window 1";
+    win->layout = LayoutType::Column;
+    win->addChild<Label>("Hello there");
+    auto winCont = win->addChild<Container>();
+    winCont->padding.set(0);
+    winCont->layout = LayoutType::Row;
+    winCont->addChild<Button>("One");
+    winCont->addChild<Button>("Two");
 
     Game::SetFontSize(16);
 }

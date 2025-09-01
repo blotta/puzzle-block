@@ -1,10 +1,10 @@
+#include "game.hpp"
+#include "asset_manager.hpp"
+#include "input_manager.hpp"
+#include "log.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
-#include "game.hpp"
-#include "input_manager.hpp"
-#include "asset_manager.hpp"
-#include "log.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -117,7 +117,7 @@ int Game::AddLevelData(const LevelData& ld)
 
 void Game::CameraSetSize(const vec2& size)
 {
-    Game::get().mCamera.offset = vec2(size.x/2, size.y/2);
+    Game::get().mCamera.offset = vec2(size.x / 2, size.y / 2);
 }
 
 void Game::CameraSetTarget(const vec2f& target)
@@ -197,9 +197,7 @@ void Game::DrawRect(int x, int y, int w, int h, SDL_Color color)
     auto& g = Game::get();
     SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
 
-    SDL_Rect r = {
-        x, y, w, h
-    };
+    SDL_Rect r = {x, y, w, h};
 
     vec2f camDiff = g.getCameraDiff(false);
     r.x += camDiff.x;
@@ -213,15 +211,24 @@ void Game::DrawFilledRect(int x, int y, int w, int h, SDL_Color color)
     auto& g = Game::get();
     SDL_SetRenderDrawColor(g.mRenderer, color.r, color.g, color.b, color.a);
 
-    SDL_Rect r = {
-        x, y, w, h
-    };
+    SDL_Rect r = {x, y, w, h};
 
     vec2f camDiff = g.getCameraDiff(false);
     r.x += camDiff.x;
     r.y += camDiff.y;
 
     SDL_RenderFillRect(g.mRenderer, &r);
+}
+
+void Game::PushClipRect(const Rect& r)
+{
+    const SDL_Rect sdlR = {r.x, r.y, r.w, r.h};
+    SDL_RenderSetClipRect(Game::get().mRenderer, &sdlR);
+}
+
+void Game::PopClipRect()
+{
+    SDL_RenderSetClipRect(Game::get().mRenderer, nullptr);
 }
 
 const Sprite& Game::GetSprite(SpriteID id)
@@ -256,7 +263,7 @@ void Game::SetSoundVolume(int vol)
     if (vol < 0)
         vol = 0;
 
-    int mixVol = MIX_MAX_VOLUME * (vol/10.f);
+    int mixVol = MIX_MAX_VOLUME * (vol / 10.f);
     Mix_Volume(-1, mixVol);
     Game::get().settings.sfx_vol = vol;
 }
@@ -275,7 +282,7 @@ void Game::SetMusicVolume(int vol)
     if (vol < 0)
         vol = 0;
 
-    int mixVol = MIX_MAX_VOLUME * (vol/10.f);
+    int mixVol = MIX_MAX_VOLUME * (vol / 10.f);
     Mix_VolumeMusic(mixVol);
     Game::get().settings.music_vol = vol;
 }
@@ -331,7 +338,6 @@ void Game::Exit()
 {
     Game::get().mRunning = false;
 }
-
 
 //////////////////////
 // Instance Methods //
@@ -398,7 +404,6 @@ void Game::init()
     mFPSTimer.reset();
 
     loadAssets();
-
 
     // start with world 0,0 on the top left
     Game::CameraSetSize({mScreenWidth, mScreenHeight});
