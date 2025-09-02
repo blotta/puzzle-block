@@ -81,6 +81,7 @@ class Widget
 
     virtual void draw() = 0;
     virtual void update(float dt);
+    virtual bool isInsideInteractArea(const vec2& pos) const;
     virtual bool isOnDragHandle(const vec2& pos) const;
     virtual Widget* handleEvent(const GuiEvent& e);
     virtual void onMouseEnter();
@@ -130,7 +131,8 @@ class Container : public Widget
         ptr->system = root->system;
         ptr->applyTheme();
         root->calcFitSize();
-        root->arrange();
+        root->calcGrowShrinkSize();
+        root->calcPosition();
         return ptr;
     }
     void update(float dt) override;
@@ -139,7 +141,7 @@ class Container : public Widget
     void bringToFront(Widget* widget);
     void calcFitSize() override;
     void calcGrowShrinkSize() override;
-    virtual void arrange();
+    virtual void calcPosition();
     void applyTheme() override;
 };
 
@@ -171,8 +173,8 @@ class Window : public Container
     vec2 dragStartPos;
     bool validDragStart = false;
     void draw() override;
-    void arrange() override;
     Widget* handleEvent(const GuiEvent& e) override;
+    bool isInsideInteractArea(const vec2& pos) const override;
     bool isOnDragHandle(const vec2& pos) const override;
 
     RectSizing headerPadding;
@@ -226,7 +228,7 @@ class _RootContainer : public Container
     _RootContainer(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
     void calcFitSize() override;
-    void arrange() override;
+    void calcPosition() override;
 };
 
 struct GuiColorSet

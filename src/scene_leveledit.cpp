@@ -24,26 +24,28 @@ void LevelEditScene::preload()
 
     auto sideBar = gui->addChild<Panel>(0, 0, 200, Game::ScreenHeight());
     sideBar->layout = LayoutType::Column;
-    sideBar->justifyContent = JustifyContent::SpaceAround;
-    sideBar->alignItems = AlignItems::Center;
+    sideBar->justifyContent = JustifyContent::Start;
+    sideBar->alignItems = AlignItems::Stretch;
 
-    auto buttons = sideBar->addChild<Container>();
-    buttons->layout = LayoutType::Row;
-    buttons->padding.set(0);
+    sideBarTitle = sideBar->addChild<Label>("");
 
-    auto btnSaveCurrent = buttons->addChild<Button>("SAVE");
+    auto sideBarSaveButtons = sideBar->addChild<Container>();
+    sideBarSaveButtons->layout = LayoutType::Row;
+    sideBarSaveButtons->padding.set(0);
+
+    auto btnSaveCurrent = sideBarSaveButtons->addChild<Button>("SAVE");
     btnSaveCurrent->onClickEvent = [this]() {
         Log::debug("Saving current level");
         this->lc->save(false, true);
     };
 
-    auto btnSaveNew = buttons->addChild<Button>("SAVE NEW");
+    auto btnSaveNew = sideBarSaveButtons->addChild<Button>("SAVE NEW");
     btnSaveNew->onClickEvent = [this]() {
         Log::debug("Saving new level");
         this->lc->save(true, true);
     };
 
-    auto btnReset = buttons->addChild<Button>("RESET");
+    auto btnReset = sideBarSaveButtons->addChild<Button>("RESET");
     btnReset->onClickEvent = [this]() {
         Log::debug("Resetting level");
         this->lc->load(this->lc->lvlIdx, Game::GetLevelData(this->lc->lvlIdx));
@@ -56,17 +58,15 @@ void LevelEditScene::preload()
         bc->nextSim = bc->currSim;
     };
 
-    sideBar->addChild<Label>("HIII");
-
-    auto win = gui->addChild<Window>(300, 300, 200, 200);
-    win->title = "Window 1";
-    win->layout = LayoutType::Column;
-    win->addChild<Label>("Hello there");
-    auto winCont = win->addChild<Container>();
-    winCont->padding.set(0);
-    winCont->layout = LayoutType::Row;
-    winCont->addChild<Button>("One");
-    winCont->addChild<Button>("Two");
+    // auto win = gui->addChild<Window>(300, 300, 200, 200);
+    // win->title = "Window 1";
+    // win->layout = LayoutType::Column;
+    // win->addChild<Label>("Hello there");
+    // auto winCont = win->addChild<Container>();
+    // winCont->padding.set(0);
+    // winCont->layout = LayoutType::Row;
+    // winCont->addChild<Button>("One");
+    // winCont->addChild<Button>("Two");
 
     Game::SetFontSize(16);
 }
@@ -251,5 +251,5 @@ void LevelEditScene::drawGUI()
                    {.align = TextAlign::CENTER, .valign = VerticalAlign::BOTTOM});
     }
     auto st = std::format("Level {}: {}x{}", lc->lvlIdx + 1, lc->cols(), lc->rows());
-    Game::Text(20, Game::ScreenHeight() - 20, st, {.valign = VerticalAlign::BOTTOM});
+    sideBarTitle->text = st;
 }

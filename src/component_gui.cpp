@@ -49,6 +49,11 @@ void Widget::update(float dt)
     }
 }
 
+bool Widget::isInsideInteractArea(const vec2& pos) const
+{
+    return rect.contains(pos);
+}
+
 bool Widget::isOnDragHandle(const vec2& pos) const
 {
     return rect.contains(pos);
@@ -62,7 +67,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     switch (e.type)
     {
     case GuiEventType::MouseMove: {
-        if (rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos))// rect.contains(e.mousePos))
         {
             if (!hovered)
             {
@@ -75,7 +80,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     }
 
     case GuiEventType::MouseDown: {
-        if (rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos))// rect.contains(e.mousePos))
         {
             onMouseDown(e.mousePos);
             return this;
@@ -84,7 +89,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     }
 
     case GuiEventType::MouseUp: {
-        if (rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos))//rect.contains(e.mousePos))
         {
             onMouseUp(e.mousePos);
             onClick();
@@ -311,7 +316,7 @@ void Container::calcGrowShrinkSize()
 {
 }
 
-void Container::arrange()
+void Container::calcPosition()
 {
     if (layout == LayoutType::None)
     {
@@ -426,42 +431,12 @@ void Container::arrange()
             }
         }
     }
-    // else if (layout == LayoutType::Row)
-    // {
-    //     int cursorX = rect.x + padding.left;
-
-    //     int totalMainSize = 0;
-    //     for (auto& child : children)
-    //     {
-    //         totalMainSize += child->rect.w;
-    //     }
-
-    //     int remainingSpace = this->rect.w - totalMainSize;
-
-    //     for (auto& child : children)
-    //     {
-    //         child->rect.x = cursorX;
-    //         child->rect.y = rect.y + padding.top;
-    //         cursorX += child->rect.w + gap;
-    //     }
-    // }
-    // else if (layout == LayoutType::Column)
-    // {
-    //     int cursorY = rect.y + padding.top;
-
-    //     for (auto& child : children)
-    //     {
-    //         child->rect.x = rect.x + padding.left;
-    //         child->rect.y = cursorY;
-    //         cursorY += child->rect.h + gap;
-    //     }
-    // }
 
     for (auto& child : children)
     {
         if (auto* cont = dynamic_cast<Container*>(child.get()))
         {
-            cont->arrange();
+            cont->calcPosition();
         }
     }
 }
@@ -527,7 +502,7 @@ void Window::draw()
     // header
     if (headerHeight > 0)
     {
-        SDL_Rect header = {rect.x, rect.y, rect.w, headerHeight};
+        SDL_Rect header = {rect.x, rect.y - headerHeight, rect.w, headerHeight};
         Game::DrawFilledRect(header.x, header.y, header.w, header.h,
                              hoveringDragHandle ? headerBackgroundColorHover.toSDL() : headerBackgroundColor.toSDL());
         Game::DrawRect(header.x, header.y, header.w, header.h, headerBorderColor.toSDL()); // header border
@@ -536,7 +511,7 @@ void Window::draw()
     }
 
     // body
-    SDL_Rect body = {rect.x, rect.y + headerHeight, rect.w, rect.h - headerHeight};
+    SDL_Rect body = {rect.x, rect.y, rect.w, rect.h};
     Game::DrawFilledRect(body.x, body.y, body.w, body.h, bodyBackgroundColor.toSDL());
     Game::DrawRect(body.x, body.y, body.w, body.h, bodyBorderColor.toSDL());
 
@@ -544,51 +519,9 @@ void Window::draw()
     Container::draw();
 }
 
-void Window::arrange()
-{
-    if (layout == LayoutType::None)
-    {
-        for (auto& c : children)
-        {
-            c->rect.x = c->rectInit.x + this->rect.x;
-            c->rect.y = c->rectInit.y + this->rect.y + headerHeight;
-        }
-    }
-    else if (layout == LayoutType::Row)
-    {
-        int cursorX = rect.x + padding.left;
-
-        for (auto& child : children)
-        {
-            child->rect.x = cursorX;
-            child->rect.y = rect.y + padding.top + headerHeight;
-            cursorX += child->rect.w + gap;
-        }
-    }
-    else if (layout == LayoutType::Column)
-    {
-        int cursorY = rect.y + padding.top + headerHeight;
-
-        for (auto& child : children)
-        {
-            child->rect.x = rect.x + padding.left;
-            child->rect.y = cursorY;
-            cursorY += child->rect.h + gap;
-        }
-    }
-
-    for (auto& child : children)
-    {
-        if (auto* cont = dynamic_cast<Container*>(child.get()))
-        {
-            cont->arrange();
-        }
-    }
-}
-
 bool Window::isOnDragHandle(const vec2& pos) const
 {
-    Rect header = {rect.x, rect.y, rect.w, headerHeight};
+    Rect header = {rect.x, rect.y - headerHeight, rect.w, headerHeight};
     return header.contains(pos);
 }
 
@@ -636,7 +569,7 @@ Widget* Window::handleEvent(const GuiEvent& e)
             rect.x = header.x;
             rect.y = header.y;
 
-            arrange();
+            calcPosition();
             onDrag(e.mousePos);
             return this;
         }
@@ -659,6 +592,12 @@ Widget* Window::handleEvent(const GuiEvent& e)
 
     // fallback: normal child handling
     return Container::handleEvent(e);
+}
+
+bool Window::isInsideInteractArea(const vec2& pos) const
+{
+    Rect interactArea = {rect.x, rect.y - headerHeight, rect.w, rect.h + headerHeight};
+    return interactArea.contains(pos);
 }
 
 ///////////
@@ -808,7 +747,7 @@ void _RootContainer::calcFitSize()
     }
 }
 
-void _RootContainer::arrange()
+void _RootContainer::calcPosition()
 {
     for (auto& c : children)
     {
@@ -820,7 +759,7 @@ void _RootContainer::arrange()
     {
         if (auto* cont = dynamic_cast<Container*>(child.get()))
         {
-            cont->arrange();
+            cont->calcPosition();
         }
     }
 }
