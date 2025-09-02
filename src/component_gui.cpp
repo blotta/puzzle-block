@@ -170,7 +170,11 @@ const Widget* Widget::getClosestFocusable() const
     return nullptr;
 }
 
-void Widget::calcSize()
+void Widget::calcFitSize()
+{
+}
+
+void Widget::calcGrowShrinkSize()
 {
 }
 
@@ -247,61 +251,7 @@ void Container::update(float dt)
     }
 }
 
-void Container::arrange()
-{
-    if (layout == LayoutType::None)
-    {
-        for (auto& c : children)
-        {
-            c->rect.x = c->rectInit.x + this->rect.x;
-            c->rect.y = c->rectInit.y + this->rect.y;
-        }
-    }
-    else if (layout == LayoutType::Row)
-    {
-        int cursorX = rect.x + padding.left;
-
-        for (auto& child : children)
-        {
-            child->rect.x = cursorX;
-            child->rect.y = rect.y + padding.top;
-            cursorX += child->rect.w + gap;
-        }
-    }
-    else if (layout == LayoutType::Column)
-    {
-        int cursorY = rect.y + padding.top;
-
-        for (auto& child : children)
-        {
-            child->rect.x = rect.x + padding.left;
-            child->rect.y = cursorY;
-            cursorY += child->rect.h + gap;
-        }
-    }
-
-    for (auto& child : children)
-    {
-        if (auto* cont = dynamic_cast<Container*>(child.get()))
-        {
-            cont->arrange();
-        }
-    }
-}
-
-void Container::bringToFront(Widget* widget)
-{
-    auto it = std::find_if(children.begin(), children.end(), [widget](auto& w) { return w.get() == widget; });
-
-    if (it != children.end())
-    {
-        auto ptr = std::move(*it);
-        children.erase(it);
-        children.push_back(std::move(ptr));
-    }
-}
-
-void Container::calcSize()
+void Container::calcFitSize()
 {
     int w = 0;
     int h = 0;
@@ -312,7 +262,7 @@ void Container::calcSize()
 
     for (auto& child : this->children)
     {
-        child->calcSize();
+        child->calcFitSize();
 
         if (layout == LayoutType::Row)
         {
@@ -355,6 +305,177 @@ void Container::calcSize()
 
     this->rect.w = max(w, minWidth);
     this->rect.h = max(h, minHeight);
+}
+
+void Container::calcGrowShrinkSize()
+{
+}
+
+void Container::arrange()
+{
+    if (layout == LayoutType::None)
+    {
+        for (auto& c : children)
+        {
+            c->rect.x = c->rectInit.x + this->rect.x;
+            c->rect.y = c->rectInit.y + this->rect.y;
+        }
+    }
+    else
+    {
+        if (children.empty())
+            return;
+
+        bool isRow = (layout == LayoutType::Row);
+
+        // total size of children + gaps
+        int totalMainSize = 0;
+        for (auto& child : children)
+        {
+            totalMainSize += isRow ? child->rect.w : child->rect.h;
+        }
+        int totalGaps = gap * (children.size() > 1 ? children.size() - 1 : 0);
+        totalMainSize += totalGaps;
+
+        // available inner space (after padding)
+        int containerMainSize =
+            isRow ? rect.w - (padding.left + padding.right) : rect.h - (padding.top + padding.bottom);
+
+        int freeSpace = containerMainSize - totalMainSize;
+
+        // decide offset + spacing
+        int offset = 0;
+        int spacing = 0;
+        switch (justifyContent)
+        {
+        case JustifyContent::Start:
+            offset = 0;
+            spacing = gap;
+            break;
+        case JustifyContent::End:
+            offset = freeSpace;
+            spacing = gap;
+            break;
+        case JustifyContent::Center:
+            offset = freeSpace / 2;
+            spacing = gap;
+            break;
+        case JustifyContent::SpaceBetween:
+            spacing = (children.size() > 1) ? (freeSpace / (children.size() - 1)) : 0;
+            offset = 0;
+            break;
+        case JustifyContent::SpaceAround:
+            spacing = (children.size() > 0) ? (freeSpace / children.size()) : 0;
+            offset = spacing / 2;
+            break;
+        case JustifyContent::SpaceEvenly:
+            spacing = (children.size() > 0) ? (freeSpace / (children.size() + 1)) : 0;
+            offset = spacing;
+            break;
+        }
+
+        // start main position after padding
+        int mainPos = (isRow ? padding.left : padding.top) + offset;
+
+        // assign positions
+        for (auto& child : children)
+        {
+            if (isRow)
+            {
+                child->rect.x = rect.x + mainPos;
+                // cross-axis alignment
+                switch (alignItems)
+                {
+                case AlignItems::Start:
+                    child->rect.y = rect.y + padding.top;
+                    break;
+                case AlignItems::End:
+                    child->rect.y = rect.y + rect.h - padding.bottom - child->rect.h;
+                    break;
+                case AlignItems::Center:
+                    child->rect.y = rect.y + (rect.h - child->rect.h) / 2;
+                    break;
+                case AlignItems::Stretch:
+                    child->rect.y = rect.y + padding.top;
+                    child->rect.h = rect.h - (padding.top + padding.bottom);
+                    break;
+                }
+                mainPos += child->rect.w + spacing;
+            }
+            else
+            {
+                child->rect.y = rect.y + mainPos;
+                // cross-axis alignment
+                switch (alignItems)
+                {
+                case AlignItems::Start:
+                    child->rect.x = rect.x + padding.left;
+                    break;
+                case AlignItems::End:
+                    child->rect.x = rect.x + rect.w - padding.right - child->rect.w;
+                    break;
+                case AlignItems::Center:
+                    child->rect.x = rect.x + (rect.w - child->rect.w) / 2;
+                    break;
+                case AlignItems::Stretch:
+                    child->rect.x = rect.x + padding.left;
+                    child->rect.w = rect.w - (padding.left + padding.right);
+                    break;
+                }
+                mainPos += child->rect.h + spacing;
+            }
+        }
+    }
+    // else if (layout == LayoutType::Row)
+    // {
+    //     int cursorX = rect.x + padding.left;
+
+    //     int totalMainSize = 0;
+    //     for (auto& child : children)
+    //     {
+    //         totalMainSize += child->rect.w;
+    //     }
+
+    //     int remainingSpace = this->rect.w - totalMainSize;
+
+    //     for (auto& child : children)
+    //     {
+    //         child->rect.x = cursorX;
+    //         child->rect.y = rect.y + padding.top;
+    //         cursorX += child->rect.w + gap;
+    //     }
+    // }
+    // else if (layout == LayoutType::Column)
+    // {
+    //     int cursorY = rect.y + padding.top;
+
+    //     for (auto& child : children)
+    //     {
+    //         child->rect.x = rect.x + padding.left;
+    //         child->rect.y = cursorY;
+    //         cursorY += child->rect.h + gap;
+    //     }
+    // }
+
+    for (auto& child : children)
+    {
+        if (auto* cont = dynamic_cast<Container*>(child.get()))
+        {
+            cont->arrange();
+        }
+    }
+}
+
+void Container::bringToFront(Widget* widget)
+{
+    auto it = std::find_if(children.begin(), children.end(), [widget](auto& w) { return w.get() == widget; });
+
+    if (it != children.end())
+    {
+        auto ptr = std::move(*it);
+        children.erase(it);
+        children.push_back(std::move(ptr));
+    }
 }
 
 void Container::applyTheme()
@@ -679,11 +800,11 @@ Widget* _RootContainer::handleEvent(const GuiEvent& e)
     return nullptr;
 }
 
-void _RootContainer::calcSize()
+void _RootContainer::calcFitSize()
 {
     for (auto& child : this->children)
     {
-        child->calcSize();
+        child->calcFitSize();
     }
 }
 

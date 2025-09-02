@@ -24,6 +24,8 @@ void LevelEditScene::preload()
 
     auto sideBar = gui->addChild<Panel>(0, 0, 200, Game::ScreenHeight());
     sideBar->layout = LayoutType::Column;
+    sideBar->justifyContent = JustifyContent::SpaceAround;
+    sideBar->alignItems = AlignItems::Center;
 
     auto buttons = sideBar->addChild<Container>();
     buttons->layout = LayoutType::Row;

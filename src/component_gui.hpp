@@ -29,17 +29,35 @@ class GuiTheme;
 
 struct RectSizing
 {
-  RectSizing();
-  RectSizing(int v);
-  RectSizing(int x, int y);
+    RectSizing();
+    RectSizing(int v);
+    RectSizing(int x, int y);
 
-  void set(int v);
-  void setX(int v);
-  void setY(int v);
-  int left = 0;
-  int top = 0;
-  int right = 0;
-  int bottom = 0;
+    void set(int v);
+    void setX(int v);
+    void setY(int v);
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
+};
+
+enum class JustifyContent
+{
+    Start,
+    End,
+    Center,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly
+};
+
+enum class AlignItems
+{
+    Start,
+    End,
+    Center,
+    Stretch
 };
 
 class Widget
@@ -54,6 +72,9 @@ class Widget
     bool isContainer = false;
     bool hovered = false;
     GuiComponent* system;
+
+    bool growWidth = false;
+    bool growHeight = false;
 
     Widget(int x, int y, int w, int h);
     virtual ~Widget() = default;
@@ -74,7 +95,8 @@ class Widget
     virtual void applyTheme();
     const GuiTheme& theme() const;
     const Widget* getClosestFocusable() const;
-    virtual void calcSize();
+    virtual void calcFitSize();
+    virtual void calcGrowShrinkSize();
 };
 
 enum class LayoutType
@@ -89,6 +111,8 @@ class Container : public Widget
   public:
     std::vector<std::unique_ptr<Widget>> children;
     LayoutType layout = LayoutType::None;
+    JustifyContent justifyContent = JustifyContent::Start;
+    AlignItems alignItems = AlignItems::Start;
     int gap = 5;
     int minWidth = 0;
     int minHeight = 0;
@@ -105,16 +129,17 @@ class Container : public Widget
         auto root = getRoot();
         ptr->system = root->system;
         ptr->applyTheme();
-        root->calcSize();
+        root->calcFitSize();
         root->arrange();
         return ptr;
     }
     void update(float dt) override;
     void draw() override;
     Widget* handleEvent(const GuiEvent& e) override;
-    virtual void arrange();
     void bringToFront(Widget* widget);
-    void calcSize() override;
+    void calcFitSize() override;
+    void calcGrowShrinkSize() override;
+    virtual void arrange();
     void applyTheme() override;
 };
 
@@ -200,7 +225,7 @@ class _RootContainer : public Container
   public:
     _RootContainer(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
-    void calcSize() override;
+    void calcFitSize() override;
     void arrange() override;
 };
 
