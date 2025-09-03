@@ -36,6 +36,7 @@ void LevelEditScene::preload()
 
     auto sideBarSaveButtons = sideBar->addChild<Container>();
     sideBarSaveButtons->layout = LayoutType::Row;
+    sideBarSaveButtons->justifyContent = JustifyContent::SpaceBetween;
     sideBarSaveButtons->padding.set(0);
 
     auto btnSaveCurrent = sideBarSaveButtons->addChild<Button>("SAVE");

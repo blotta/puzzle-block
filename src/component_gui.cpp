@@ -345,8 +345,6 @@ void Container::calcPosition()
         {
             totalMainSize += isRow ? child->rect.w : child->rect.h;
         }
-        int totalGaps = gap * (children.size() > 1 ? children.size() - 1 : 0);
-        totalMainSize += totalGaps;
 
         // available inner space (after padding)
         int containerMainSize =
@@ -357,17 +355,21 @@ void Container::calcPosition()
         // decide offset + spacing
         int offset = 0;
         int spacing = 0;
+        int totalGaps = gap * (children.size() > 1 ? children.size() - 1 : 0);
         switch (justifyContent)
         {
         case JustifyContent::Start:
+            freeSpace -= totalGaps;
             offset = 0;
             spacing = gap;
             break;
         case JustifyContent::End:
+            freeSpace -= totalGaps;
             offset = freeSpace;
             spacing = gap;
             break;
         case JustifyContent::Center:
+            freeSpace -= totalGaps;
             offset = freeSpace / 2;
             spacing = gap;
             break;
@@ -484,7 +486,9 @@ void Panel::draw()
     Game::DrawRect(rect.x, rect.y, rect.w, rect.h, backgroundColor.toSDL());
 
     // draw children
+    Game::PushClipRect(rect);
     Container::draw();
+    Game::PopClipRect();
 }
 
 void Panel::applyTheme()
