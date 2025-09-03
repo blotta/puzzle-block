@@ -56,6 +56,7 @@ class Font
         SDL_Rect src;
         int advance;
         int offsetX, offsetY;
+        Uint16 glyphIndex;
     };
 
     SDL_Renderer* pRenderer = nullptr;

@@ -4,12 +4,22 @@
 #include "log.hpp"
 #include <sstream>
 
+static inline int kerningPx(TTF_Font* f, Uint16 prevIndex, Uint16 index)
+{
+    if (!prevIndex || !index)
+        return 0;
+
+    return TTF_GetFontKerningSizeGlyphs(f, prevIndex, index);
+}
+
 Font::Font(SDL_Renderer* renderer, const std::string& fontPath, int fontSize)
     : fontPath(fontPath), fontSize(fontSize), pRenderer(renderer), mFont(nullptr), mAtlas(nullptr)
 {
     mFont = TTF_OpenFont(fontPath.c_str(), fontSize);
     if (!mFont)
         return;
+
+    TTF_SetFontKerning(mFont, 1);
 
     generateAtlas();
 }
@@ -40,10 +50,11 @@ Font::~Font()
 
 void Font::drawText(int x, int y, const std::string& text, const FontDrawOptions& options) const
 {
-    int lineHeight = (options.lineHeight > 0) ? options.lineHeight : fontSize;
-    TextSize size = measureText(text, options);
+    const int lineHeight = (options.lineHeight > 0) ? options.lineHeight : TTF_FontLineSkip(mFont);
 
     int cursorY = y;
+
+    TextSize size = measureText(text, options);
 
     switch (options.valign)
     {
@@ -72,11 +83,25 @@ void Font::drawTextLine(int x, int y, const std::string& text, const FontDrawOpt
         return;
 
     int totalWidth = 0;
+    Uint16 prevIndex = 0;
     for (char c : text)
     {
         if (c < 32 || c > 126)
+        {
+            prevIndex = 0;
             continue;
-        totalWidth += mCharData.at(c).advance;
+        }
+        auto it = mCharData.find(c);
+        if (it == mCharData.end())
+        {
+            prevIndex = 0;
+            continue;
+        }
+
+        const Glyph& g = it->second;
+        totalWidth += kerningPx(mFont, prevIndex, g.glyphIndex);
+        totalWidth += g.advance;
+        prevIndex = g.glyphIndex;
     }
 
     int drawX = x;
@@ -85,26 +110,38 @@ void Font::drawTextLine(int x, int y, const std::string& text, const FontDrawOpt
     else if (options.align == TextAlign::RIGHT)
         drawX -= totalWidth;
 
+    SDL_SetTextureColorMod(mAtlas, options.color.r, options.color.g, options.color.b);
+    SDL_SetTextureAlphaMod(mAtlas, options.color.a);
+
+    prevIndex = 0;
     for (char c : text)
     {
         if (c < 32 || c > 126)
+        {
+            prevIndex = 0;
             continue;
+        }
+
         const Glyph& g = mCharData.at(c);
+
+        drawX += kerningPx(mFont, prevIndex, g.glyphIndex);
+
         SDL_Rect src = g.src;
         SDL_Rect dst = {drawX + g.offsetX, y + g.offsetY, src.w, src.h};
-        SDL_SetTextureColorMod(mAtlas, options.color.r, options.color.g, options.color.b);
-        SDL_SetTextureAlphaMod(mAtlas, options.color.a);
         SDL_RenderCopy(pRenderer, mAtlas, &src, &dst);
+
         drawX += g.advance;
+        prevIndex = g.glyphIndex;
     }
 }
 
+// Ignores kerning, as it was giving mixed results. Only sums "advance"
 TextSize Font::measureText(const std::string& text, const FontDrawOptions& options) const
 {
     if (!mAtlas)
         return {0, 0};
 
-    int lineHeight = (options.lineHeight > 0) ? options.lineHeight : fontSize;
+    const int lineHeight = (options.lineHeight > 0) ? options.lineHeight : TTF_FontLineSkip(mFont);
 
     int maxWidth = 0;
     int currentWidth = 0;
@@ -126,11 +163,17 @@ TextSize Font::measureText(const std::string& text, const FontDrawOptions& optio
         }
 
         auto it = mCharData.find(c);
-        if (it != mCharData.end())
-            currentWidth += it->second.advance;
+        if (it == mCharData.end())
+        {
+            continue;
+        }
+
+        const Glyph& g = it->second;
+
+        // currentWidth += kerningPx(mFont, prevIndex, g.glyphIndex);
+        currentWidth += g.advance;
     }
 
-    // last line check
     maxWidth = std::max(maxWidth, currentWidth);
 
     return {maxWidth, lines * lineHeight};
@@ -169,8 +212,15 @@ void Font::generateAtlas()
 
         int minx, maxx, miny, maxy, advance;
         TTF_GlyphMetrics32(mFont, c, &minx, &maxx, &miny, &maxy, &advance);
+        Uint16 gindex = TTF_GlyphIsProvided32(mFont, c);
 
-        this->mCharData[c] = {.src = dst, .advance = advance, .offsetX = minx, .offsetY = 0};
+        this->mCharData[c] = {
+            .src = dst,
+            .advance = advance,
+            .offsetX = minx,
+            .offsetY = 0,
+            .glyphIndex = gindex,
+        };
 
         xOffset += surf->w + spacing;
         SDL_FreeSurface(surf);
