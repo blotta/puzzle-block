@@ -27,7 +27,12 @@ void LevelEditScene::preload()
     sideBar->justifyContent = JustifyContent::Start;
     sideBar->alignItems = AlignItems::Stretch;
 
-    sideBarTitle = sideBar->addChild<Label>("");
+    auto sideBarTitle = sideBar->addChild<Label>("");
+    lc->onChange = [sideBarTitle, this]() {
+        auto st = std::format("Level {}: {}x{}", lc->lvlIdx + 1, lc->cols(), lc->rows());
+        sideBarTitle->setText(st);
+    };
+    lc->onChange();
 
     auto sideBarSaveButtons = sideBar->addChild<Container>();
     sideBarSaveButtons->layout = LayoutType::Row;
@@ -58,17 +63,11 @@ void LevelEditScene::preload()
         bc->nextSim = bc->currSim;
     };
 
-    // auto win = gui->addChild<Window>(300, 300, 200, 200);
-    // win->title = "Window 1";
-    // win->layout = LayoutType::Column;
-    // win->addChild<Label>("Hello there");
-    // auto winCont = win->addChild<Container>();
-    // winCont->padding.set(0);
-    // winCont->layout = LayoutType::Row;
-    // winCont->addChild<Button>("One");
-    // winCont->addChild<Button>("Two");
-
-    Game::SetFontSize(16);
+    auto modePanel = gui->addChild<Panel>(Game::ScreenWidth() / 2 - 70, Game::ScreenHeight() - 30, 140, 30);
+    modePanel->layout = LayoutType::Row;
+    modePanel->justifyContent = JustifyContent::Center;
+    modePanel->alignItems = AlignItems::Center;
+    modeIndicatorLabel = modePanel->addChild<Label>(0, Game::ScreenHeight() / 2, "NORMAL");
 }
 
 void LevelEditScene::init()
@@ -147,7 +146,7 @@ void LevelEditScene::update(float dt)
 
             if (lc->cellAt(mouseIsoPos) == CellType::FLOOR)
             {
-                if (Input::JustPressed(SDL_SCANCODE_S))
+                if (Input::JustPressed(SDL_SCANCODE_T))
                 {
                     // enter switch edit mode if no switch in gridpos
                     LevelSwitch* sw;
@@ -158,6 +157,7 @@ void LevelEditScene::update(float dt)
                     else
                     {
                         this->mMode = LevelEditMode::SWITCH;
+                        modeIndicatorLabel->setText("SWITCH");
                         this->tmpSwitch.x = this->mouseIsoPos.x;
                         this->tmpSwitch.y = this->mouseIsoPos.y;
                     }
@@ -170,9 +170,10 @@ void LevelEditScene::update(float dt)
         this->tmpSwitch.floorX = this->mouseIsoPos.x;
         this->tmpSwitch.floorY = this->mouseIsoPos.y;
 
-        if (Input::JustPressed(SDL_SCANCODE_ESCAPE) || Input::JustPressed(SDL_SCANCODE_S))
+        if (Input::JustPressed(SDL_SCANCODE_ESCAPE) || Input::JustPressed(SDL_SCANCODE_T))
         {
             mMode = LevelEditMode::NORMAL;
+            modeIndicatorLabel->setText("NORMAL");
         }
 
         if (Input::MouseJustPressed(SDL_BUTTON_RIGHT))
@@ -186,6 +187,7 @@ void LevelEditScene::update(float dt)
             {
                 lc->addSwitch(tmpSwitch);
                 mMode = LevelEditMode::NORMAL;
+                modeIndicatorLabel->setText("NORMAL");
             }
         }
     }
@@ -238,18 +240,4 @@ void LevelEditScene::draw()
 
 void LevelEditScene::drawGUI()
 {
-    Game::SetFontSize(16);
-
-    if (mMode == LevelEditMode::NORMAL)
-    {
-        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() - 20, "-- NORMAL --",
-                   {.align = TextAlign::CENTER, .valign = VerticalAlign::BOTTOM});
-    }
-    else if (mMode == LevelEditMode::SWITCH)
-    {
-        Game::Text(Game::ScreenWidth() / 2, Game::ScreenHeight() - 20, "-- SWITCH --",
-                   {.align = TextAlign::CENTER, .valign = VerticalAlign::BOTTOM});
-    }
-    auto st = std::format("Level {}: {}x{}", lc->lvlIdx + 1, lc->cols(), lc->rows());
-    sideBarTitle->text = st;
 }

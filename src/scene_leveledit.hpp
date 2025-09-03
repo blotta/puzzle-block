@@ -25,7 +25,7 @@ class LevelEditScene : public Scene
   private:
     LevelEditComponent* lc;
     GuiComponent* gui;
-    Label* sideBarTitle;
+    Label* modeIndicatorLabel;
     LevelSwitch tmpSwitch = {};
     vec2 mouseIsoPos;
     vec2f camTarget;

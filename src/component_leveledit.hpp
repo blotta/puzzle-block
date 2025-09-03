@@ -4,6 +4,7 @@
 #include "component_block.hpp"
 #include "entity.hpp"
 #include "level.hpp"
+#include <functional>
 
 class BlockComponent;
 
@@ -32,6 +33,8 @@ class LevelEditComponent : public Component
     void init() override;
     void update(float dt) override;
     void draw() override;
+
+    std::function<void()>  onChange = nullptr;
 
 private:
     Level mModel;

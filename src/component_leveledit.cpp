@@ -16,6 +16,8 @@ void LevelEditComponent::load(int lvlIdx, const LevelData& ld)
     this->mModel.centerCells();
     this->rect = this->mModel.rect();
     this->modified = false;
+    if (onChange)
+        onChange();
 }
 
 void LevelEditComponent::save(bool newLevel, bool saveToFile)
@@ -133,6 +135,8 @@ void LevelEditComponent::update(float dt)
     {
         this->justModified = false;
         this->rect = this->mModel.rect();
+        if (onChange)
+            onChange();
     }
 }
 

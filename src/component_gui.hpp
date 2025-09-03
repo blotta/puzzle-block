@@ -76,7 +76,7 @@ class Widget
     bool growWidth = false;
     bool growHeight = false;
 
-    Widget(int x, int y, int w, int h);
+    Widget(Container* parent, int x, int y, int w, int h);
     virtual ~Widget() = default;
 
     virtual void draw() = 0;
@@ -118,18 +118,15 @@ class Container : public Widget
     int minWidth = 0;
     int minHeight = 0;
     RectSizing padding;
-    Container();
-    Container(int x, int y);
-    Container(int x, int y, int w, int h);
+    Container(Container* parent);
+    Container(Container* parent, int x, int y);
+    Container(Container* parent, int x, int y, int w, int h);
 
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
-        children.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        children.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
         T* ptr = static_cast<T*>(children.back().get());
-        ptr->parent = this;
         auto root = getRoot();
-        ptr->system = root->system;
-        ptr->applyTheme();
         root->calcFitSize();
         root->calcGrowShrinkSize();
         root->calcPosition();
@@ -148,7 +145,7 @@ class Container : public Widget
 class Panel : public Container
 {
   public:
-    Panel(int x, int y, int w, int h);
+    Panel(Container* parent, int x, int y, int w, int h);
     std::string title;
     bool hoveringDragHandle = false;
     bool dragging = false;
@@ -164,7 +161,7 @@ class Panel : public Container
 class Window : public Container
 {
   public:
-    Window(int x, int y, int w, int h);
+    Window(Container* parent, int x, int y, int w, int h);
     std::string title;
     int headerHeight = 20;
     bool hoveringDragHandle = false;
@@ -190,13 +187,19 @@ class Window : public Container
 class Label : public Widget
 {
   public:
-    std::string text;
-    Label(int x, int y, int w, int h, std::string t);
-    Label(int x, int y, std::string t);
-    Label(std::string t);
+    Label(Container* parent, int x, int y, int w, int h, std::string t);
+    Label(Container* parent, int x, int y, std::string t);
+    Label(Container* parent, std::string t);
     void draw() override;
     Color textColor;
     void applyTheme() override;
+    const std::string& getText() const;
+    void setText(const std::string& text);
+    void setFontSize(int fontSize);
+
+  private:
+    std::string text;
+    int fontSize;
 };
 
 class Button : public Widget
@@ -204,10 +207,9 @@ class Button : public Widget
     bool clicking = false;
 
   public:
-    std::string caption;
-    Button(int x, int y, int w, int h, std::string cap);
-    Button(int x, int y, std::string cap);
-    Button(std::string cap);
+    Button(Container* parent, int x, int y, int w, int h, std::string cap);
+    Button(Container* parent, int x, int y, std::string cap);
+    Button(Container* parent, std::string cap);
     void draw() override;
     void onMouseDown(vec2 pos) override;
     void onMouseUp(vec2 pos) override;
@@ -220,6 +222,13 @@ class Button : public Widget
     Color backgroundColorActive;
     Color borderColor;
     void applyTheme() override;
+
+    const std::string& getText() const;
+    void setText(const std::string& text);
+    void setFontSize(int fontSize);
+  private:
+    std::string text;
+    int fontSize;
 };
 
 class _RootContainer : public Container
@@ -227,6 +236,7 @@ class _RootContainer : public Container
   public:
     _RootContainer(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
+    void applyTheme() override;
     void calcFitSize() override;
     void calcPosition() override;
 };
@@ -279,8 +289,10 @@ struct GuiTheme
 
     GuiTheme() = default;
 
-    static const GuiTheme& Dark();
-    static const GuiTheme& Light();
+    static GuiTheme& Current();
+    static void Set(const GuiTheme& theme);
+    static GuiTheme& Dark();
+    static GuiTheme& Light();
 };
 
 class GuiComponent : public Component
@@ -291,7 +303,6 @@ class GuiComponent : public Component
     Widget* hoveredWidget = nullptr;
     Widget* activeWidget = nullptr;
     _RootContainer root;
-    const GuiTheme* mTheme;
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
         T* ptr = root.addChild<T>(std::forward<Args>(args)...);
@@ -302,10 +313,8 @@ class GuiComponent : public Component
     void update(float dt) override;
     void drawGUI() override;
     bool isInteracting() const;
+    void drawHoverAndActive(int x, int y) const;
     int drawHierarchy(Container* cont, int x, int y) const;
-
-    void setTheme(const GuiTheme& theme);
-    const GuiTheme* theme() const;
 
   private:
     void dispatchEvent(const GuiEvent& e);

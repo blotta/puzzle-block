@@ -36,8 +36,11 @@ void RectSizing::setY(int v)
     bottom = v;
 }
 
-Widget::Widget(int x, int y, int w, int h) : rectInit(x, y, w, h), rect(x, y, w, h)
+Widget::Widget(Container* parent, int x, int y, int w, int h) : rectInit(x, y, w, h), rect(x, y, w, h), parent(parent)
 {
+    if (parent != nullptr)
+        system = parent->system;
+    this->applyTheme();
 }
 
 void Widget::update(float dt)
@@ -67,7 +70,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     switch (e.type)
     {
     case GuiEventType::MouseMove: {
-        if (this->isInsideInteractArea(e.mousePos))// rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos))
         {
             if (!hovered)
             {
@@ -80,7 +83,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     }
 
     case GuiEventType::MouseDown: {
-        if (this->isInsideInteractArea(e.mousePos))// rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos))
         {
             onMouseDown(e.mousePos);
             return this;
@@ -89,7 +92,7 @@ Widget* Widget::handleEvent(const GuiEvent& e)
     }
 
     case GuiEventType::MouseUp: {
-        if (this->isInsideInteractArea(e.mousePos))//rect.contains(e.mousePos))
+        if (this->isInsideInteractArea(e.mousePos)) // rect.contains(e.mousePos))
         {
             onMouseUp(e.mousePos);
             onClick();
@@ -157,7 +160,7 @@ void Widget::applyTheme()
 
 const GuiTheme& Widget::theme() const
 {
-    return *this->system->theme();
+    return GuiTheme::Current();
 }
 
 const Widget* Widget::getClosestFocusable() const
@@ -187,21 +190,24 @@ void Widget::calcGrowShrinkSize()
 // CONTAINER //
 ///////////////
 
-Container::Container() : Widget(0, 0, 0, 0)
+Container::Container(Container* parent) : Widget(parent, 0, 0, 0, 0)
 {
     isContainer = true;
+    this->applyTheme();
 }
 
-Container::Container(int x, int y) : Widget(x, y, 0, 0)
+Container::Container(Container* parent, int x, int y) : Widget(parent, x, y, 0, 0)
 {
     isContainer = true;
+    this->applyTheme();
 }
 
-Container::Container(int x, int y, int w, int h) : Widget(x, y, w, h)
+Container::Container(Container* parent, int x, int y, int w, int h) : Widget(parent, x, y, w, h)
 {
     isContainer = true;
     minWidth = w;
     minHeight = h;
+    this->applyTheme();
 }
 
 void Container::draw()
@@ -465,10 +471,11 @@ void Container::applyTheme()
 // PANEL //
 ///////////
 
-Panel::Panel(int x, int y, int w, int h) : Container(x, y, w, h)
+Panel::Panel(Container* parent, int x, int y, int w, int h) : Container(parent, x, y, w, h)
 {
     draggable = false;
     focusable = false;
+    this->applyTheme();
 }
 
 void Panel::draw()
@@ -482,7 +489,6 @@ void Panel::draw()
 
 void Panel::applyTheme()
 {
-    Container::applyTheme();
     backgroundColor = theme().windowBg;
 }
 
@@ -490,10 +496,11 @@ void Panel::applyTheme()
 // WINDOW //
 ////////////
 
-Window::Window(int x, int y, int w, int h) : Container(x, y, w, h)
+Window::Window(Container* parent, int x, int y, int w, int h) : Container(parent, x, y, w, h)
 {
     draggable = true;
     focusable = true;
+    this->applyTheme();
 }
 
 void Window::draw()
@@ -527,8 +534,6 @@ bool Window::isOnDragHandle(const vec2& pos) const
 
 void Window::applyTheme()
 {
-    Container::applyTheme();
-
     headerBackgroundColor = theme().panelHeader.normal;
     headerBackgroundColorHover = theme().panelHeader.hover;
     headerBorderColor = theme().borderColor;
@@ -604,53 +609,72 @@ bool Window::isInsideInteractArea(const vec2& pos) const
 // LABEL //
 ///////////
 
-Label::Label(int x, int y, int w, int h, std::string t) : Widget(x, y, w, h), text(std::move(t))
+Label::Label(Container* parent, int x, int y, int w, int h, std::string t)
+    : Widget(parent, x, y, w, h), text(std::move(t))
 {
-    auto size = Game::TextSize(text);
-    if (w <= 0)
-        rectInit.w = size.x + 10;
-    if (h <= 0)
-        rectInit.h = size.y + 5;
-    rect = rectInit;
+    this->applyTheme();
 }
 
-Label::Label(int x, int y, std::string t) : Label(x, y, 0, 0, t)
+Label::Label(Container* parent, int x, int y, std::string t) : Label(parent, x, y, 0, 0, std::move(t))
 {
 }
 
-Label::Label(std::string t) : Label(0, 0, 0, 0, t)
+Label::Label(Container* parent, std::string t) : Label(parent, 0, 0, 0, 0, std::move(t))
 {
 }
 
 void Label::draw()
 {
-    Game::Text(rect.x, rect.y, text, {.color = textColor.toSDL()});
+    Game::SetFontSize(this->fontSize);
+    Game::Text(rect.x, rect.y, text,
+               {
+                   .color = textColor.toSDL(),
+                   .align = TextAlign::LEFT,
+               });
 }
 
 void Label::applyTheme()
 {
     textColor = theme().textColor;
+
+    this->setFontSize(theme().fontSize);
+}
+
+const std::string& Label::getText() const
+{
+    return text;
+}
+
+void Label::setText(const std::string& t)
+{
+    this->text = t;
+    this->setFontSize(this->fontSize);
+}
+
+void Label::setFontSize(int fs)
+{
+    this->fontSize = fs;
+    Game::SetFontSize(this->fontSize);
+    auto size = Game::TextSize(text);
+    rect.w = size.x;
+    rect.h = size.y;
 }
 
 ////////////
 // BUTTON //
 ////////////
 
-Button::Button(int x, int y, int w, int h, std::string cap) : Widget(x, y, w, h), caption(std::move(cap))
+Button::Button(Container* parent, int x, int y, int w, int h, std::string t)
+    : Widget(parent, x, y, w, h), text(std::move(t))
 {
-    auto size = Game::TextSize(caption);
-    if (w <= 0)
-        rectInit.w = size.x + 10;
-    if (h <= 0)
-        rectInit.h = size.y + 5;
-    rect = rectInit;
+    this->applyTheme();
 }
 
-Button::Button(int x, int y, std::string cap) : Button(x, y, 0, 0, cap)
+Button::Button(Container* parent, int x, int y, std::string cap) : Button(parent, x, y, 0, 0, cap)
 {
 }
 
-Button::Button(std::string cap) : Button(0, 0, 0, 0, cap)
+Button::Button(Container* parent, std::string cap) : Button(parent, 0, 0, 0, 0, cap)
 {
 }
 
@@ -669,7 +693,8 @@ void Button::draw()
     Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, bgColor.toSDL());
     Game::DrawRect(rect.x, rect.y, rect.w, rect.h, borderColor.toSDL());
     auto center = rect.center();
-    Game::Text(center.x, center.y, caption,
+    Game::SetFontSize(this->fontSize);
+    Game::Text(center.x, center.y, text,
                {.color = textColor.toSDL(), .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
 }
 
@@ -689,6 +714,26 @@ void Button::onClick()
         onClickEvent();
 }
 
+const std::string& Button::getText() const
+{
+    return text;
+}
+
+void Button::setText(const std::string& t)
+{
+    this->text = t;
+    this->setFontSize(this->fontSize);
+}
+
+void Button::setFontSize(int fs)
+{
+    this->fontSize = fs;
+    Game::SetFontSize(this->fontSize);
+    auto size = Game::TextSize(text);
+    rect.w = size.x + 10;
+    rect.h = size.y + 5;
+}
+
 void Button::applyTheme()
 {
     textColor = theme().textColor;
@@ -696,13 +741,16 @@ void Button::applyTheme()
     backgroundColorHover = theme().button.hover;
     backgroundColorActive = theme().button.active;
     borderColor = theme().borderColor;
+
+    setFontSize(theme().fontSize);
 }
 
 ///////////////////////////////
 // ROOT CONTAINER (internal) //
 ///////////////////////////////
 
-_RootContainer::_RootContainer(GuiComponent* system) : Container(0, 0, Game::ScreenWidth(), Game::ScreenHeight())
+_RootContainer::_RootContainer(GuiComponent* system)
+    : Container(nullptr, 0, 0, Game::ScreenWidth(), Game::ScreenHeight())
 {
     this->system = system;
 }
@@ -739,6 +787,10 @@ Widget* _RootContainer::handleEvent(const GuiEvent& e)
     return nullptr;
 }
 
+void _RootContainer::applyTheme()
+{
+}
+
 void _RootContainer::calcFitSize()
 {
     for (auto& child : this->children)
@@ -768,6 +820,10 @@ void _RootContainer::calcPosition()
 // GUI COMPONENT //
 ///////////////////
 
+GuiComponent::GuiComponent() : root(this)
+{
+}
+
 void GuiComponent::dispatchEvent(const GuiEvent& e)
 {
     hoveredWidget = root.handleEvent(e);
@@ -785,11 +841,6 @@ void GuiComponent::dispatchEvent(const GuiEvent& e)
             focused->parent->bringToFront((Widget*)focused);
         }
     }
-}
-
-GuiComponent::GuiComponent() : root(this)
-{
-    this->mTheme = &GuiTheme::Dark();
 }
 
 void GuiComponent::init()
@@ -823,17 +874,28 @@ void GuiComponent::update(float dt)
 
 void GuiComponent::drawGUI()
 {
-    Game::SetFontSize(theme()->fontSize);
+    Game::SetFontSize(GuiTheme::Current().fontSize);
     root.draw();
 
+    // this->drawHoverAndActive(Game::ScreenWidth() - 10, 10);
+    // this->drawHierarchy(static_cast<Container*>(&root), Game::ScreenWidth() - 300, 100);
+}
+
+bool GuiComponent::isInteracting() const
+{
+    return hoveredWidget != nullptr || activeWidget != nullptr;
+}
+
+void GuiComponent::drawHoverAndActive(int x, int y) const
+{
     std::string hoverTxt = "Not hovering a widget";
     if (auto* btn = dynamic_cast<Button*>(hoveredWidget))
     {
-        hoverTxt = std::format("Hovering button {}", btn->caption);
+        hoverTxt = std::format("Hovering button {}", btn->getText());
     }
     else if (auto* lbl = dynamic_cast<Label*>(hoveredWidget))
     {
-        hoverTxt = std::format("Hovering label {}", lbl->text);
+        hoverTxt = std::format("Hovering label {}", lbl->getText());
     }
     else if (auto* win = dynamic_cast<Window*>(hoveredWidget))
     {
@@ -852,16 +914,16 @@ void GuiComponent::drawGUI()
         hoverTxt = std::format("Hovering widget {},{}", wid->rect.x, wid->rect.y);
     }
 
-    Game::Text(Game::ScreenWidth() - 10, 10, hoverTxt, {.align = TextAlign::RIGHT});
+    Game::Text(x, y, hoverTxt, {.align = TextAlign::RIGHT});
 
     std::string activeTxt = "No active widget";
     if (auto* btn = dynamic_cast<Button*>(activeWidget))
     {
-        activeTxt = std::format("Active button {}", btn->caption);
+        activeTxt = std::format("Active button {}", btn->getText());
     }
     else if (auto* lbl = dynamic_cast<Label*>(activeWidget))
     {
-        activeTxt = std::format("Active label {}", lbl->text);
+        activeTxt = std::format("Active label {}", lbl->getText());
     }
     else if (auto* win = dynamic_cast<Window*>(activeWidget))
     {
@@ -880,14 +942,7 @@ void GuiComponent::drawGUI()
         activeTxt = std::format("Active widget {},{}", wid->rect.x, wid->rect.y);
     }
 
-    this->drawHierarchy(static_cast<Container*>(&root), Game::ScreenWidth() - 300, 100);
-
-    Game::Text(Game::ScreenWidth() - 10, 30, activeTxt, {.align = TextAlign::RIGHT});
-}
-
-bool GuiComponent::isInteracting() const
-{
-    return hoveredWidget != nullptr || activeWidget != nullptr;
+    Game::Text(x, y + 25, activeTxt, {.align = TextAlign::RIGHT});
 }
 
 int GuiComponent::drawHierarchy(Container* cont, int x, int y) const
@@ -923,7 +978,7 @@ int GuiComponent::drawHierarchy(Container* cont, int x, int y) const
 
         if (auto* btn = dynamic_cast<Button*>(child.get()))
         {
-            childTxt = std::format("Button {} {},{},{},{}", btn->caption, child->rect.x, child->rect.y, child->rect.w,
+            childTxt = std::format("Button {} {},{},{},{}", btn->getText(), child->rect.x, child->rect.y, child->rect.w,
                                    child->rect.h);
             Game::Text(x, y, childTxt);
             y += lineHeight;
@@ -931,7 +986,7 @@ int GuiComponent::drawHierarchy(Container* cont, int x, int y) const
         }
         else if (auto* lbl = dynamic_cast<Label*>(child.get()))
         {
-            childTxt = std::format("Label {} {},{},{},{}", lbl->text, child->rect.x, child->rect.y, child->rect.w,
+            childTxt = std::format("Label {} {},{},{},{}", lbl->getText(), child->rect.x, child->rect.y, child->rect.w,
                                    child->rect.h);
             Game::Text(x, y, childTxt);
             y += lineHeight;
@@ -948,23 +1003,24 @@ int GuiComponent::drawHierarchy(Container* cont, int x, int y) const
     return lines;
 }
 
-void GuiComponent::setTheme(const GuiTheme& theme)
+GuiTheme& GuiTheme::Current()
 {
-    mTheme = &theme;
+    static GuiTheme instance = GuiTheme::Dark();
+    return instance;
 }
 
-const GuiTheme* GuiComponent::theme() const
+void GuiTheme::Set(const GuiTheme& theme)
 {
-    return mTheme;
+    Current() = theme;
 }
 
-const GuiTheme& GuiTheme::Dark()
+GuiTheme& GuiTheme::Dark()
 {
     static GuiTheme theme;
     return theme;
 }
 
-const GuiTheme& GuiTheme::Light()
+GuiTheme& GuiTheme::Light()
 {
     static GuiTheme t;
     t.textColor = {30};
