@@ -791,6 +791,11 @@ Widget* _RootContainer::handleEvent(const GuiEvent& e)
     return nullptr;
 }
 
+void _RootContainer::update(float dt)
+{
+    Container::update(dt);
+}
+
 void _RootContainer::applyTheme()
 {
 }
@@ -805,11 +810,11 @@ void _RootContainer::calcFitSize()
 
 void _RootContainer::calcPosition()
 {
-    for (auto& c : children)
-    {
-        c->rect.x = c->rectInit.x + this->rect.x;
-        c->rect.y = c->rectInit.y + this->rect.y;
-    }
+    // for (auto& c : children)
+    // {
+    //     c->rect.x = c->rectInit.x + this->rect.x;
+    //     c->rect.y = c->rectInit.y + this->rect.y;
+    // }
 
     for (auto& child : children)
     {
@@ -873,7 +878,12 @@ void GuiComponent::update(float dt)
         dispatchEvent(e);
     }
 
+    root.rect.x = this->transform->pos.x;
+    root.rect.y = this->transform->pos.y;
+
     root.update(dt);
+
+    this->calcAll();
 }
 
 void GuiComponent::drawGUI()
@@ -888,6 +898,13 @@ void GuiComponent::drawGUI()
 bool GuiComponent::isInteracting() const
 {
     return hoveredWidget != nullptr || activeWidget != nullptr;
+}
+
+void GuiComponent::calcAll()
+{
+    root.calcFitSize();
+    root.calcGrowShrinkSize();
+    root.calcPosition();
 }
 
 void GuiComponent::drawHoverAndActive(int x, int y) const
@@ -1040,4 +1057,100 @@ GuiTheme& GuiTheme::Light()
     t.panelHeader = {{210}, {190}, {170}, {240}};
 
     return t;
+}
+
+/////////////////
+// ProgressBar //
+/////////////////
+
+ProgressBar::ProgressBar(Container* parent, int x, int y, int w, int h) : Widget(parent, x, y, w, h)
+{
+}
+
+void ProgressBar::draw()
+{
+    // SDL_RenderFillRect(Game::GetRenderer(), &sfx_rect);
+    Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, {255, 255, 255, 255});
+
+    float prog = min(1.f, ((float)value / maxValue));
+
+    SDL_Rect r = {
+        rect.x,
+        rect.y,
+        (int)(rect.w * prog),
+        rect.h,
+    };
+    Game::DrawFilledRect(r.x, r.y, r.w, r.h, {0, 0, 0, 255});
+}
+
+////////////
+// Cursor //
+////////////
+
+Cursor::Cursor(Container* parent) : Widget(parent, 0, 0, 0, 0)
+{
+}
+
+void Cursor::addSelectable(Widget* w, std::function<void()> action)
+{
+    selectables.push_back(w);
+    actions[w] = action;
+    if (!selected)
+        selected = w;
+}
+
+void Cursor::focusNext()
+{
+    if (selectables.empty())
+        return;
+
+    if (!selected || selectables.size() == 1)
+    {
+        selected = selectables.front();
+    }
+    else
+    {
+        auto it = std::find_if(selectables.begin(), selectables.end(), [&](auto& c) { return c == selected; });
+        ++it;
+        if (it == selectables.end())
+            selected = selectables.front();
+        else
+            selected = *it;
+    }
+}
+
+void Cursor::focusPrevious()
+{
+    if (selectables.empty())
+        return;
+
+    if (!selected || selectables.size() == 1)
+    {
+        selected = selectables.front();
+    }
+    else
+    {
+        auto it = std::find_if(selectables.begin(), selectables.end(), [&](auto& c) { return c == selected; });
+        if (it == selectables.begin())
+            selected = selectables.back();
+        else
+            selected = *std::prev(it);
+    }
+}
+
+void Cursor::update(float dt)
+{
+    if (!selected || !enabled)
+        return;
+    
+    actions[selected]();
+}
+
+void Cursor::draw()
+{
+    if (!selected || !enabled)
+        return;
+
+    Game::DrawLine(selected->rect.x, selected->rect.bottom() + 5, selected->rect.right(), selected->rect.bottom() + 5,
+                   {255, 255, 255, 255});
 }

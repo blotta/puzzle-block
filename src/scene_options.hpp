@@ -2,6 +2,7 @@
 #define SCENE_OPTIONS_HPP
 
 #include "animation.hpp"
+#include "component_gui.hpp"
 #include "scene.hpp"
 #include <SDL2/SDL.h>
 
@@ -14,20 +15,21 @@ enum class OptionsState
 class OptionsScene : public Scene
 {
   public:
+    void preload() override;
     void init() override;
     void update(float dt) override;
     void drawGUI() override;
     void dispose() override;
 
   private:
-    int mCursor = 1;
-    int mLines = 2; // sfx, music
-    int mPanelWidth = 600;
-    int mPanelHeight = 400;
+    int mPanelWidth = 400;
+    int mPanelHeight = 300;
     OptionsState mState = OptionsState::IDLE;
+    GuiComponent* gui;
+    Panel* panel;
+    Cursor* cursor;
     Animation animPanel;
     AnimationProperty<int> animPanelDropHeight;
-    SDL_Texture* mPanelTex;
 };
 
 #endif

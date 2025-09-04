@@ -226,9 +226,35 @@ class Button : public Widget
     const std::string& getText() const;
     void setText(const std::string& text);
     void setFontSize(int fontSize);
+
   private:
     std::string text;
     int fontSize;
+};
+
+class ProgressBar : public Widget
+{
+  public:
+    ProgressBar(Container* parent, int x, int y, int w, int h);
+    void draw() override;
+
+    int maxValue = 10;
+    int value = 2;
+};
+
+class Cursor : public Widget
+{
+  public:
+    std::vector<Widget*> selectables;
+    std::unordered_map<Widget*,std::function<void()>> actions;
+    Widget* selected = nullptr;
+    bool enabled = false;
+    Cursor(Container* parent);
+    void addSelectable(Widget* w, std::function<void()> action);
+    void focusNext();
+    void focusPrevious();
+    void update(float dt) override;
+    void draw() override;
 };
 
 class _RootContainer : public Container
@@ -236,6 +262,7 @@ class _RootContainer : public Container
   public:
     _RootContainer(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
+    void update(float dt) override;
     void applyTheme() override;
     void calcFitSize() override;
     void calcPosition() override;
@@ -317,6 +344,7 @@ class GuiComponent : public Component
     int drawHierarchy(Container* cont, int x, int y) const;
 
   private:
+    void calcAll();
     void dispatchEvent(const GuiEvent& e);
 };
 
