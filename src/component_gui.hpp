@@ -155,6 +155,7 @@ class Panel : public Container
     void draw() override;
 
     Color backgroundColor;
+    Color borderColor;
     void applyTheme() override;
 };
 
@@ -238,8 +239,14 @@ class ProgressBar : public Widget
     ProgressBar(Container* parent, int x, int y, int w, int h);
     void draw() override;
 
-    int maxValue = 10;
-    int value = 2;
+    float maxValue = 1.f;
+    float value = 0.f;
+
+    RectSizing padding;
+    Color backgroundColor;
+    Color borderColor;
+    Color barColor;
+    void applyTheme() override;
 };
 
 class Cursor : public Widget
@@ -320,6 +327,7 @@ struct GuiTheme
     static void Set(const GuiTheme& theme);
     static GuiTheme& Dark();
     static GuiTheme& Light();
+    static GuiTheme& Game();
 };
 
 class GuiComponent : public Component

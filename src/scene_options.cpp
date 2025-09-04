@@ -7,6 +7,7 @@ void OptionsScene::preload()
     auto guiEntity = entities.add("gui");
     guiEntity->addComponent<CTransform>();
     this->gui = guiEntity->addComponent<GuiComponent>();
+    GuiTheme::Set(GuiTheme::Game());
 
     this->panel = gui->addChild<Panel>(Game::ScreenWidth() / 2 - mPanelWidth / 2,
                                        Game::ScreenHeight() / 2 - mPanelHeight / 2, mPanelWidth, mPanelHeight);
@@ -21,8 +22,8 @@ void OptionsScene::preload()
     sfxCont->alignItems = AlignItems::Center;
     sfxCont->addChild<Label>("SFX VOL");
     auto sfxProg = sfxCont->addChild<ProgressBar>(0, 0, (int)(.3f * mPanelWidth), 15);
-    sfxProg->maxValue = 10;
-    sfxProg->value = Game::Settings().sfx_vol;
+    sfxProg->maxValue = 10.f;
+    sfxProg->value = (float)Game::Settings().sfx_vol;
 
     auto musicCont = panel->addChild<Container>();
     musicCont->layout = LayoutType::Row;
@@ -30,25 +31,25 @@ void OptionsScene::preload()
     musicCont->alignItems = AlignItems::Center;
     musicCont->addChild<Label>("MUSIC VOL");
     auto musicProg = musicCont->addChild<ProgressBar>(0, 0, (int)(.3f * mPanelWidth), 15);
-    musicProg->maxValue = 10;
-    musicProg->value = Game::Settings().music_vol;
+    musicProg->maxValue = 10.f;
+    musicProg->value = (float)Game::Settings().music_vol;
 
     this->cursor = gui->addChild<Cursor>();
-    cursor->addSelectable(sfxCont, [sfxProg] {
+    cursor->addSelectable(sfxCont, [sfxProg]() {
         if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         {
             Game::PlaySound("assets/sfx/ui_move.ogg");
             Game::SetSoundVolume(Game::Settings().sfx_vol + 1);
-            sfxProg->value = Game::Settings().sfx_vol;
+            sfxProg->value = (float)Game::Settings().sfx_vol;
         };
         if (Input::JustPressed(SDL_SCANCODE_LEFT))
         {
             Game::PlaySound("assets/sfx/ui_move.ogg");
             Game::SetSoundVolume(Game::Settings().sfx_vol - 1);
-            sfxProg->value = Game::Settings().sfx_vol;
+            sfxProg->value = (float)Game::Settings().sfx_vol;
         };
     });
-    cursor->addSelectable(musicCont, [musicProg] {
+    cursor->addSelectable(musicCont, [musicProg]() {
         if (Input::JustPressed(SDL_SCANCODE_RIGHT))
         {
             Game::PlaySound("assets/sfx/ui_move.ogg");

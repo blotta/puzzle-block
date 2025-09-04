@@ -483,17 +483,19 @@ Panel::Panel(Container* parent, int x, int y, int w, int h) : Container(parent, 
 void Panel::draw()
 {
     Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, backgroundColor.toSDL());
-    Game::DrawRect(rect.x, rect.y, rect.w, rect.h, backgroundColor.toSDL());
 
     // draw children
     Game::PushClipRect(rect);
     Container::draw();
     Game::PopClipRect();
+
+    Game::DrawRect(rect.x, rect.y, rect.w, rect.h, borderColor.toSDL());
 }
 
 void Panel::applyTheme()
 {
     backgroundColor = theme().windowBg;
+    borderColor = theme().borderColor;
 }
 
 ////////////
@@ -1059,28 +1061,56 @@ GuiTheme& GuiTheme::Light()
     return t;
 }
 
+GuiTheme& GuiTheme::Game()
+{
+    static GuiTheme t;
+    t.textColor = {200};
+    t.textDisabledColor = {150};
+    t.windowBg = {10, 250};
+    t.childBg = {15, 250};
+    t.popupBg = {20, 250};
+    t.borderColor = {200};
+    t.shadowColor = {0, 60};
+
+    return t;
+}
+
 /////////////////
 // ProgressBar //
 /////////////////
 
 ProgressBar::ProgressBar(Container* parent, int x, int y, int w, int h) : Widget(parent, x, y, w, h)
 {
+    applyTheme();
 }
 
 void ProgressBar::draw()
 {
-    // SDL_RenderFillRect(Game::GetRenderer(), &sfx_rect);
-    Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, {255, 255, 255, 255});
+    Game::DrawFilledRect(rect.x, rect.y, rect.w, rect.h, backgroundColor.toSDL());
 
-    float prog = min(1.f, ((float)value / maxValue));
+    float prog = clamp(value / maxValue, 0.f, 1.f);
 
     SDL_Rect r = {
-        rect.x,
-        rect.y,
-        (int)(rect.w * prog),
-        rect.h,
+        rect.x + padding.left,
+        rect.y + padding.top,
+        (int)((rect.w - padding.left - padding.right) * prog),
+        rect.h - padding.top - padding.bottom,
     };
-    Game::DrawFilledRect(r.x, r.y, r.w, r.h, {0, 0, 0, 255});
+    Game::DrawFilledRect(r.x, r.y, r.w, r.h, barColor.toSDL());
+
+    Game::DrawRect(rect.x, rect.y, rect.w, rect.h, borderColor.toSDL());
+}
+
+void ProgressBar::applyTheme()
+{
+    padding.left = theme().framePaddingX;
+    padding.right = theme().framePaddingX;
+    padding.top = theme().framePaddingY;
+    padding.bottom = theme().framePaddingY;
+
+    backgroundColor = theme().childBg;
+    borderColor = theme().borderColor;
+    barColor = theme().textColor;
 }
 
 ////////////
@@ -1142,7 +1172,7 @@ void Cursor::update(float dt)
 {
     if (!selected || !enabled)
         return;
-    
+
     actions[selected]();
 }
 
@@ -1151,6 +1181,5 @@ void Cursor::draw()
     if (!selected || !enabled)
         return;
 
-    Game::DrawLine(selected->rect.x, selected->rect.bottom() + 5, selected->rect.right(), selected->rect.bottom() + 5,
-                   {255, 255, 255, 255});
+    Game::DrawFilledRect(selected->rect.x, selected->rect.y, selected->rect.w, selected->rect.h, {200, 200, 200, 10});
 }

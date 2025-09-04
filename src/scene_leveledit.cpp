@@ -21,6 +21,7 @@ void LevelEditScene::preload()
     auto guiEntity = entities.add("gui");
     guiEntity->addComponent<CTransform>();
     this->gui = guiEntity->addComponent<GuiComponent>();
+    GuiTheme::Set(GuiTheme::Dark());
 
     auto sideBar = gui->addChild<Panel>(0, 0, 200, Game::ScreenHeight());
     sideBar->layout = LayoutType::Column;
