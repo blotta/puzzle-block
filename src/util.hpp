@@ -15,6 +15,10 @@ int clamp(int val, int min, int max);
 int min(int a, int b);
 int max(int a, int b);
 
+float clamp(float val, float min, float max);
+float min(float a, float b);
+float max(float a, float b);
+
 float random01();
 float randomNeg1to1();
 
