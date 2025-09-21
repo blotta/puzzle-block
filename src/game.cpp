@@ -222,13 +222,45 @@ void Game::DrawFilledRect(int x, int y, int w, int h, SDL_Color color)
 
 void Game::PushClipRect(const Rect& r)
 {
-    const SDL_Rect sdlR = {r.x, r.y, r.w, r.h};
-    SDL_RenderSetClipRect(Game::get().mRenderer, &sdlR);
+    Rect newClip = r;
+
+    auto& g = Game::get();
+
+    if (!g.mClipRects.empty())
+    {
+        Rect current = g.mClipRects.top();
+        Rect intersect;
+        if (newClip.intersect(current, intersect)) {
+            newClip = intersect;
+        }
+        else
+        {
+            newClip = {0, 0, 0, 0};
+        }
+    }
+
+    g.mClipRects.push(newClip);
+    SDL_Rect sdlClip = {newClip.x, newClip.y, newClip.w, newClip.h};
+    SDL_RenderSetClipRect(Game::get().mRenderer, &sdlClip);
 }
 
 void Game::PopClipRect()
 {
-    SDL_RenderSetClipRect(Game::get().mRenderer, nullptr);
+    auto& g = Game::get();
+    if (g.mClipRects.empty())
+        return;
+    
+    g.mClipRects.pop();
+    if (g.mClipRects.empty())
+    {
+        SDL_RenderSetClipRect(Game::get().mRenderer, nullptr);
+    }
+    else
+    {
+        Rect& top = g.mClipRects.top();
+        SDL_Rect sdlClip = {top.x, top.y, top.w, top.h};
+        SDL_RenderSetClipRect(Game::get().mRenderer, &sdlClip);
+    }
 }
 
 const Sprite& Game::GetSprite(SpriteID id)

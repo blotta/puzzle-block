@@ -23,7 +23,6 @@ struct GuiEvent
     int key = 0;
 };
 
-class Container;
 class GuiComponent;
 class GuiTheme;
 
@@ -40,6 +39,13 @@ struct RectSizing
     int top = 0;
     int right = 0;
     int bottom = 0;
+};
+
+enum class LayoutType
+{
+    None,
+    Row,
+    Column
 };
 
 enum class JustifyContent
@@ -60,6 +66,25 @@ enum class AlignItems
     Stretch
 };
 
+enum class AxisSizing
+{
+    FIT,
+    FIXED,
+    GROW
+};
+
+struct AxisSize
+{
+    AxisSizing sizing = AxisSizing::FIT;
+    int value = 0; // FIXED
+    int min = -1;
+    int max = -1;
+
+    // void fixed(int value);
+    // void grow(int minValue);
+    // void fit(int minValue);
+};
+
 class Widget
 {
   public:
@@ -68,18 +93,46 @@ class Widget
     bool visible = true;
     bool draggable = false;
     bool focusable = false;
-    Container* parent = nullptr;
+    Widget* parent = nullptr;
     bool isContainer = false;
     bool hovered = false;
     GuiComponent* system;
 
-    bool growWidth = false;
-    bool growHeight = false;
+    std::vector<std::unique_ptr<Widget>> children;
+    LayoutType layout = LayoutType::None;
+    JustifyContent justifyContent = JustifyContent::Start;
+    AlignItems alignItems = AlignItems::Start;
+    int gap = 5;
+    RectSizing padding;
 
-    Widget(Container* parent, int x, int y, int w, int h);
+    int scrollX = 0;
+    int scrollY = 0;
+    int contentWidth = 0;
+    int contentHeight = 0;
+    bool scrollableX = false;
+    bool scrollableY = false;
+
+    AxisSize widthSizing;
+    AxisSize heightSizing;
+    // bool growWidth = false;
+    // bool growHeight = false;
+
+    Widget(Widget* parent);
+    Widget(Widget* parent, int x, int y, int w, int h);
     virtual ~Widget() = default;
 
-    virtual void draw() = 0;
+    template <typename T, typename... Args> T* addChild(Args&&... args)
+    {
+        children.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
+        T* ptr = static_cast<T*>(children.back().get());
+        // auto root = getRoot();
+        // root->calcFitSize();
+        // root->calcGrowShrinkSize();
+        // root->calcPosition();
+        return ptr;
+    }
+
+    virtual void draw();
     virtual void update(float dt);
     virtual bool isInsideInteractArea(const vec2& pos) const;
     virtual bool isOnDragHandle(const vec2& pos) const;
@@ -92,60 +145,59 @@ class Widget
     virtual void onDragStart(vec2 pos);
     virtual void onDrag(vec2 pos);
     virtual void onDragEnd(vec2 pos);
-    Container* getRoot() const;
+    Widget* getRoot() const;
     virtual void applyTheme();
     const GuiTheme& theme() const;
     const Widget* getClosestFocusable() const;
+    void bringToFront(Widget* widget);
     virtual void calcFitSize();
     virtual void calcGrowShrinkSize();
-};
-
-enum class LayoutType
-{
-    None,
-    Row,
-    Column
-};
-
-class Container : public Widget
-{
-  public:
-    std::vector<std::unique_ptr<Widget>> children;
-    LayoutType layout = LayoutType::None;
-    JustifyContent justifyContent = JustifyContent::Start;
-    AlignItems alignItems = AlignItems::Start;
-    int gap = 5;
-    int minWidth = 0;
-    int minHeight = 0;
-    RectSizing padding;
-    Container(Container* parent);
-    Container(Container* parent, int x, int y);
-    Container(Container* parent, int x, int y, int w, int h);
-
-    template <typename T, typename... Args> T* addChild(Args&&... args)
-    {
-        children.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
-        T* ptr = static_cast<T*>(children.back().get());
-        auto root = getRoot();
-        root->calcFitSize();
-        root->calcGrowShrinkSize();
-        root->calcPosition();
-        return ptr;
-    }
-    void update(float dt) override;
-    void draw() override;
-    Widget* handleEvent(const GuiEvent& e) override;
-    void bringToFront(Widget* widget);
-    void calcFitSize() override;
-    void calcGrowShrinkSize() override;
     virtual void calcPosition();
-    void applyTheme() override;
 };
 
-class Panel : public Container
+// class Container : public Widget
+// {
+//   public:
+//     // std::vector<std::unique_ptr<Widget>> children;
+//     // LayoutType layout = LayoutType::None;
+//     // JustifyContent justifyContent = JustifyContent::Start;
+//     // AlignItems alignItems = AlignItems::Start;
+//     // int gap = 5;
+
+//     // int minWidth = 0;
+//     // int minHeight = 0;
+//     // int maxWidth = 0;
+//     // int maxHeight = 0;
+//     // RectSizing padding;
+//     Container(Widget* parent);
+//     Container(Widget* parent, int x, int y);
+//     Container(Widget* parent, int x, int y, int w, int h);
+
+//     template <typename T, typename... Args> T* addChild(Args&&... args)
+//     {
+//         children.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
+//         T* ptr = static_cast<T*>(children.back().get());
+//         auto root = getRoot();
+//         root->calcFitSize();
+//         root->calcGrowShrinkSize();
+//         root->calcPosition();
+//         return ptr;
+//     }
+//     void update(float dt) override;
+//     void draw() override;
+//     Widget* handleEvent(const GuiEvent& e) override;
+//     void bringToFront(Widget* widget);
+//     void calcFitSize() override;
+//     void calcGrowShrinkSize() override;
+//     virtual void calcPosition();
+//     void applyTheme() override;
+// };
+
+class Panel : public Widget
 {
   public:
-    Panel(Container* parent, int x, int y, int w, int h);
+    Panel(Widget* parent, int w, int h);
+    Panel(Widget* parent, int x, int y, int w, int h);
     std::string title;
     bool hoveringDragHandle = false;
     bool dragging = false;
@@ -159,10 +211,10 @@ class Panel : public Container
     void applyTheme() override;
 };
 
-class Window : public Container
+class Window : public Widget
 {
   public:
-    Window(Container* parent, int x, int y, int w, int h);
+    Window(Widget* parent, int x, int y, int w, int h);
     std::string title;
     int headerHeight = 20;
     bool hoveringDragHandle = false;
@@ -188,9 +240,9 @@ class Window : public Container
 class Label : public Widget
 {
   public:
-    Label(Container* parent, int x, int y, int w, int h, std::string t);
-    Label(Container* parent, int x, int y, std::string t);
-    Label(Container* parent, std::string t);
+    Label(Widget* parent, int x, int y, int w, int h, std::string t);
+    Label(Widget* parent, int x, int y, std::string t);
+    Label(Widget* parent, std::string t);
     void draw() override;
     Color textColor;
     void applyTheme() override;
@@ -208,9 +260,9 @@ class Button : public Widget
     bool clicking = false;
 
   public:
-    Button(Container* parent, int x, int y, int w, int h, std::string cap);
-    Button(Container* parent, int x, int y, std::string cap);
-    Button(Container* parent, std::string cap);
+    Button(Widget* parent, int x, int y, int w, int h, std::string cap);
+    Button(Widget* parent, int x, int y, std::string cap);
+    Button(Widget* parent, std::string cap);
     void draw() override;
     void onMouseDown(vec2 pos) override;
     void onMouseUp(vec2 pos) override;
@@ -236,7 +288,7 @@ class Button : public Widget
 class ProgressBar : public Widget
 {
   public:
-    ProgressBar(Container* parent, int x, int y, int w, int h);
+    ProgressBar(Widget* parent, int x, int y, int w, int h);
     void draw() override;
 
     float maxValue = 1.f;
@@ -253,10 +305,10 @@ class Cursor : public Widget
 {
   public:
     std::vector<Widget*> selectables;
-    std::unordered_map<Widget*,std::function<void()>> actions;
+    std::unordered_map<Widget*, std::function<void()>> actions;
     Widget* selected = nullptr;
     bool enabled = false;
-    Cursor(Container* parent);
+    Cursor(Widget* parent);
     void addSelectable(Widget* w, std::function<void()> action);
     void focusNext();
     void focusPrevious();
@@ -264,15 +316,17 @@ class Cursor : public Widget
     void draw() override;
 };
 
-class _RootContainer : public Container
+class _RootWidget : public Widget
 {
   public:
-    _RootContainer(GuiComponent* system);
+    _RootWidget(GuiComponent* system);
     Widget* handleEvent(const GuiEvent& e) override;
     void update(float dt) override;
     void applyTheme() override;
     void calcFitSize() override;
+    void calcGrowShrinkSize() override;
     void calcPosition() override;
+    void draw() override;
 };
 
 struct GuiColorSet
@@ -337,7 +391,7 @@ class GuiComponent : public Component
     CTransform* transform;
     Widget* hoveredWidget = nullptr;
     Widget* activeWidget = nullptr;
-    _RootContainer root;
+    _RootWidget root;
     template <typename T, typename... Args> T* addChild(Args&&... args)
     {
         T* ptr = root.addChild<T>(std::forward<Args>(args)...);
@@ -349,7 +403,7 @@ class GuiComponent : public Component
     void drawGUI() override;
     bool isInteracting() const;
     void drawHoverAndActive(int x, int y) const;
-    int drawHierarchy(Container* cont, int x, int y) const;
+    int drawHierarchy(Widget* cont, int x, int y) const;
 
   private:
     void calcAll();

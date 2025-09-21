@@ -55,6 +55,7 @@ struct Rect
     vec2 pos() const;
     bool contains(int x, int y) const;
     bool contains(const vec2& pos) const;
+    bool intersect(const Rect& other, Rect& dst) const;
     int right() const;
     int bottom() const;
     void clampInside(const Rect& parent);

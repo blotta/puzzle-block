@@ -11,12 +11,16 @@ void OptionsScene::preload()
 
     this->panel = gui->addChild<Panel>(Game::ScreenWidth() / 2 - mPanelWidth / 2,
                                        Game::ScreenHeight() / 2 - mPanelHeight / 2, mPanelWidth, mPanelHeight);
+    panel->widthSizing.sizing = AxisSizing::FIXED;
+    panel->widthSizing.value = mPanelWidth;
+    panel->heightSizing.sizing = AxisSizing::FIXED;
+    panel->heightSizing.value = mPanelHeight;
     panel->layout = LayoutType::Column;
     panel->justifyContent = JustifyContent::SpaceEvenly;
     panel->alignItems = AlignItems::Stretch;
     panel->padding.setX(50);
 
-    auto sfxCont = panel->addChild<Container>();
+    auto sfxCont = panel->addChild<Widget>(0, 0, 30, 30);
     sfxCont->layout = LayoutType::Row;
     sfxCont->justifyContent = JustifyContent::SpaceBetween;
     sfxCont->alignItems = AlignItems::Center;
@@ -25,7 +29,7 @@ void OptionsScene::preload()
     sfxProg->maxValue = 10.f;
     sfxProg->value = (float)Game::Settings().sfx_vol;
 
-    auto musicCont = panel->addChild<Container>();
+    auto musicCont = panel->addChild<Widget>(0, 0, 30, 30);
     musicCont->layout = LayoutType::Row;
     musicCont->justifyContent = JustifyContent::SpaceBetween;
     musicCont->alignItems = AlignItems::Center;

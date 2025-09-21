@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -121,6 +122,7 @@ class Game
 
     std::map<std::string, std::string> mState;
 
+    std::stack<Rect> mClipRects;
     std::vector<LevelData> mLevels;
 
     // data

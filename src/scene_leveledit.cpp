@@ -24,6 +24,9 @@ void LevelEditScene::preload()
     GuiTheme::Set(GuiTheme::Dark());
 
     auto sideBar = gui->addChild<Panel>(0, 0, 200, Game::ScreenHeight());
+    sideBar->widthSizing.sizing = AxisSizing::FIXED;
+    sideBar->widthSizing.value = 200;
+    sideBar->heightSizing.sizing = AxisSizing::GROW;
     sideBar->layout = LayoutType::Column;
     sideBar->justifyContent = JustifyContent::Start;
     sideBar->alignItems = AlignItems::Stretch;
@@ -35,7 +38,8 @@ void LevelEditScene::preload()
     };
     lc->onChange();
 
-    auto sideBarSaveButtons = sideBar->addChild<Container>();
+    auto sideBarSaveButtons = sideBar->addChild<Widget>();
+    sideBarSaveButtons->widthSizing.sizing = AxisSizing::GROW;
     sideBarSaveButtons->layout = LayoutType::Row;
     sideBarSaveButtons->justifyContent = JustifyContent::SpaceBetween;
     sideBarSaveButtons->padding.set(0);

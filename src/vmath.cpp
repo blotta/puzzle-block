@@ -92,6 +92,21 @@ bool Rect::contains(const vec2& pos) const
     return this->contains(pos.x, pos.y);
 }
 
+bool Rect::intersect(const Rect& other, Rect& dst) const
+{
+    int nx = std::max(x, other.x);
+    int ny = std::max(y, other.y);
+    int nr = std::min(x + w, other.x + other.w);
+    int nb = std::min(y + h, other.y + other.h);
+
+    if (nr > nx && nb > ny)
+    {
+        dst = {nx, ny, nr - nx, nb - ny};
+        return true;
+    }
+    return false;
+}
+
 int Rect::right() const
 {
     return x + w;
