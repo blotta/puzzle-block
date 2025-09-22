@@ -15,22 +15,20 @@ enum class PauseState
 class PauseScene : public Scene
 {
   public:
+    void preload() override;
     void init() override;
     void update(float dt) override;
     void drawGUI() override;
     void dispose() override;
 
   private:
-    int mPanelWidth = 600;
-    int mPanelHeight = 400;
-    int mCursor = 1;
-    int mLines = 4; // resume, options, mainmenu, exit
+    int mPanelWidth = 250;
+    int mPanelHeight = 300;
     Panel* panel;
     Cursor* cursor;
     PauseState mState = PauseState::IDLE;
     Animation animPanel;
     AnimationProperty<int> animPanelDropHeight;
-    SDL_Texture* mPanelTex;
 };
 
 #endif

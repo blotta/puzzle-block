@@ -196,6 +196,7 @@ class Widget
 class Panel : public Widget
 {
   public:
+    Panel(Widget* parent);
     Panel(Widget* parent, int w, int h);
     Panel(Widget* parent, int x, int y, int w, int h);
     std::string title;

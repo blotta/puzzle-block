@@ -38,6 +38,7 @@ struct AnimLevelCleared : public Component
         if (anim.playing)
         {
             float x = animProp.evaluate(anim.getProgress());
+            Game::SetFontSize(32);
             Game::Text(x, Game::ScreenHeight() / 4, "LEVEL CLEARED",
                        {.color = {200, 255, 200, 255}, .align = TextAlign::CENTER});
         }
@@ -136,6 +137,7 @@ void LevelScene::update(float dt)
 
 void LevelScene::drawGUI()
 {
+    Game::SetFontSize(32);
     Game::Text(Game::ScreenWidth() / 2, 10, title, {.align = TextAlign::CENTER});
 }
 

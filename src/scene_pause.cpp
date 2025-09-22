@@ -1,22 +1,85 @@
 #include "scene_pause.hpp"
 #include "game.hpp"
 #include "input_manager.hpp"
+#include "log.hpp"
 #include <format>
 
-static SDL_Color DEFAULT = {180, 180, 180, 255};
-static SDL_Color FOCUSED = {255, 255, 255, 255};
+void PauseScene::preload()
+{
+    auto guiEntity = entities.add("gui");
+    guiEntity->addComponent<CTransform>();
+    auto gui = guiEntity->addComponent<GuiComponent>();
+    GuiTheme::Set(GuiTheme::Game());
+
+    this->panel = gui->addChild<Panel>(Game::ScreenWidth() / 2 - mPanelWidth / 2,
+                                       Game::ScreenHeight() / 2 - mPanelHeight / 2, mPanelWidth, mPanelHeight);
+    panel->widthSizing.sizing = AxisSizing::FIXED;
+    panel->widthSizing.value = mPanelWidth;
+    panel->heightSizing.sizing = AxisSizing::FIXED;
+    panel->heightSizing.value = mPanelHeight;
+    Log::debug("%d %d", mPanelWidth, mPanelHeight);
+    panel->layout = LayoutType::TopToBottom;
+    panel->justifyContent = JustifyContent::SpaceEvenly;
+    panel->alignItems = AlignItems::Center;
+    // panel->padding.setX(50);
+    // panel->padding.setY(30);
+
+    auto pauseTitle = panel->addChild<Label>("PAUSED");
+    pauseTitle->setFontSize(32);
+
+    auto optResume = panel->addChild<Label>("RESUME");
+    auto optOptions = panel->addChild<Label>("OPTIONS");
+    auto optMainMenu = panel->addChild<Label>("MAIN MENU");
+    auto optExit = panel->addChild<Label>("EXIT");
+
+    this->cursor = panel->addChild<Cursor>();
+    this->cursor->enabled = true;
+
+    cursor->addSelectable(optResume, [this]() {
+        if (Input::JustPressed(SDL_SCANCODE_RETURN))
+        {
+            animPanel.start();
+            animPanel.onComplete = []() { Game::PopScene(); };
+            mState = PauseState::EXITING;
+        }
+    });
+
+    cursor->addSelectable(optOptions, [this]() {
+        if (Input::JustPressed(SDL_SCANCODE_RETURN))
+        {
+            animPanel.start();
+            animPanel.onComplete = []() {
+                Game::PopScene();
+                Game::PushScene(Scenes::OPTIONS);
+            };
+            mState = PauseState::EXITING;
+        }
+    });
+
+    cursor->addSelectable(optMainMenu, [this]() {
+        if (Input::JustPressed(SDL_SCANCODE_RETURN))
+        {
+            animPanel.start();
+            animPanel.onComplete = []() {
+                Game::PopScene();
+                Game::LoadScene(Scenes::MAIN_MENU);
+            };
+            mState = PauseState::EXITING;
+        }
+    });
+
+    cursor->addSelectable(optExit, [this]() {
+        if (Input::JustPressed(SDL_SCANCODE_RETURN))
+        {
+            animPanel.start();
+            animPanel.onComplete = []() { Game::Exit(); };
+            mState = PauseState::EXITING;
+        }
+    });
+}
 
 void PauseScene::init()
 {
-    Game::SetFontSize(20);
-
-    mPanelWidth = 250;
-    mPanelHeight = 300;
-
-    mPanelTex = SDL_CreateTexture(Game::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, mPanelWidth,
-                                  mPanelHeight);
-    SDL_SetTextureBlendMode(mPanelTex, SDL_BLENDMODE_BLEND);
-
     animPanel.duration = .5f;
     animPanelDropHeight.interpolationType = InterpolationType::EASE_OUT;
     animPanelDropHeight.addKeyframe(0.f, -(mPanelHeight + Game::ScreenHeight() / 2));
@@ -29,7 +92,13 @@ void PauseScene::update(float dt)
     animPanel.update(dt);
 
     if (mState == PauseState::EXITING)
-        return;
+    {
+        this->panel->rect.y = this->panel->rectInit.y + animPanelDropHeight.evaluate(1 - animPanel.getProgress());
+    }
+    else
+    {
+        this->panel->rect.y = this->panel->rectInit.y + animPanelDropHeight.evaluate(animPanel.getProgress());
+    }
 
     if (Input::JustPressed(SDL_SCANCODE_ESCAPE))
     {
@@ -39,118 +108,23 @@ void PauseScene::update(float dt)
         return;
     }
 
-    if (Input::JustPressed(SDL_SCANCODE_RETURN))
-    {
-        animPanel.onComplete = [this]() {
-            Game::PopScene();
-
-            // RESUME
-            if (this->mCursor == 1)
-                return;
-            
-            // OPTIONS
-            if (this->mCursor == 2)
-            {
-                Game::PushScene(Scenes::OPTIONS);
-                return;
-            }
-
-            // MAIN MENU
-            if (this->mCursor == 3)
-            {
-                Game::LoadScene(Scenes::MAIN_MENU);
-                return;
-            }
-
-            // EXIT
-            if (this->mCursor == 4)
-            {
-                Game::Exit();
-            }
-        };
-        mState = PauseState::EXITING;
-        animPanel.start();
-    }
-
     if (Input::JustPressed(SDL_SCANCODE_UP))
     {
         Game::PlaySound("assets/sfx/ui_move.ogg");
-        mCursor -= 1;
-        if (mCursor < 1)
-            mCursor = mLines;
+        cursor->focusPrevious();
     }
     if (Input::JustPressed(SDL_SCANCODE_DOWN))
     {
         Game::PlaySound("assets/sfx/ui_move.ogg");
+        cursor->focusNext();
 
-        mCursor += 1;
-        if (mCursor > mLines)
-            mCursor = 1;
     }
 }
 
 void PauseScene::drawGUI()
 {
-    SDL_Rect panel = {
-        Game::ScreenWidth() / 2 - mPanelWidth / 2,
-        Game::ScreenHeight() / 2 - mPanelHeight / 2,
-        mPanelWidth,
-        mPanelHeight,
-    };
-    if (mState == PauseState::EXITING)
-        panel.y += animPanelDropHeight.evaluate(1 - animPanel.getProgress());
-    else
-        panel.y += animPanelDropHeight.evaluate(animPanel.getProgress());
-
-    SDL_SetRenderTarget(Game::GetRenderer(), mPanelTex);
-    {
-        SDL_SetRenderDrawBlendMode(Game::GetRenderer(), SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, 255 * 0.95f);
-        SDL_RenderClear(Game::GetRenderer());
-
-        // PANEL CONTENT BEGIN
-
-        int sec_line = (mPanelHeight / (mLines + 1));
-
-        SDL_Color* color;
-
-        // RESUME
-        color = mCursor == 1 ? &FOCUSED : &DEFAULT;
-        Game::Text(mPanelWidth / 2, 1 * sec_line, "RESUME",
-                   {.color = *color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-
-        // OPTIONS
-        color = mCursor == 2 ? &FOCUSED : &DEFAULT;
-        Game::Text(mPanelWidth / 2, 2 * sec_line, "OPTIONS",
-                   {.color = *color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-
-        // MAIN MENU
-        color = mCursor == 3 ? &FOCUSED : &DEFAULT;
-        Game::Text(mPanelWidth / 2, 3 * sec_line, "MAIN MENU",
-                   {.color = *color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-
-        // EXIT
-        color = mCursor == 4 ? &FOCUSED : &DEFAULT;
-        Game::Text(mPanelWidth / 2, 4 * sec_line, "EXIT",
-                   {.color = *color, .align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-
-        // PANEL CONTENT END
-
-        SDL_SetRenderTarget(Game::GetRenderer(), nullptr);
-    }
-    SDL_RenderCopy(Game::GetRenderer(), mPanelTex, nullptr, &panel);
-
-    SDL_Rect panel_border = {
-        panel.x - 1,
-        panel.y - 1,
-        panel.w + 2,
-        panel.h + 2,
-    };
-    SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
-    SDL_RenderDrawRect(Game::GetRenderer(), &panel_border);
 }
 
 void PauseScene::dispose()
 {
-    SDL_DestroyTexture(mPanelTex);
 }

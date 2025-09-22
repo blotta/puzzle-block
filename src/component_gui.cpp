@@ -489,6 +489,10 @@ void Widget::calcPosition()
 // PANEL //
 ///////////
 
+Panel::Panel(Widget* parent) : Panel(parent, 0, 0, 0, 0)
+{
+}
+
 Panel::Panel(Widget* parent, int w, int h) : Panel(parent, 0, 0, w, h)
 {
 }
