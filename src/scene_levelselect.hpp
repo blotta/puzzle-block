@@ -10,9 +10,9 @@ enum class LevelSelectState
 {
     IDLE,
     EXITING,
-    SLIDING_LEVEL_LEFT,
-    SLIDING_LEVEL_RIGHT,
 };
+
+class LevelSelectWidget;
 
 class LevelSelectScene : public Scene
 {
@@ -28,18 +28,13 @@ class LevelSelectScene : public Scene
     Panel* panel;
     Cursor* cursor;
     Panel* levelListCont;
+    LevelSelectWidget* levelSelectWidget;
 
     int mPanelWidth = 850;
     int mPanelHeight = 500;
 
-    int mLevelCount = 1;
-    int mLvlIdx = 0;
-    LevelVisual level;
-    LevelVisual levelAux;
     Animation animPanel;
     AnimationProperty<int> animPanelDropHeight;
-    Animation animLevelSlide;
-    AnimationProperty<int> animLevelSlideLeft;
     LevelSelectState mState = LevelSelectState::IDLE;
 };
 

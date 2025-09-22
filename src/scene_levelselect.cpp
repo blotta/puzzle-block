@@ -3,7 +3,90 @@
 #include "input_manager.hpp"
 #include <format>
 
-const int OFFSCREEN_LEVEL_OFFSET = 1200;
+const int cellSize = 64;
+
+class LevelSelectWidget : public Widget
+{
+  private:
+    int levelIdx = 0;
+    Level level;
+    vec2 centerOffset;
+
+  public:
+    LevelSelectWidget(Widget* parent, int levelIdx) : Widget(parent)
+    {
+        layout = LayoutType::None;
+        setLevel(levelIdx);
+    }
+
+    void setLevel(int levelIdx)
+    {
+        this->levelIdx = levelIdx;
+        level.load(Game::GetLevelData(levelIdx));
+        Rect r = level.rect();
+        vec2 isoCenter = r.center();
+        IsoToWorld(isoCenter.x, isoCenter.y, cellSize, cellSize / 2, &centerOffset.x, &centerOffset.y);
+        centerOffset = centerOffset + vec2{cellSize, cellSize / 2};
+    }
+
+    void draw() override
+    {
+        int x = this->parent->rect.center().x - centerOffset.x;
+        int y = this->parent->rect.center().y - centerOffset.y;
+
+        for (int i = 0; i < level.cols; i++)
+        {
+            for (int j = 0; j < level.rows; j++)
+            {
+
+                if (level.grid[j][i] == CellType::EMPTY)
+                    continue;
+
+                SpriteID sprId = SpriteID::SPR_FLOOR;
+
+                switch (level.grid[j][i])
+                {
+                case CellType::START:
+                    sprId = SpriteID::SPR_FLOOR_START;
+                    break;
+                case CellType::FINISH:
+                    sprId = SpriteID::SPR_FLOOR_FINISH;
+                    break;
+                case CellType::THIN:
+                    sprId = SpriteID::SPR_FLOOR_THIN;
+                    break;
+                default:
+                    sprId = SpriteID::SPR_FLOOR;
+                    break;
+                }
+
+                int sx;
+                int sy;
+                IsoToWorld(i, j, cellSize, cellSize / 2, &sx, &sy);
+
+                vec2 posDiff = {0, 0};
+
+                Game::DrawSprite(x + sx + posDiff.x, y + sy + posDiff.y, sprId);
+
+                for (int sidx = 0; sidx < this->level.switchCount; sidx++)
+                {
+                    auto& sw = this->level.switches[sidx];
+                    if (sw.x != i || sw.y != j)
+                        continue;
+
+                    int sx;
+                    int sy;
+                    IsoToWorld(sw.x, sw.y, cellSize, cellSize / 2, &sx, &sy);
+
+                    Game::DrawSprite(x + sx + posDiff.x, y + sy + posDiff.y,
+                                     sw.on ? SpriteID::SPR_SWITCH_ON : SpriteID::SPR_SWITCH_OFF);
+                }
+            }
+        }
+
+        // Game::DrawPoint(x, y, {255, 0, 0, 255});
+    }
+};
 
 void LevelSelectScene::preload()
 {
@@ -34,7 +117,7 @@ void LevelSelectScene::preload()
     this->cursor = gui->addChild<Cursor>();
     this->cursor->enabled = true;
 
-    for (int i = 0; i < Game::GetLevelsSize() + 5; i++)
+    for (int i = 0; i < Game::GetLevelsSize(); i++)
     {
         auto levelItem = levelListCont->addChild<Panel>(50, 50);
         levelItem->widthSizing.sizing = AxisSizing::FIXED;
@@ -61,40 +144,26 @@ void LevelSelectScene::preload()
             }
         });
     }
+
+    auto levelVisualPanel = panel->addChild<Panel>(0, 0);
+    levelVisualPanel->widthSizing.sizing = AxisSizing::GROW;
+    levelVisualPanel->heightSizing.sizing = AxisSizing::GROW;
+
+    this->levelSelectWidget = levelVisualPanel->addChild<LevelSelectWidget>(0);
 }
 
 void LevelSelectScene::init()
 {
-    Game::SetFontSize(20);
-    level.init(Game::GetLevelData(mLvlIdx));
-
-    mLevelCount = Game::GetLevelsSize();
-
-    // int w = Game::ScreenWidth() * 0.7;
-    // int h = Game::ScreenHeight() * 0.7;
-    // mPanelTex = SDL_CreateTexture(Game::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h);
-    // if (mPanelTex == nullptr)
-    // {
-    //     Log::debug("Couldn't create render target texture: %s", SDL_GetError());
-    // }
-    // SDL_SetTextureBlendMode(mPanelTex, SDL_BLENDMODE_BLEND);
-
     animPanel.duration = .5f;
     animPanelDropHeight.interpolationType = InterpolationType::EASE_OUT;
     animPanelDropHeight.addKeyframe(0.f, -(mPanelHeight + Game::ScreenHeight() / 2));
     animPanelDropHeight.addKeyframe(1.f, 0);
     animPanel.start();
-
-    animLevelSlide.duration = .2f;
-    animLevelSlideLeft.interpolationType = InterpolationType::EASE_OUT;
-    animLevelSlideLeft.addKeyframe(0.f, OFFSCREEN_LEVEL_OFFSET);
-    animLevelSlideLeft.addKeyframe(1.f, 0);
 }
 
 void LevelSelectScene::update(float dt)
 {
     animPanel.update(dt);
-    animLevelSlide.update(dt);
 
     if (mState == LevelSelectState::EXITING)
     {
@@ -117,6 +186,11 @@ void LevelSelectScene::update(float dt)
     {
         Game::PlaySound("assets/sfx/ui_move.ogg");
         this->cursor->focusNext();
+
+        auto it = std::find(this->cursor->selectables.begin(), this->cursor->selectables.end(), this->cursor->selected);
+        int levelIdx = std::distance(this->cursor->selectables.begin(), it);
+        this->levelSelectWidget->setLevel(levelIdx);
+
         auto selectedW = cursor->selected->rect.right() - cursor->selectables[0]->rect.x;
         auto W = levelListCont->rect.w - 20;
         int scrollX = 0;
@@ -131,6 +205,11 @@ void LevelSelectScene::update(float dt)
     {
         Game::PlaySound("assets/sfx/ui_move.ogg");
         this->cursor->focusPrevious();
+
+        auto it = std::find(this->cursor->selectables.begin(), this->cursor->selectables.end(), this->cursor->selected);
+        int levelIdx = std::distance(this->cursor->selectables.begin(), it);
+        this->levelSelectWidget->setLevel(levelIdx);
+
         auto selectedW = cursor->selected->rect.right() - cursor->selectables[0]->rect.x;
         auto W = levelListCont->rect.w - 20;
         int scrollX = 0;
@@ -141,136 +220,12 @@ void LevelSelectScene::update(float dt)
 
         levelListCont->scrollX = scrollX;
     }
-
-    // if (Input::JustPressed(SDL_SCANCODE_RIGHT))
-    // {
-    //     Game::PlaySound("assets/sfx/ui_move.ogg");
-
-    //     int prevLvlIdx = mLvlIdx;
-
-    //     mLvlIdx += 1;
-    //     if (mLvlIdx > mLevelCount - 1)
-    //         mLvlIdx = 0;
-
-    //     levelAux.init(Game::GetLevelData(prevLvlIdx));
-    //     level.init(Game::GetLevelData(mLvlIdx));
-    //     mState = LevelSelectState::SLIDING_LEVEL_LEFT;
-    //     animLevelSlide.onComplete = [this]() { this->mState = LevelSelectState::IDLE; };
-
-    //     animLevelSlide.start();
-    // }
-    // if (Input::JustPressed(SDL_SCANCODE_LEFT))
-    // {
-    //     Game::PlaySound("assets/sfx/ui_move.ogg");
-
-    //     int prevLvlIdx = mLvlIdx;
-
-    //     mLvlIdx -= 1;
-    //     if (mLvlIdx < 0)
-    //         mLvlIdx = mLevelCount - 1;
-
-    //     levelAux.init(Game::GetLevelData(prevLvlIdx));
-    //     level.init(Game::GetLevelData(mLvlIdx));
-    //     mState = LevelSelectState::SLIDING_LEVEL_RIGHT;
-    //     animLevelSlide.onComplete = [this]() { this->mState = LevelSelectState::IDLE; };
-
-    //     animLevelSlide.start();
-    // }
-
-    int w = Game::ScreenWidth() * 0.7;
-    int h = Game::ScreenHeight() * 0.7;
-    if (mState == LevelSelectState::SLIDING_LEVEL_LEFT)
-    {
-        int lx = animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-
-        level.pos = vec2f{(float)(w / 2 + lx), (float)(h / 2 - 100)};
-        levelAux.pos = vec2f{(float)(w / 2 - OFFSCREEN_LEVEL_OFFSET + lx), (float)(h / 2 - 100)};
-    }
-    else if (mState == LevelSelectState::SLIDING_LEVEL_RIGHT)
-    {
-        int lx = -1 * animLevelSlideLeft.evaluate(animLevelSlide.getProgress());
-
-        level.pos = vec2f{(float)(w / 2 + lx), (float)(h / 2 - 100)};
-        levelAux.pos = vec2f{(float)(w / 2 + OFFSCREEN_LEVEL_OFFSET + lx), (float)(h / 2 - 100)};
-    }
-    else
-    {
-        level.pos = vec2f{(float)(w / 2), (float)(h / 2 - 100)};
-    }
 }
 
 void LevelSelectScene::drawGUI()
 {
-    // int w = Game::ScreenWidth() * 0.7;
-    // int h = Game::ScreenHeight() * 0.7;
-
-    // SDL_Rect panel = {
-    //     Game::ScreenWidth() / 2 - w / 2,
-    //     Game::ScreenHeight() / 2 - h / 2,
-    //     w,
-    //     h,
-    // };
-    // if (mState == LevelSelectState::EXITING)
-    //     panel.y += animPanelDropHeight.evaluate(1 - animPanel.getProgress());
-    // else
-    //     panel.y += animPanelDropHeight.evaluate(animPanel.getProgress());
-
-    // SDL_SetRenderTarget(Game::GetRenderer(), mPanelTex);
-    // {
-    //     SDL_SetRenderDrawBlendMode(Game::GetRenderer(), SDL_BLENDMODE_BLEND);
-    //     SDL_SetRenderDrawColor(Game::GetRenderer(), 0, 0, 0, 255 * 0.95f);
-    //     SDL_RenderClear(Game::GetRenderer());
-
-    //     int levelNumberBaseX = 20;
-    //     int levelNumberBaseY = 20;
-    //     int levelNumberWidth = 40;
-    //     int levelNumberHeight = 40;
-    //     int levelNumberGap = 5;
-
-    //     int cursorX = mLvlIdx * levelNumberWidth + mLvlIdx * levelNumberGap;
-    //     int diff = cursorX - panel.w * 3 / 4 > 0 ? cursorX - panel.w * 3 / 4 : 0;
-    //     static int diffState = 0;
-    //     diffState = easings::easeOut(diffState, diff, 0.1);
-
-    //     for (int i = 0; i < mLevelCount; i++)
-    //     {
-    //         int offsetX = i * levelNumberWidth + (i)*levelNumberGap;
-
-    //         SDL_SetRenderDrawColor(Game::GetRenderer(), 30, 30, 30, 255);
-    //         if (i == mLvlIdx)
-    //         {
-    //             SDL_SetRenderDrawColor(Game::GetRenderer(), 60, 60, 60, 255);
-    //         }
-
-    //         SDL_Rect levelNumberRect = {
-    //             levelNumberBaseX + offsetX - diffState,
-    //             levelNumberBaseY,
-    //             levelNumberWidth,
-    //             levelNumberHeight,
-    //         };
-    //         SDL_RenderFillRect(Game::GetRenderer(), &levelNumberRect);
-    //         Game::Text(levelNumberRect.x + levelNumberRect.w / 2, levelNumberRect.y + levelNumberRect.h / 2,
-    //                    std::format("{}", i + 1), {.align = TextAlign::CENTER, .valign = VerticalAlign::MIDDLE});
-    //     }
-
-    //     level.draw();
-    //     levelAux.draw();
-
-    //     SDL_SetRenderTarget(Game::GetRenderer(), nullptr);
-    // }
-    // SDL_RenderCopy(Game::GetRenderer(), mPanelTex, nullptr, &panel);
-
-    // SDL_Rect panel_border = {
-    //     panel.x - 1,
-    //     panel.y - 1,
-    //     panel.w + 2,
-    //     panel.h + 2,
-    // };
-    // SDL_SetRenderDrawColor(Game::GetRenderer(), 255, 255, 255, 255);
-    // SDL_RenderDrawRect(Game::GetRenderer(), &panel_border);
 }
 
 void LevelSelectScene::dispose()
 {
-    // SDL_DestroyTexture(mPanelTex);
 }
