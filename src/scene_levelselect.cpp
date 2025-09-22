@@ -26,7 +26,6 @@ class LevelSelectWidget : public Widget
         Rect r = level.rect();
         vec2 isoCenter = r.center();
         IsoToWorld(isoCenter.x, isoCenter.y, cellSize, cellSize / 2, &centerOffset.x, &centerOffset.y);
-        centerOffset = centerOffset + vec2{cellSize, cellSize / 2};
     }
 
     void draw() override
@@ -84,6 +83,7 @@ class LevelSelectWidget : public Widget
             }
         }
 
+        // Game::DrawPoint(parent->rect.center().x, parent->rect.center().y, {255, 255, 0, 255});
         // Game::DrawPoint(x, y, {255, 0, 0, 255});
     }
 };
@@ -148,6 +148,7 @@ void LevelSelectScene::preload()
     auto levelVisualPanel = panel->addChild<Panel>(0, 0);
     levelVisualPanel->widthSizing.sizing = AxisSizing::GROW;
     levelVisualPanel->heightSizing.sizing = AxisSizing::GROW;
+    levelVisualPanel->borderColor = {0, 0};
 
     this->levelSelectWidget = levelVisualPanel->addChild<LevelSelectWidget>(0);
 }
