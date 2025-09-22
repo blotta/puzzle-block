@@ -44,8 +44,8 @@ struct RectSizing
 enum class LayoutType
 {
     None,
-    Row,
-    Column
+    TopToBottom,
+    LeftToRight
 };
 
 enum class JustifyContent

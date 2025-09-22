@@ -15,13 +15,13 @@ void OptionsScene::preload()
     panel->widthSizing.value = mPanelWidth;
     panel->heightSizing.sizing = AxisSizing::FIXED;
     panel->heightSizing.value = mPanelHeight;
-    panel->layout = LayoutType::Column;
+    panel->layout = LayoutType::TopToBottom;
     panel->justifyContent = JustifyContent::SpaceEvenly;
     panel->alignItems = AlignItems::Stretch;
     panel->padding.setX(50);
 
     auto sfxCont = panel->addChild<Widget>(0, 0, 30, 30);
-    sfxCont->layout = LayoutType::Row;
+    sfxCont->layout = LayoutType::LeftToRight;
     sfxCont->justifyContent = JustifyContent::SpaceBetween;
     sfxCont->alignItems = AlignItems::Center;
     sfxCont->addChild<Label>("SFX VOL");
@@ -30,7 +30,7 @@ void OptionsScene::preload()
     sfxProg->value = (float)Game::Settings().sfx_vol;
 
     auto musicCont = panel->addChild<Widget>(0, 0, 30, 30);
-    musicCont->layout = LayoutType::Row;
+    musicCont->layout = LayoutType::LeftToRight;
     musicCont->justifyContent = JustifyContent::SpaceBetween;
     musicCont->alignItems = AlignItems::Center;
     musicCont->addChild<Label>("MUSIC VOL");

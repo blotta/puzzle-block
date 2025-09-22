@@ -255,7 +255,7 @@ void Widget::calcFitSize()
     else
     {
         // Container widget: compute based on children + layout
-        if (layout == LayoutType::Row)
+        if (layout == LayoutType::TopToBottom)
         {
             for (auto& child : children)
             {
@@ -265,7 +265,7 @@ void Widget::calcFitSize()
             if (children.size() > 1)
                 h += gap * (children.size() - 1);
         }
-        else if (layout == LayoutType::Column)
+        else if (layout == LayoutType::LeftToRight)
         {
             for (auto& child : children)
             {
@@ -333,7 +333,7 @@ void Widget::calcGrowShrinkSize()
         return;
 
     // Determine axis orientation
-    bool isRow = (layout == LayoutType::Row);
+    bool isRow = (layout == LayoutType::TopToBottom);
     int containerMainSize = isRow ? rect.h - (padding.top + padding.bottom) : rect.w - (padding.left + padding.right);
 
     // Compute total fixed size of children
@@ -385,7 +385,7 @@ void Widget::calcPosition()
     if (children.empty())
         return;
 
-    bool isRow = (layout == LayoutType::Row);
+    bool isRow = (layout == LayoutType::TopToBottom);
 
     // Available space after padding
     int innerMainSize = isRow ? rect.h - (padding.top + padding.bottom) : rect.w - (padding.left + padding.right);
@@ -454,7 +454,7 @@ void Widget::calcPosition()
 
             mainPos += child->rect.h + spacing;
         }
-        else // Column layout
+        else // LeftToRight layout
         {
             child->rect.x = rect.x + mainPos - scrollX;
 
@@ -910,8 +910,6 @@ Widget* _RootWidget::handleEvent(const GuiEvent& e)
 
 void _RootWidget::update(float dt)
 {
-    Widget::update(dt);
-
     for (auto& c : children)
     {
         if (c->visible)

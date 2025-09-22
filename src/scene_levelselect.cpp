@@ -101,7 +101,7 @@ void LevelSelectScene::preload()
     panel->widthSizing.value = mPanelWidth;
     panel->heightSizing.sizing = AxisSizing::FIXED;
     panel->heightSizing.value = mPanelHeight;
-    panel->layout = LayoutType::Row;
+    panel->layout = LayoutType::TopToBottom;
     panel->justifyContent = JustifyContent::Start;
     panel->alignItems = AlignItems::Stretch;
     panel->padding.setX(50);
@@ -111,7 +111,7 @@ void LevelSelectScene::preload()
     levelListCont->widthSizing.sizing = AxisSizing::GROW;
     levelListCont->heightSizing.sizing = AxisSizing::FIXED;
     levelListCont->heightSizing.value = 60;
-    levelListCont->layout = LayoutType::Column;
+    levelListCont->layout = LayoutType::LeftToRight;
     levelListCont->scrollableX = true;
 
     this->cursor = gui->addChild<Cursor>();
@@ -124,7 +124,7 @@ void LevelSelectScene::preload()
         levelItem->widthSizing.value = 50;
         levelItem->heightSizing.sizing = AxisSizing::FIXED;
         levelItem->heightSizing.value = 50;
-        levelItem->layout = LayoutType::Column;
+        levelItem->layout = LayoutType::LeftToRight;
         levelItem->justifyContent = JustifyContent::Center;
         levelItem->alignItems = AlignItems::Center;
         levelItem->backgroundColor = levelItem->backgroundColor + 30;

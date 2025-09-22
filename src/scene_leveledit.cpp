@@ -27,7 +27,7 @@ void LevelEditScene::preload()
     sideBar->widthSizing.sizing = AxisSizing::FIXED;
     sideBar->widthSizing.value = 200;
     sideBar->heightSizing.sizing = AxisSizing::GROW;
-    sideBar->layout = LayoutType::Column;
+    sideBar->layout = LayoutType::TopToBottom;
     sideBar->justifyContent = JustifyContent::Start;
     sideBar->alignItems = AlignItems::Stretch;
 
@@ -40,7 +40,7 @@ void LevelEditScene::preload()
 
     auto sideBarSaveButtons = sideBar->addChild<Widget>();
     sideBarSaveButtons->widthSizing.sizing = AxisSizing::GROW;
-    sideBarSaveButtons->layout = LayoutType::Row;
+    sideBarSaveButtons->layout = LayoutType::LeftToRight;
     sideBarSaveButtons->justifyContent = JustifyContent::SpaceBetween;
     sideBarSaveButtons->padding.set(0);
 
@@ -70,7 +70,7 @@ void LevelEditScene::preload()
     };
 
     auto modePanel = gui->addChild<Panel>(Game::ScreenWidth() / 2 - 70, Game::ScreenHeight() - 30, 140, 30);
-    modePanel->layout = LayoutType::Row;
+    modePanel->layout = LayoutType::TopToBottom;
     modePanel->justifyContent = JustifyContent::Center;
     modePanel->alignItems = AlignItems::Center;
     modeIndicatorLabel = modePanel->addChild<Label>(0, Game::ScreenHeight() / 2, "NORMAL");
