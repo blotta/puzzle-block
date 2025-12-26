@@ -4,7 +4,7 @@
 #include "animation.hpp"
 #include "component_gui.hpp"
 #include "scene.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 enum class OptionsState
 {

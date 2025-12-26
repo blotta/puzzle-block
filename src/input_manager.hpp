@@ -1,7 +1,7 @@
 #ifndef INPUT_MANAGER_HPP
 #define INPUT_MANAGER_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 struct MouseState
 {

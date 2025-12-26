@@ -16,7 +16,6 @@ class SplashScene : public Scene
 
   private:
     Timer mTimer;
-    bool splashDone;
 
     Animation splashAnim;
     AnimationProperty<vec2> animB;

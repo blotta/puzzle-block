@@ -1,6 +1,7 @@
 #include "vmath.hpp"
 
 #include <math.h>
+#include <algorithm>
 
 vec2 vec2::operator+(const vec2& other) const
 {
@@ -21,7 +22,7 @@ bool vec2::operator==(const vec2& other) const
 
 int vec2::length() const
 {
-    return std::sqrt(x * x + y * y);
+    return sqrt(x * x + y * y);
 }
 
 vec2f vec2f::operator+(const vec2f& other) const
@@ -49,7 +50,7 @@ void vec2f::operator+=(const vec2f& other)
 
 float vec2f::length() const
 {
-    return std::sqrt(x * x + y * y);
+    return sqrt(x * x + y * y);
 }
 
 void vec2f::normalize()

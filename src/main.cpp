@@ -1,9 +1,9 @@
 #include "game.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 
-int main(int argc, char** args)
+int main(int argc, char* args[])
 {
     Game::Run();
 

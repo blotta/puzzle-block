@@ -3,7 +3,7 @@
 
 #include <random>
 #include <initializer_list>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 void IsoToWorld(int x, int y, int tile_width, int tile_height, int* sx, int* sy);
 void WorldToIso(int x, int y, int tile_width, int tile_height, int* sx, int* sy);

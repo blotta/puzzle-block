@@ -6,7 +6,7 @@
 #include "level.hpp"
 #include "particle.hpp"
 #include "util.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <utility>
 
 enum BlockState

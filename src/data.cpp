@@ -244,7 +244,7 @@ void LevelData::print(FILE* file) const
     bool needClose = false;
     if (f == nullptr)
     {
-        f = fopen("level.txt", "w");
+        fopen_s(&f, "level.txt", "w");
         needClose = true;
     }
 
@@ -352,7 +352,7 @@ LevelData generateRandomLevel(int pathLength)
     if (block.state == BlockState::UP)
         grid[endA.y * level.cols + endA.x] = '3';
 
-    strncpy(level.data, grid.c_str(), level.cols * level.rows);
+    strncpy_s(level.data, grid.c_str(), level.cols * level.rows);
     level.data[level.cols * level.rows] = '\0';
 
     if (path.size() >= 5 && level.switchCount < MAX_SWITCH_COUNT)

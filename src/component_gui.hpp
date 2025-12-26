@@ -24,7 +24,7 @@ struct GuiEvent
 };
 
 class GuiComponent;
-class GuiTheme;
+struct GuiTheme;
 
 struct RectSizing
 {

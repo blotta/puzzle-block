@@ -2,7 +2,7 @@
 #define PARTICLE_HPP
 
 #include "vmath.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <vector>
 
 #define MAX_PARTICLES 500

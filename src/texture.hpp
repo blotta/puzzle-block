@@ -1,7 +1,7 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <string>
 
 class Texture

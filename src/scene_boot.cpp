@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "asset_manager.hpp"
 #include "game.hpp"

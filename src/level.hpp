@@ -6,7 +6,7 @@
 #include "game.hpp"
 #include "log.hpp"
 #include "util.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <array>
 #include <span>
 #include <vector>

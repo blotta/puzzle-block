@@ -42,7 +42,8 @@ void LevelEditComponent::save(bool newLevel, bool saveToFile)
 #ifndef __EMSCRIPTEN__
         char fileName[50] = {};
         sprintf(fileName, "assets-build/levels/%d.txt", lvlIdx + 1);
-        FILE* f = fopen(fileName, "w");
+        FILE* f;
+        fopen_s(&f, fileName, "w");
         ld.print(f);
         fclose(f);
 #endif

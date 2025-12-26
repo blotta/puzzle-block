@@ -4,6 +4,7 @@ obj/
 .vscode/
 .cache/
 testscripts/
+dependencies/
 
 assets-projects/anim-ref/*.png
 

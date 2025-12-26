@@ -4,9 +4,9 @@
 #include "data.hpp"
 #include "font.hpp"
 #include "texture.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #include <span>
 #include <string>
 #include <unordered_map>

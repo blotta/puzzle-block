@@ -1,7 +1,7 @@
 #ifndef LOG_HPP
 #define LOG_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <cstdarg>
 #include <string>
 

@@ -1,7 +1,7 @@
 
 #include "texture.hpp"
 #include "log.hpp"
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 
 Texture::Texture(SDL_Renderer* rend, const std::string& path) : path(std::move(path)), pRenderer(rend)
 {

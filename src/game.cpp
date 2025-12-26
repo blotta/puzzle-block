@@ -2,9 +2,9 @@
 #include "asset_manager.hpp"
 #include "input_manager.hpp"
 #include "log.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -249,7 +249,7 @@ void Game::PopClipRect()
     auto& g = Game::get();
     if (g.mClipRects.empty())
         return;
-    
+
     g.mClipRects.pop();
     if (g.mClipRects.empty())
     {

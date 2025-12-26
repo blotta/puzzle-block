@@ -1,0 +1,38 @@
+{
+  "name": "puzzle-block",
+  "version": "0.1.0",
+  "source_dirs": ["recursive::src"],
+  "parallel_compilation": false,
+  "output": "build/puzzle-block.exe",
+  "c_compiler": "clang",
+  "cpp_compiler": "clang++",
+  "include_dirs": [],
+  "lib_dirs": [],
+  "libs": [],
+  "compile_flags": ["-Werror", "-Wall", "-std=c++20", "-g", "-DDEBUG"],
+  "link_flags": [],
+  "modes": {},
+  "dependencies": {
+    "SDL2": {
+      "include_dirs": ["include"],
+      "lib_dirs": ["lib/x64"],
+      "compile_flags": ["-DSDL_MAIN_HANDLED"],
+      "libs": ["SDL2main", "SDL2"]
+    },
+    "SDL2_image": {
+      "include_dirs": ["include"],
+      "lib_dirs": ["lib/x64"],
+      "libs": ["SDL2_image"]
+    },
+    "SDL2_ttf": {
+      "include_dirs": ["include"],
+      "lib_dirs": ["lib/x64"],
+      "libs": ["SDL2_ttf"]
+    },
+    "SDL2_mixer": {
+      "include_dirs": ["include"],
+      "lib_dirs": ["lib/x64"],
+      "libs": ["SDL2_mixer"]
+    }
+  }
+}

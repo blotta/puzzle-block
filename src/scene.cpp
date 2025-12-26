@@ -1,6 +1,6 @@
 #include "scene.hpp"
 #include "log.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 Scene::~Scene()
 {

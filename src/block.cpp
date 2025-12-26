@@ -3,8 +3,6 @@
 #include "input_manager.hpp"
 #include "log.hpp"
 
-static const int cellSize = 64;
-
 std::pair<vec2, vec2> BlockSim::GetBlockPositionsForState(const vec2& pos, BlockState state)
 {
     if (state == BlockState::LONG)
